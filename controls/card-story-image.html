@@ -1,0 +1,178 @@
+<dom-module id="card-story-image">
+  <template>
+    <style>
+       :host {
+        display: block;
+      }
+
+      #imgPanel {
+        box-sizing: border-box;
+        overflow: hidden;
+        transform: translate3d(0, 0, 0);
+      }
+
+      .background {
+        background: rgba(0, 0, 255, 0.02);
+      }
+
+      .fullWidthImage {
+        width: 100%;
+        box-sizing: border-box;
+        display: block;
+        transition: transform 0.5s ease;
+      }
+    </style>
+    <div id="imgPanel" class="background"></div>
+  </template>
+  <script>
+    class CardStoryImage extends Polymer.Element {
+      static get is() { return "card-story-image" }
+      static get properties() {
+        return {
+          data: {
+            type: Object,
+            observer: '_refresh'
+          },
+          panel: {
+            type: Object,
+            observer: '_onPanel'
+          },
+          fullWidth: Boolean
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this._connected = true;
+        requestAnimationFrame(() => {
+          if (this._connected) {
+            this._refresh();
+          }
+        });
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        this._connected = false;
+      }
+
+      _onPanel() {
+        this._refresh();
+      }
+
+      _refresh() {
+        if (this.data && this.panel && this._connected) {
+          this._ensureLaidOut().then(() => {
+            let pStyle = this.$.imgPanel.style;
+            let imgRatio = this.data.width / this.data.height;
+            if (this.fullWidth) {
+              pStyle.width = "100%;";
+              let w = this.panel.offsetWidth;
+              let h = Math.min(w / imgRatio, this.panel.offsetHeight);
+              pStyle.height = h + "px";
+            }
+            this._attachIntersectionObserver();
+          });
+        }
+      }
+
+      _ensureLaidOut() {
+        this._sizeAttempts = 0;
+        return new Promise((resolve, reject) => {
+          let w = this.offsetWidth;
+          if (w) {
+            resolve();
+          } else {
+            var cb = () => {
+              this._sizeAttempts++;
+              let w = this.offsetWidth;
+              if (w) {
+                resolve();
+              } else {
+                if (this._sizeResizeAttempts > 20) {
+                  reject();
+                } else {
+                  setTimeout(cb, 50);
+                }
+              }
+            };
+            setTimeout(cb, 50);
+          }
+        });
+      }
+
+      _buildThresholds(steps) {
+        let thresholds = [0];
+        for (let i = 1.0; i <= steps; i++) {
+          thresholds.push(i / steps);
+        }
+        return thresholds;
+      }
+
+      _attachIntersectionObserver() {
+        let options = {
+          root: this.panel,
+          rootMargin: "0px",
+          threshold: this._buildThresholds(20)
+        };
+        let observer = new IntersectionObserver(this._handleIntersection.bind(this), options);
+        observer.observe(this.$.imgPanel);
+      }
+
+      _handleIntersection(entries) {
+        entries.forEach((entry) => {
+          this._lastIntersectionEntry = entry;
+          if (entry.isIntersecting) {
+            if (!(this._imageLoaded || this._imageLoading)) {
+              this._loadImage();
+              return;
+            } else {
+              if (this._imageLoaded) {
+                this._applyScrollToImage(entry);
+              }
+            }
+          }
+          console.log(entry.intersectionRatio);
+        });
+      }
+
+      _loadImage() {
+        if (this._imageLoading || this._imageLoaded) {
+          return;
+        }
+        this._imageLoading = true;
+        let image = new Image();
+        this._image = image;
+        image.addEventListener("load", () => {
+          this._imageLoading = false;
+          this._imageLoaded = true;
+          console.log("image loaded", image.width, image.height);
+          if (this.fullWidth) {
+            image.classList.add("fullWidthImage")
+          }
+          this.$.imgPanel.classList.remove("background");
+          this.$.imgPanel.appendChild(image);
+          this._applyScrollToImage(this._lastIntersectionEntry);
+        });
+        image.src = this.data.href;
+      }
+
+      _applyScrollToImage(entry) {
+        if (entry && this._image && this.fullWidth) {
+          if (entry.isIntersecting) {
+            let panelWidth = this.$.imgPanel.offsetWidth;
+            let panelHeight = this.$.imgPanel.offsetHeight;
+            let imgRatio = this.data.width / this.data.height;
+            let imgHeight = panelWidth / imgRatio;
+            if (imgHeight > panelHeight) {
+              let diff = (imgHeight - panelHeight);
+              let offset = diff * Math.min(entry.intersectionRatio, 0.5);
+              this._image.style.transform = "translate3d(0," + (-offset + "px") + ",0)";
+            }
+          }
+        }
+      }
+    }
+    window.customElements.define(CardStoryImage.is, CardStoryImage);
+  </script>
+</dom-module>

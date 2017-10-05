@@ -1,36 +1,175 @@
 <link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="controls/card-story-text.html">
+<link rel="import" href="controls/card-story-image.html">
 
 <dom-module id="card-story">
   <template>
     <style>
-      :host {
+       :host {
         display: block;
+        font-family: 'Open Sans', sans-serif;
+        font-weight: 400;
+        line-height: 1.5;
+        font-size: 16px;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: 'Raleway', sans-serif;
+        margin: 0;
+        font-weight: 400;
+        line-height: 1.4;
+      }
+
+      h1 {
+        font-size: 36px;
+        text-transform: capitalize;
+      }
+
+      #article {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
     </style>
-    <h2>Hello [[prop1]]!</h2>
+    <article id="article">
+      <card-story-text>
+        <h1>The Devastation in Puerto Rico, as Seen From Above</h1>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+      </card-story-text>
+      <card-story-image full-width data="[[imgA]]" panel="[[scrollPanel]]"></card-story-image>
+      <card-story-text>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+      </card-story-text>
+    </article>
   </template>
 
   <script>
-    /**
-     * `card-story`
-     * 
-     *
-     * @customElement
-     * @polymer
-     * @demo demo/index.html
-     */
     class CardStory extends Polymer.Element {
       static get is() { return 'card-story'; }
       static get properties() {
         return {
-          prop1: {
-            type: String,
-            value: 'card-story'
-          }
+          imgA: {
+            type: Object,
+            value: function () {
+              return {
+                href: "images/a.jpg",
+                width: 912,
+                height: 1367
+              }
+            }
+          },
+          scrollPanel: Object
         };
       }
-    }
 
+      connectedCallback() {
+        super.connectedCallback();
+        this.scrollPanel = this.$.article;
+      }
+    }
     window.customElements.define(CardStory.is, CardStory);
   </script>
 </dom-module>

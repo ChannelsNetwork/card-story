@@ -1,0 +1,19 @@
+<dom-module id="card-story-text">
+  <template>
+    <style>
+       :host {
+        display: block;
+        padding: 10px 12px;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+    </style>
+    <slot></slot>
+  </template>
+  <script>
+    class CardStoryText extends Polymer.Element {
+      static get is() { return "card-story-text"; }
+    }
+    window.customElements.define(CardStoryText.is, CardStoryText);
+  </script>
+</dom-module>
