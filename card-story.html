@@ -92,7 +92,58 @@
           commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
           of the island without water and almost the entire island without power.</p>
       </card-story-text>
-      <card-story-image full-width data="[[imgA]]" panel="[[scrollPanel]]"></card-story-image>
+      <card-story-image full-width data="[[imgA]]" delegate="[[delegate]]"></card-story-image>
+      <card-story-text>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+        <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+          commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+          of the island without water and almost the entire island without power.</p>
+      </card-story-text>
+      <card-story-image full-width data="[[imgB]]" delegate="[[delegate]]"></card-story-image>
       <card-story-text>
         <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
           commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
@@ -161,13 +212,67 @@
               }
             }
           },
-          scrollPanel: Object
+          imgB: {
+            type: Object,
+            value: function () {
+              return {
+                href: "images/b.jpg",
+                width: 960,
+                height: 641
+              }
+            }
+          },
+          delegate: Object
         };
       }
 
       connectedCallback() {
         super.connectedCallback();
-        this.scrollPanel = this.$.article;
+        this.delegate = this;
+      }
+
+      get scrollPanel() {
+        return this.$.article;
+      }
+
+      addIntersectionHandler(node, handler) {
+        if (!this._intersectionObserver) {
+          let options = {
+            root: this.scrollPanel,
+            rootMargin: "0px",
+            threshold: this._buildThresholds(30)
+          };
+          this._intersectionObserver = new IntersectionObserver(this._handleIntersection.bind(this), options);
+          this._intersectionHandlers = [];
+        }
+        this._intersectionHandlers.push({
+          node: node,
+          handler: handler
+        });
+        this._intersectionObserver.observe(node);
+      }
+
+      _buildThresholds(steps) {
+        let thresholds = [0];
+        for (let i = 1.0; i <= steps; i++) {
+          thresholds.push(i / steps);
+        }
+        return thresholds;
+      }
+
+      _handleIntersection(entries) {
+        entries.forEach((entry) => {
+          let handler = null;
+          for (let i = 0; i < this._intersectionHandlers.length; i++) {
+            if (this._intersectionHandlers[i].node == entry.target) {
+              handler = this._intersectionHandlers[i].handler;
+              break;
+            }
+          }
+          if (handler) {
+            handler(entry);
+          }
+        });
       }
     }
     window.customElements.define(CardStory.is, CardStory);

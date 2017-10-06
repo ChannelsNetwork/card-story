@@ -19,7 +19,7 @@
         width: 100%;
         box-sizing: border-box;
         display: block;
-        transition: transform 0.5s ease;
+        transition: transform 0.6s ease, opacity 0.2s ease;
       }
     </style>
     <div id="imgPanel" class="background"></div>
@@ -33,9 +33,9 @@
             type: Object,
             observer: '_refresh'
           },
-          panel: {
+          delegate: {
             type: Object,
-            observer: '_onPanel'
+            observer: '_onDelegate'
           },
           fullWidth: Boolean
         };
@@ -56,19 +56,19 @@
         this._connected = false;
       }
 
-      _onPanel() {
+      _onDelegate() {
         this._refresh();
       }
 
       _refresh() {
-        if (this.data && this.panel && this._connected) {
+        if (this.data && this.delegate && this._connected) {
           this._ensureLaidOut().then(() => {
             let pStyle = this.$.imgPanel.style;
             let imgRatio = this.data.width / this.data.height;
             if (this.fullWidth) {
               pStyle.width = "100%;";
-              let w = this.panel.offsetWidth;
-              let h = Math.min(w / imgRatio, this.panel.offsetHeight);
+              let w = this.delegate.scrollPanel.offsetWidth;
+              let h = Math.min(w / imgRatio, this.delegate.scrollPanel.offsetHeight);
               pStyle.height = h + "px";
             }
             this._attachIntersectionObserver();
@@ -110,30 +110,21 @@
       }
 
       _attachIntersectionObserver() {
-        let options = {
-          root: this.panel,
-          rootMargin: "0px",
-          threshold: this._buildThresholds(20)
-        };
-        let observer = new IntersectionObserver(this._handleIntersection.bind(this), options);
-        observer.observe(this.$.imgPanel);
+        this.delegate.addIntersectionHandler(this.$.imgPanel, this._handleIntersection.bind(this));
       }
 
-      _handleIntersection(entries) {
-        entries.forEach((entry) => {
-          this._lastIntersectionEntry = entry;
-          if (entry.isIntersecting) {
-            if (!(this._imageLoaded || this._imageLoading)) {
-              this._loadImage();
-              return;
-            } else {
-              if (this._imageLoaded) {
-                this._applyScrollToImage(entry);
-              }
+      _handleIntersection(entry) {
+        this._lastIntersectionEntry = entry;
+        if (entry.isIntersecting) {
+          if (!(this._imageLoaded || this._imageLoading)) {
+            this._loadImage();
+            return;
+          } else {
+            if (this._imageLoaded) {
+              this._applyScrollToImage(entry);
             }
           }
-          console.log(entry.intersectionRatio);
-        });
+        }
       }
 
       _loadImage() {
@@ -158,17 +149,37 @@
       }
 
       _applyScrollToImage(entry) {
-        if (entry && this._image && this.fullWidth) {
+        if (entry && this._image) {
           if (entry.isIntersecting) {
+            let entering = entry.boundingClientRect.y >= 0;
             let panelWidth = this.$.imgPanel.offsetWidth;
             let panelHeight = this.$.imgPanel.offsetHeight;
             let imgRatio = this.data.width / this.data.height;
             let imgHeight = panelWidth / imgRatio;
-            if (imgHeight > panelHeight) {
+            let ir = entry.intersectionRatio;
+            if (this.fullWidth && (imgHeight > panelHeight)) {
               let diff = (imgHeight - panelHeight);
-              let offset = diff * Math.min(entry.intersectionRatio, 0.5);
+              let gain = 0;
+              if (entering) {
+                if (ir > 0.2 && ir <= 0.9) {
+                  gain = (5 / 7) * ir - (1 / 7);
+                } else if (ir > 0.9) {
+                  gain = 0.5;
+                }
+              } else {
+                if (ir < 0.1) {
+                  gain = 1;
+                } else if (ir >= 0.7) {
+                  gain = 0.5;
+                } else {
+                  gain = (-5 / 6) * ir + (13 / 12);
+                }
+              }
+              let offset = diff * gain;
               this._image.style.transform = "translate3d(0," + (-offset + "px") + ",0)";
             }
+            let opacity = (ir < 0.4) ? ((9 / 4) * ir + 0.1) : 1;
+            this._image.style.opacity = opacity;
           }
         }
       }
