@@ -15,11 +15,19 @@
         background: rgba(0, 0, 255, 0.02);
       }
 
+      img {
+        display: block;
+        box-sizing: border-box;
+        margin: 0 auto;
+        transition: transform 0.6s ease, opacity 0.2s ease;
+      }
+
+      .flowingImage {
+        max-width: 100%;
+      }
+
       .fullWidthImage {
         width: 100%;
-        box-sizing: border-box;
-        display: block;
-        transition: transform 0.6s ease, opacity 0.2s ease;
       }
     </style>
     <div id="imgPanel" class="background"></div>
@@ -37,7 +45,15 @@
             type: Object,
             observer: '_onDelegate'
           },
-          fullWidth: Boolean
+          width: {
+            type: String,
+            value: "300px",
+          },
+          height: {
+            type: String,
+            value: "300px",
+          },
+          type: String
         };
       }
 
@@ -65,11 +81,25 @@
           this._ensureLaidOut().then(() => {
             let pStyle = this.$.imgPanel.style;
             let imgRatio = this.data.width / this.data.height;
-            if (this.fullWidth) {
-              pStyle.width = "100%;";
-              let w = this.delegate.scrollPanel.offsetWidth;
-              let h = Math.min(w / imgRatio, this.delegate.scrollPanel.offsetHeight);
-              pStyle.height = h + "px";
+            switch (this.type) {
+              case "fullWidth": {
+                pStyle.width = "100%;";
+                let w = this.delegate.scrollPanel.offsetWidth;
+                let h = Math.min(w / imgRatio, this.delegate.scrollPanel.offsetHeight);
+                pStyle.height = h + "px";
+                break;
+              }
+              case "sized":
+                pStyle.width = this.width
+                pStyle.height = this.height;
+                pStyle.margin = "0 auto";
+                break;
+              case "page":
+                pStyle.width = "100vw";
+                pStyle.height = "100vh";
+                break;
+              default:
+                break;
             }
             this._attachIntersectionObserver();
           });
@@ -133,14 +163,39 @@
         }
         this._imageLoading = true;
         let image = new Image();
+        let panelWidth = this.$.imgPanel.offsetWidth;
+        let panelHeight = this.$.imgPanel.offsetHeight;
+        let imgRatio = this.data.width / this.data.height;
+        switch (this.type) {
+          case "fullWidth": {
+            image.classList.add("fullWidthImage")
+            let imgHeight = panelWidth / imgRatio;
+            this._imageIsPortrait = imgHeight > panelHeight;
+            break;
+          }
+          case "page":
+          case "sized": {
+            image.classList.add("sizedImage");
+            let imW = panelWidth;
+            let imH = imW / imgRatio;
+            this._imageIsPortrait = true;
+            if (imH < panelHeight) {
+              imH = panelHeight;
+              imW = imH * imgRatio;
+              this._imageIsPortrait = false;
+            }
+            image.style.width = imW + "px";
+            image.style.height = "auto";
+            break;
+          }
+          default:
+            image.classList.add("flowingImage");
+            break;
+        }
         this._image = image;
         image.addEventListener("load", () => {
           this._imageLoading = false;
           this._imageLoaded = true;
-          console.log("image loaded", image.width, image.height);
-          if (this.fullWidth) {
-            image.classList.add("fullWidthImage")
-          }
           this.$.imgPanel.classList.remove("background");
           this.$.imgPanel.appendChild(image);
           this._applyScrollToImage(this._lastIntersectionEntry);
@@ -155,10 +210,33 @@
             let panelWidth = this.$.imgPanel.offsetWidth;
             let panelHeight = this.$.imgPanel.offsetHeight;
             let imgRatio = this.data.width / this.data.height;
-            let imgHeight = panelWidth / imgRatio;
+            let scrollDirection = 0;
+            let scrollDiff = 0;
+            switch (this.type) {
+              case "fullWidth":
+                if (this._imageIsPortrait) {
+                  scrollDirection = 1;
+                  let imgHeight = panelWidth / imgRatio;
+                  scrollDiff = imgHeight - panelHeight;
+                }
+                break;
+              case "page":
+              case "sized":
+                scrollDirection = this._imageIsPortrait ? 1 : 2;
+                if (this._imageIsPortrait) {
+                  let imgHeight = panelWidth / imgRatio;
+                  scrollDiff = imgHeight - panelHeight;
+                } else {
+                  let imgWidth = panelHeight * imgRatio;
+                  scrollDiff = imgWidth - panelWidth;
+                }
+                break;
+              default:
+                break;
+            }
             let ir = entry.intersectionRatio;
-            if (this.fullWidth && (imgHeight > panelHeight)) {
-              let diff = (imgHeight - panelHeight);
+            if (scrollDirection) {
+              let diff = scrollDiff;
               let gain = 0;
               if (entering) {
                 if (ir > 0.2 && ir <= 0.9) {
@@ -176,7 +254,11 @@
                 }
               }
               let offset = diff * gain;
-              this._image.style.transform = "translate3d(0," + (-offset + "px") + ",0)";
+              if (scrollDirection == 1) {
+                this._image.style.transform = "translate3d(0," + (-offset + "px") + ",0)";
+              } else {
+                this._image.style.transform = "translate3d(" + (-offset + "px") + ",0,0)";
+              }
             }
             let opacity = (ir < 0.4) ? ((9 / 4) * ir + 0.1) : 1;
             this._image.style.opacity = opacity;
