@@ -1,7 +1,7 @@
 <dom-module id="card-story-image">
   <template>
     <style>
-       :host {
+      :host {
         display: block;
         position: relative;
       }
@@ -132,7 +132,7 @@
               if (w) {
                 resolve();
               } else {
-                if (this._sizeResizeAttempts > 20) {
+                if (this._sizeAttempts > 20) {
                   reject();
                 } else {
                   setTimeout(cb, 50);
