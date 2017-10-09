@@ -2,6 +2,7 @@
 <link rel="import" href="controls/card-story-text.html">
 <link rel="import" href="controls/card-story-image.html">
 <link rel="import" href="controls/story-image-section.html">
+<link rel="import" href="controls/card-story-gallery.html">
 
 <dom-module id="card-story">
   <template>
@@ -48,16 +49,8 @@
     </style>
     <article id="article">
       <h1>The Devastation in Puerto Rico, as Seen From Above</h1>
-      <card-story-text></card-story-text>
-      <card-story-image data="[[imgA]]" delegate="[[delegate]]"></card-story-image>
       <!-- <card-story-text></card-story-text>
-      <card-story-image type="fullWidth" data="[[imgB]]" delegate="[[delegate]]"></card-story-image>
-      <card-story-text></card-story-text>
-      <card-story-image data="[[imgC]]" delegate="[[delegate]]"></card-story-image>
-      <card-story-text></card-story-text>
-      <card-story-image type="sized" width="500px" height="500px" data="[[imgA]]" delegate="[[delegate]]"></card-story-image> -->
-      <card-story-text></card-story-text>
-      <card-story-image type="page" data="[[imgB]]" delegate="[[delegate]]"></card-story-image>
+      <card-story-image data="[[imgA]]" delegate="[[delegate]]"></card-story-image>
       <card-story-text></card-story-text>
       <card-story-image type="page" data="[[imgA]]" delegate="[[delegate]]">
         <story-image-section>
@@ -82,7 +75,9 @@
             commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
             of the island without water and almost the entire island without power.</p>
         </story-image-section>
-      </card-story-image>
+      </card-story-image> -->
+      <card-story-text></card-story-text>
+      <card-story-gallery data="[[gallery]]"></card-story-gallery>
       <card-story-text></card-story-text>
 
       <!-- <card-story-image type="page" data="[[imgA2]]" delegate="[[delegate]]">
@@ -147,6 +142,7 @@
               }
             }
           },
+          gallery: Array,
           delegate: Object
         };
       }
@@ -154,6 +150,9 @@
       connectedCallback() {
         super.connectedCallback();
         this.delegate = this;
+        this.gallery = [
+          this.imgA, this.imgA2, this.imgB, this.imgC, this.imgA, this.imgA2, this.imgB, this.imgA, this.imgA2, this.imgB
+        ];
       }
 
       get scrollPanel() {
