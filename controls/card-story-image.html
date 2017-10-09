@@ -3,12 +3,12 @@
     <style>
        :host {
         display: block;
+        position: relative;
       }
 
       #imgPanel {
         box-sizing: border-box;
         overflow: hidden;
-        transform: translate3d(0, 0, 0);
       }
 
       .background {
@@ -19,6 +19,7 @@
         display: block;
         box-sizing: border-box;
         margin: 0 auto;
+        transform-origin: 0 0 0;
         transition: transform 0.6s ease, opacity 0.2s ease;
       }
 
@@ -29,8 +30,19 @@
       .fullWidthImage {
         width: 100%;
       }
+
+      .floating {
+        position: fixed;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: -1;
+      }
     </style>
     <div id="imgPanel" class="background"></div>
+    <section id="overlay">
+      <slot on-slotchange="_onSlotChange"></slot>
+    </section>
   </template>
   <script>
     class CardStoryImage extends Polymer.Element {
@@ -60,6 +72,7 @@
       connectedCallback() {
         super.connectedCallback();
         this._connected = true;
+        this._lastTranslate = [0, 0];
         requestAnimationFrame(() => {
           if (this._connected) {
             this._refresh();
@@ -204,64 +217,125 @@
       }
 
       _applyScrollToImage(entry) {
-        if (entry && this._image) {
+        if (entry && entry.isIntersecting && this._image && (!this._imageFloating)) {
+          let entering = entry.boundingClientRect.y >= 0;
+          let panelWidth = this.$.imgPanel.offsetWidth;
+          let panelHeight = this.$.imgPanel.offsetHeight;
+          let imgRatio = this.data.width / this.data.height;
+          let scrollDirection = 0;
+          let scrollDiff = 0;
+          switch (this.type) {
+            case "fullWidth":
+              if (this._imageIsPortrait) {
+                scrollDirection = 1;
+                let imgHeight = panelWidth / imgRatio;
+                scrollDiff = imgHeight - panelHeight;
+              }
+              break;
+            case "page":
+            case "sized":
+              scrollDirection = this._imageIsPortrait ? 1 : 2;
+              if (this._imageIsPortrait) {
+                let imgHeight = panelWidth / imgRatio;
+                scrollDiff = imgHeight - panelHeight;
+              } else {
+                let imgWidth = panelHeight * imgRatio;
+                scrollDiff = imgWidth - panelWidth;
+              }
+              break;
+            default:
+              break;
+          }
+          let ir = entry.intersectionRatio;
+          if (scrollDirection) {
+            let diff = scrollDiff;
+            let gain = 0;
+            if (entering) {
+              if (ir > 0.2 && ir <= 0.9) {
+                gain = (5 / 7) * ir - (1 / 7);
+              } else if (ir > 0.9) {
+                gain = 0.5;
+              }
+            } else {
+              if (ir < 0.1) {
+                gain = 1;
+              } else if (ir >= 0.7) {
+                gain = 0.5;
+              } else {
+                gain = (-5 / 6) * ir + (13 / 12);
+              }
+            }
+            let offset = diff * gain;
+            this._lastTranslate = [0, 0];
+            if (scrollDirection == 1) {
+              this._image.style.transform = "translate3d(0," + (-offset + "px") + ",0)";
+              this._lastTranslate[1] = offset;
+            } else {
+              this._image.style.transform = "translate3d(" + (-offset + "px") + ",0,0)";
+              this._lastTranslate[0] = offset;
+            }
+          }
+          let opacity = (ir < 0.4) ? ((9 / 4) * ir + 0.1) : 1;
+          this._image.style.opacity = opacity;
+        }
+      }
+
+      _onSlotChange() {
+        let sections = this.shadowRoot.querySelector('slot').assignedNodes({ flatten: true }).filter(n => n.nodeType === Node.ELEMENT_NODE);
+        if (sections && sections.length) {
+          this.delegate.addVisibleIntersectionHandle(this.$.overlay, this._handleOverlayIntersection.bind(this));
+          sections.forEach((s) => {
+            this.delegate.addIntersectionHandler(s, this._handleSectionIntersection.bind(this));
+          });
+        }
+      }
+
+      _handleOverlayIntersection(entry) {
+        if (this._image) {
           if (entry.isIntersecting) {
+            this._imageFloating = true;
+            this._image.classList.add("floating");
+          } else {
+            this._imageFloating = false;
+            this._image.classList.remove("floating");
+          }
+        }
+      }
+
+      _handleSectionIntersection(entry) {
+        if (this._image) {
+          const target = entry.target;
+          if (target.handleIntersection) {
+            target.handleIntersection(entry);
+          }
+          const focusPoint = target.focusPoint;
+          if (focusPoint) {
             let entering = entry.boundingClientRect.y >= 0;
-            let panelWidth = this.$.imgPanel.offsetWidth;
-            let panelHeight = this.$.imgPanel.offsetHeight;
-            let imgRatio = this.data.width / this.data.height;
-            let scrollDirection = 0;
-            let scrollDiff = 0;
-            switch (this.type) {
-              case "fullWidth":
-                if (this._imageIsPortrait) {
-                  scrollDirection = 1;
-                  let imgHeight = panelWidth / imgRatio;
-                  scrollDiff = imgHeight - panelHeight;
-                }
-                break;
-              case "page":
-              case "sized":
-                scrollDirection = this._imageIsPortrait ? 1 : 2;
-                if (this._imageIsPortrait) {
-                  let imgHeight = panelWidth / imgRatio;
-                  scrollDiff = imgHeight - panelHeight;
-                } else {
-                  let imgWidth = panelHeight * imgRatio;
-                  scrollDiff = imgWidth - panelWidth;
-                }
-                break;
-              default:
-                break;
+            if (entry.isIntersecting && entering) {
+              let ir = entry.intersectionRatio;
+              let naturalZoom = this._image.offsetWidth / (this._image.naturalWidth);
+              let zoom = Math.min(2.0, 3 / naturalZoom);
+              let gain = (entering && (ir < 0.4)) ? (2.5 * ir) : 1;
+              let scale = 1 + (gain * (zoom - 1));
+              let imw = this._image.offsetWidth * scale;
+              let imh = this._image.offsetHeight * scale;
+              let px = (focusPoint[0] * imw);
+              let py = (focusPoint[1] * imh);
+              let cx = (this.$.imgPanel.offsetWidth * 0.6 / 2);
+              let cy = (this.$.imgPanel.offsetHeight / 2);
+              let ox = -this._lastTranslate[0];
+              let oy = -this._lastTranslate[1];
+              let dx = (cx - px) - ox;
+              let dy = (cy - py) - oy;
+
+              let transform = "translate3d(" + (ox + dx * gain) + "px," + (oy + dy * gain) + "px,0) scale(" + scale + ")";
+              this._image.style.transform = transform;
+            } else {
+              // if (entering) {
+              //   let transform = "translate3d(" + (-this._lastTranslate[0]) + "px," + (-this._lastTranslate[1]) + "px,0) scale(" + 1 + ")";
+              //   this._image.style.transform = transform;
+              // }
             }
-            let ir = entry.intersectionRatio;
-            if (scrollDirection) {
-              let diff = scrollDiff;
-              let gain = 0;
-              if (entering) {
-                if (ir > 0.2 && ir <= 0.9) {
-                  gain = (5 / 7) * ir - (1 / 7);
-                } else if (ir > 0.9) {
-                  gain = 0.5;
-                }
-              } else {
-                if (ir < 0.1) {
-                  gain = 1;
-                } else if (ir >= 0.7) {
-                  gain = 0.5;
-                } else {
-                  gain = (-5 / 6) * ir + (13 / 12);
-                }
-              }
-              let offset = diff * gain;
-              if (scrollDirection == 1) {
-                this._image.style.transform = "translate3d(0," + (-offset + "px") + ",0)";
-              } else {
-                this._image.style.transform = "translate3d(" + (-offset + "px") + ",0,0)";
-              }
-            }
-            let opacity = (ir < 0.4) ? ((9 / 4) * ir + 0.1) : 1;
-            this._image.style.opacity = opacity;
           }
         }
       }

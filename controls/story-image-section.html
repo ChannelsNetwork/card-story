@@ -1,0 +1,62 @@
+<dom-module id="story-image-section">
+  <template>
+    <style>
+       :host {
+        display: block;
+        min-height: 100vh;
+        width: 100vw;
+        box-sizing: border-box;
+        position: relative;
+      }
+
+      .panel {
+        background: #fff;
+        border-radius: 3px;
+        max-width: 40vw;
+        position: absolute;
+        top: 16px;
+        right: 20px;
+        box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+      }
+
+      .content {
+        padding: 16px;
+      }
+    </style>
+    <div id="panel" class="panel">
+      <div class="content">
+        <slot></slot>
+      </div>
+    </div>
+  </template>
+  <script>
+    class StoryImageSection extends Polymer.Element {
+      static get is() { return "story-image-section"; }
+      static get properties() {
+        return {
+          top: Number,
+          left: Number
+        };
+      }
+
+      handleIntersection(entry) {
+        if (entry.isIntersecting) {
+          let ir = entry.intersectionRatio;
+          let opacity = (ir < 0.3) ? (10 / 3) * ir : 1;
+          this.$.panel.style.opacity = opacity;
+        }
+      }
+
+      get focusPoint() {
+        if (this.top && this.left) {
+          return [
+            this.left || 0,
+            this.top || 0
+          ];
+        }
+        return null;
+      }
+    }
+    window.customElements.define(StoryImageSection.is, StoryImageSection);
+  </script>
+</dom-module>
