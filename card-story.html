@@ -1,0 +1,224 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="controls/card-story-text.html">
+<link rel="import" href="controls/card-story-image.html">
+<link rel="import" href="controls/story-image-section.html">
+
+<dom-module id="card-story">
+  <template>
+    <style>
+      :host {
+        display: block;
+        font-family: 'Open Sans', sans-serif;
+        font-weight: 400;
+        line-height: 1.5;
+        font-size: 16px;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: 'Raleway', sans-serif;
+        margin: 0;
+        font-weight: 400;
+        line-height: 1.4;
+      }
+
+      h1 {
+        font-size: 36px;
+        text-transform: capitalize;
+        text-align: center;
+      }
+
+      h3 {
+        font-weight: bold;
+      }
+
+      #article {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+    </style>
+    <article id="article">
+      <h1>The Devastation in Puerto Rico, as Seen From Above</h1>
+      <card-story-text></card-story-text>
+      <card-story-image data="[[imgA]]" delegate="[[delegate]]"></card-story-image>
+      <!-- <card-story-text></card-story-text>
+      <card-story-image type="fullWidth" data="[[imgB]]" delegate="[[delegate]]"></card-story-image>
+      <card-story-text></card-story-text>
+      <card-story-image data="[[imgC]]" delegate="[[delegate]]"></card-story-image>
+      <card-story-text></card-story-text>
+      <card-story-image type="sized" width="500px" height="500px" data="[[imgA]]" delegate="[[delegate]]"></card-story-image> -->
+      <card-story-text></card-story-text>
+      <card-story-image type="page" data="[[imgB]]" delegate="[[delegate]]"></card-story-image>
+      <card-story-text></card-story-text>
+      <card-story-image type="page" data="[[imgA]]" delegate="[[delegate]]">
+        <story-image-section>
+          <h3>Ashley + Ashley</h3>
+          <p>They got married on October 2nd, 2017 in New York city. It was a warm day. Unusually warm for October.</p>
+        </story-image-section>
+        <story-image-section top="0.30525" left="0.45">
+          <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+            commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+            of the island without water and almost the entire island without power.</p>
+        </story-image-section>
+      </card-story-image>
+      <card-story-text></card-story-text>
+      <card-story-image type="page" data="[[imgB]]" delegate="[[delegate]]">
+        <story-image-section top="0.33697" left="0.3125">
+          <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+            commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+            of the island without water and almost the entire island without power.</p>
+        </story-image-section>
+        <story-image-section top="0.38378" left="0.5677">
+          <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+            commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+            of the island without water and almost the entire island without power.</p>
+        </story-image-section>
+      </card-story-image>
+      <card-story-text></card-story-text>
+
+      <!-- <card-story-image type="page" data="[[imgA2]]" delegate="[[delegate]]">
+        <story-image-section>
+          <h3>Ashley + Ashley</h3>
+          <p>They got married on October 2nd, 2017 in New York city. It was a warm day. Unusually warm for October, so they
+            have to get rid of the sweaters they were planning to wear.</p>
+        </story-image-section>
+        <story-image-section top="0.3262" left="0.399">
+          <p>Last week, Hurricane Maria made landfall in Puerto Rico with winds of 155 miles an hour, leaving the United States
+            commonwealth on the brink of a humanitarian crisis. The storm left 80 percent of crop value destroyed, 60 percent
+            of the island without water and almost the entire island without power.</p>
+        </story-image-section>
+      </card-story-image>
+      <card-story-text></card-story-text> -->
+
+    </article>
+  </template>
+
+  <script>
+    class CardStory extends Polymer.Element {
+      static get is() { return 'card-story'; }
+      static get properties() {
+        return {
+          imgA: {
+            type: Object,
+            value: function () {
+              return {
+                href: "images/a.jpg",
+                width: 600,
+                height: 819
+              }
+            }
+          },
+          imgA2: {
+            type: Object,
+            value: function () {
+              return {
+                href: "images/a2.jpg",
+                width: 912,
+                height: 1367
+              }
+            }
+          },
+          imgB: {
+            type: Object,
+            value: function () {
+              return {
+                href: "images/b.jpg",
+                width: 960,
+                height: 641
+              }
+            }
+          },
+          imgC: {
+            type: Object,
+            value: function () {
+              return {
+                href: "images/c.png",
+                width: 512,
+                height: 512
+              }
+            }
+          },
+          delegate: Object
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.delegate = this;
+      }
+
+      get scrollPanel() {
+        return this.$.article;
+      }
+
+      addIntersectionHandler(node, handler) {
+        if (!this._intersectionObserver) {
+          let options = {
+            root: this.scrollPanel,
+            rootMargin: "0px",
+            threshold: this._buildThresholds(30)
+          };
+          this._intersectionObserver = new IntersectionObserver(this._handleIntersection.bind(this), options);
+          if (!this._intersectionHandlers)
+            this._intersectionHandlers = [];
+        }
+        this._intersectionHandlers.push({
+          node: node,
+          handler: handler
+        });
+        this._intersectionObserver.observe(node);
+      }
+
+      addVisibleIntersectionHandle(node, handler) {
+        if (!this._visibleIntersectionObserver) {
+          let options = {
+            root: this.scrollPanel,
+            rootMargin: "0px",
+            threshold: 0
+          };
+          this._visibleIntersectionObserver = new IntersectionObserver(this._handleIntersection.bind(this), options);
+          if (!this._intersectionHandlers)
+            this._intersectionHandlers = [];
+        }
+        this._intersectionHandlers.push({
+          node: node,
+          handler: handler
+        });
+        this._visibleIntersectionObserver.observe(node);
+      }
+
+      _buildThresholds(steps) {
+        let thresholds = [0];
+        for (let i = 1.0; i <= steps; i++) {
+          thresholds.push(i / steps);
+        }
+        return thresholds;
+      }
+
+      _handleIntersection(entries) {
+        entries.forEach((entry) => {
+          let handler = null;
+          for (let i = 0; i < this._intersectionHandlers.length; i++) {
+            if (this._intersectionHandlers[i].node == entry.target) {
+              handler = this._intersectionHandlers[i].handler;
+              break;
+            }
+          }
+          if (handler) {
+            handler(entry);
+          }
+        });
+      }
+    }
+    window.customElements.define(CardStory.is, CardStory);
+  </script>
+</dom-module>

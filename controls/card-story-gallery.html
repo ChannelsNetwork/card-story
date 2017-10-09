@@ -1,0 +1,69 @@
+<dom-module id="card-story-gallery">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+      }
+    </style>
+  </template>
+  <script>
+    class CardStoryGallery extends Polymer.Element {
+      static get is() { return "card-story-gallery"; }
+      static get properties() {
+        return {
+          data: {
+            type: Array,
+            observer: '_refresh'
+          }
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this._connected = true;
+        requestAnimationFrame(() => {
+          this._refresh();
+        });
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        this._connected = false;
+      }
+
+      _refresh() {
+        if (this._connected && this.data) {
+          this._ensureLaidOut().then(() => {
+          });
+        }
+      }
+
+      _ensureLaidOut() {
+        this._sizeAttempts = 0;
+        return new Promise((resolve, reject) => {
+          let w = this.offsetWidth;
+          if (w) {
+            resolve();
+          } else {
+            var cb = () => {
+              this._sizeAttempts++;
+              let w = this.offsetWidth;
+              if (w) {
+                resolve();
+              } else {
+                if (this._sizeAttempts > 20) {
+                  reject();
+                } else {
+                  setTimeout(cb, 50);
+                }
+              }
+            };
+            setTimeout(cb, 50);
+          }
+        });
+      }
+    }
+    window.customElements.define(CardStoryGallery.is, CardStoryGallery);
+  </script>
+</dom-module>
