@@ -1,0 +1,287 @@
+<link rel="import" href="story-gallery-thumbnail.html">
+<dom-module id="story-gallery-viewer">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      :host {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.99);
+        display: none;
+      }
+
+      .container {
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+      }
+
+      .bottomBar {
+        padding: 10px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      story-gallery-thumbnail {
+        height: 85px;
+        width: 85px;
+        min-width: 85px;
+        margin: 10px 5px;
+        cursor: pointer;
+        box-sizing: border-box;
+        transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0.75;
+      }
+
+      story-gallery-thumbnail.selected {
+        transform: translateY(-9px) scale(1.12);
+        border-radius: 5px;
+        opacity: 1;
+        box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 8px 0 rgba(0, 0, 0, 0.12), 0 3px 3px -2px rgba(0, 0, 0, 0.4);
+      }
+
+      .notSelected:hover {
+        box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.24);
+        opacity: 1;
+      }
+
+      .closeIcon {
+        display: block;
+        cursor: pointer;
+        width: 44px;
+        height: 44px;
+        padding: 0px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 100%;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+
+      .arrowPanel {
+        height: 100%;
+        box-sizing: border-box;
+      }
+
+      .arrowPanel .arrow {
+        opacity: 0;
+      }
+
+      .arrowPanel:hover .arrow {
+        opacity: 1;
+      }
+
+      .arrow {
+        display: block;
+        cursor: pointer;
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 100%;
+        margin: 10px;
+
+        transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #panel {
+        position: relative;
+      }
+
+      #imagePanel {
+        opacity: 0;
+        margin: 0 auto;
+        background-color: #f0f0f0;
+        background-size: cover;
+        background-origin: border-box;
+        background-position: 50% 50%;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px, rgba(0, 0, 0, 0.2) 0px 3px 1px -2px;
+      }
+
+      .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+
+      @media (max-width: 600px) {
+        .overlay,
+        .arrowPanel {
+          display: none !important;
+        }
+      }
+    </style>
+    <div class="container vertical layout">
+      <div id="panel" class="flex horizontal layout center">
+        <div id="imagePanel"></div>
+        <div class="overlay horizontal layout center">
+          <div class="flex horizontal layout center arrowPanel">
+            <img class="arrow" on-click="_prev" title="Previous" width="50" height="50" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAADoElEQVRoQ92ai5ENQRSG/40AESACRIAIEAEiQASIABGwESACRIAIEAEioL5bfW6d29Mz/ZjuuVu3q6Z2l5np8513d8+ZTmScnQiHeoJclnRb0k1JdyRdC5fX1U9JXJ8lfZP0RdKfHsrsAfJQ0v1wtcj0QRLXecvD9swakOeSHkVaR8NomwtNo3U/sBaWw2JcWNAGlnot6U0LUAsIArx1AN+DAGi11k2AwppPJd0IAAA9DsooZqoFeRUmZQIAEADt9xgoCIsYEL8/K31xKQia+xQC+a+kF2HS0nlq7kM5vP9ScM27JZYuAcGvcSV+YgXiIvb9GkFL7mWud8E6zIWrLc6ZA/GWAALz18ZBieCpe5gbt8XVgFi0TA7kq7PElhAGFsPcmtPKEgjB9iS40zEgUjCkZmJoMuZAEJzgJrD5fXRM5NyPmMHNSAC42CRTzoH8CHWC9IdlLsLAEqR/6sz1WKAUCKmPqk1wo4lewxIH75v19cxkeAbBP1FwCsSskTRhI1Wc/VoVZC4/sUoMQo2gZvS0Ru8UblahtlBrdiMGoV+6FwrQ/qZGK/BYbwjeacr+6DtuD8Kkv4PQVzoUvhEQppyJnB6ELvR9WOzgi2vGKAiTifTLEuBBWMscuJZlq5ehaWsFGQ2BXBNZvUWMck222gICkIn3eBBLu+T4lkq+FQQgpG/6QOTc1SQP8m8mk5W42JYQJs+BvL1AjtElDwGxIpVdN5SYt/CeISBVi6BCQXO3zYLQv1wNwdMa7MUrupyUmf+3YN+3UiPS7xYw1jyyj7Yr3h6kZ0EcDbNYEHu3KCNhFluUEU3jCJiknFu08b1hsm287/X3pX9ldrG2uyeMFd/FhRUTWxpe0zzG/L7OAMW7W4Zlq1/x2UtqzW67FT2t4i3DTmXresesUbT54K1yEbeDJtaI64g3tZkQ7eEGLZW+xXXmnqGSs2GIi1Zt0PFC2zLdshFMgfglQvWWqb3wGF2thyneD8vtxh+jqzWQqsVaDsSWlVWHLh2Co/pwqQQkLmokAJq2ptPXAkiOMng/Fik+XCoFsfktAfA38UN67nkYym677QvPBnZKGbUgvIPUjKuxCDMgANnCrD2WQ+ts0VKEDYA6QT9VpaAWEFMIk3MZEP9uHwvwk0Oi1AcDHNbYBwO+wgOAQprOY9aAGBDaYy2DZlsGlmTzfNWmeQ8Qny7RsP+oxluL+whe3M8+qrFPPVoUcPBMT5DVwqx5wcmA/AddExFC37YOUAAAAABJRU5ErkJggg==">
+            <span class="flex"></span>
+          </div>
+          <div class="flex horizontal layout center arrowPanel">
+            <span class="flex"></span>
+            <img class="arrow" on-click="_next" title="Next" width="50" height="50" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAADpklEQVRoQ92ajZENQRSFz0aACBABIkAEiAARIAJEgAjYCBABIkAEiAARUN9Wn1e9Mz0z3T139r16XTW1P9XTfc89969vz4mOZJwcCQ5FArks6bakm5LuSLqWnlxXPyXxfJb0TdIXSX8ilBkB5KGk++npkemDJJ7Tnpf9zhogzyU9GmgdDaNtHjSN1vMBWzAHYzww6AFTryW96QHUAwQB3mYAvicB0GqrmQAKNp9KupEAAOhxUkY1plYgr9KmbAAABED7EQMFwYgB8fuz2oVrgaC5T8mR/0p6kTat3adlHsph/UvJNO/WMF0DBLvGlPgJC/jF0PZbBK2Zy17vEjvshanN7rkEJGcCENDf6gc1gpfmsDdmi6kBYpaZJSBfMyYuEoSBDcHcmtLKHBCc7Ukyp32AKIEhNONDozEFBMFxbhyb37f2iSXzw2cwMwIAJjaKlFNAfqQ8QfiDmUMYMEH4J89cHwpUAkLoI2vj3GiiZ+BbjKrQ2bABloHzjxRcAmI2ihRWbuoNF6NN5XqeZpMfsTIEQo4gZ6xhg02bQmcjGCuJ3EKuORtDINRL91IC2k1q3KgUbSKZsbI/5hV3DgQt/k5SXAlKfFswU5QzB0IV+j4ddrDFqLEFGMIvR4AH6SxzzrQcrV6moi0KyBY+M5I1Z8Qo10SrOfCRzIysJwfisEs9s1UmjwJDfiNXIedZ/ZUD+TcRySJNLNLMzsm7DyAlMJNV7YwWDwaIT5y9yXfvQKIOa5NAqF+uJufZ0tlzJnrPOXb2HZsXHX4jQOA2Lh7po50l7xzI1gkxCgRyzybELUuUSBAAmS1Rtioao0EsFo0gjS7jo0Eg42IZn0/apf7OtB4VYkvbu0U1e7DiRYfhNcUjTBBNopt6jla/hncvpTO7uxVrWMEZfX0Q2Zk0G1XNh5yVQ2wHjdgondltk6YQbWJiW2X6Whckk2OusNzUoGMDt0wjGwe1gufz8sDR3DL1Qlv1p2oBDaPfZMNwqRsfdaKrFXyKicXotwSEhZsvXXqkHrzTfLlUA2R4oiMAULR13b5WgOQqg/WxhkUmvF4tEM93AOBv/IfwHHkZSrfdfjDp2CVltALxWYB2KocwAwIgLczW5IfWadGShA2APEE91aSgHiBWCJvzGBD/98cC/OSSqPTBAJc1/mAg72gCAIV03cesAWJAaI+zDJrtGTBJ1b2qaR4BxMK7tso/qsnZYh7Oi/n5oxp/6tGjgHPvRAJZLcyaBY4GyH/eexJCMSSOWwAAAABJRU5ErkJggg==">
+          </div>
+        </div>
+      </div>
+      <div class="bottomBar horizontal layout center">
+        <dom-repeat items="[[data]]">
+          <template>
+            <story-gallery-thumbnail data-index$="[[index]]" class="notSelected" src="[[item.href]]" on-click="_onThumbnailClick"></story-gallery-thumbnail>
+          </template>
+        </dom-repeat>
+      </div>
+      <img on-click="_onClose" class="closeIcon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAD4UlEQVRoQ92ajZEMQRTH30WACBABIkAEiAARIAJEgAgQASJABIgAESAC6rfV/613PdPTrz/ubG1XTe3u3cy8/r3v7pkTO5JxciQcNhPkopndNLPrZnbLzK6kw+vqh5lxfDKzr2b22cx+z1DmDJD7ZnY3HT1zem9mHG97LtY1IyBPzexBpnU0jLY50DRa9wNrYTksxoEFNbDUSzN71QPUA8IEXjsAJv8mabXVTYDCmo/N7FoCAOhhUkaYqRXkRRKKgG/pO9qfMVAQFhEQ359EbxwFQXMfUyD/MbNnSWhUTst5WIf7X0iueTuSECIg+DWuxCdWIC5y32+ZaORcZOGuWAdZuNqmzBqItwQQmL81DiITXzsH2bitYDYtUwP54ixxnhACy2FulLSyBUKwPUru9D8g1mBIzcTQYpRAmDjBTWDz/axjouZ+xAxuRgLAxRaZsgTyPdUJ0h+WOYSBJUj/1Jmr+YTWQEh9VG2CG00c0sAzCP6FgtdAZI1VE2ZUJANGKNcXNKLMyL+LwZyulcsvrJKDUCOoGbQdXFQb0hCfPTA+vbfKpLZQa3YjB6ELvZMK0P6kDZqmXJ/dp7dGSdkffMftQbjxryTsUkPh64HphWB6q/P0IHSh7xrcyiu4BWYEQjJJvywB7qWu+5RrKVs9T01bLT7y/0dgZkAgdzFXbxFRRrJVCXILZhYEshfe40GUdkmBI5V8DQbhWgbMaD6pb6R+5rlL2R7kbyGTtbqYAtJ3rvxNy4BZfdup+Z4VSA7D7xmW8Eo9VxC5ExPoLZoljzgXkDywmUxogdTgx0UQ+pfLKXhGgz0PbOYXXu0FYBTs+8b2LNJvKTtF6kyAYXeKmsd9f+ZBZhTEWoqdBbNZEEdblBqEtD0DZrNFGWkaoxAzYKpNI0J62vhWiFGYahuPAJ20L/2V6BvdLgpv97h5SObmworzlYYjzaPS9EjbIRi1MVu6U7b6mT97WVuza7ciapVoypxx3qo18qbRC5JVDnE7aGGNLRCZkH1eXGyk0s+wBJWcpIIbNm3QIVxbprObvVYw37c1b5lK2Oh2T+uk8/Pz5rO4YVjbjZ9RhXthmpbGNRClxKaHLr0zd9c1P1yKgHB/bxkSAE1b19PXACSPMrg/MsOryiiI5CsB8Jv4IT3PfBjKbrvioBjYa8poBdFaAFdjESYgANnCbH0sh9bZoqUIC4A6QavUpKAeECkE4RwC4u96WYBPHhKtvTDAwxq9MOA3ygFAIV3PY0ZABIT2WMug2Z6BJem6I5vmxfvPANHNcRM07F+q8dbiPIIX99NLNXrVo0cBp66ZCTI8mZEbHA3IPxjPOEJIew9zAAAAAElFTkSuQmCC">
+    </div>
+  </template>
+  <script>
+    class StoryGalleryViewer extends Polymer.Element {
+      static get is() { return "story-gallery-viewer"; }
+      static get properties() {
+        return {
+          data: Array,
+          selected: {
+            type: Number,
+            observer: '_refreshSelection'
+          },
+          open: {
+            type: Boolean,
+            observer: '_onOpen'
+          }
+        };
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        this._detachListeners();
+      }
+
+      _onOpen() {
+        this.style.display = this.open ? "block" : "none";
+        if (this.open) {
+          this._refreshSelection();
+          this._attachListeners();
+          this.focus();
+        } else {
+          this._detachListeners();
+        }
+      }
+
+      _onClose() {
+        this.$.imagePanel.style.opacity = 0;
+        this.set("open", false);
+      }
+
+      _attachListeners() {
+        if (!this._keyListener) {
+          this._keyListener = (event) => {
+            this._onKeyDown(event);
+          };
+          window.addEventListener('keydown', this._keyListener, true);
+        }
+      }
+
+      _detachListeners() {
+        if (this._keyListener) {
+          window.removeEventListener('keydown', this._keyListener, true);
+          this._keyListener = null;
+        }
+      }
+
+      _refreshSelection() {
+        if (!this.open) {
+          return;
+        }
+        if (this._selectedThumbnail) {
+          this._selectedThumbnail.classList.remove("selected");
+          this._selectedThumbnail.classList.add("notSelected");
+          this._selectedThumbnail = null;
+        }
+        let selected = this.selected || 0;
+        let thumbnail = this.shadowRoot.querySelector('story-gallery-thumbnail[data-index="' + selected + '"');
+        thumbnail.classList.add("selected");
+        thumbnail.classList.remove("notSelected");
+        this._selectedThumbnail = thumbnail;
+        setTimeout(() => {
+          this._refreshImage();
+        }, 100);
+      }
+
+      _onThumbnailClick(event) {
+        this.set("selected", event.model.index);
+      }
+
+      _refreshImage() {
+        let pw = this.$.panel.offsetWidth - 10;
+        let ph = this.$.panel.offsetHeight - 10;
+        let selected = this.selected || 0;
+        let d = this.data[selected];
+        if (d) {
+          let r = d.width / d.height;
+          let iw = 0;
+          let ih = 0;
+          if (r >= 1) {
+            iw = Math.min(pw, d.width);
+            ih = iw / r;
+            if (ih > ph) {
+              ih = ph;
+              iw = r * ih;
+            }
+          } else {
+            ih = Math.min(d.height, ph);
+            iw = r * ih;
+            if (iw > pw) {
+              iw = pw;
+              ih = iw / r;
+            }
+          }
+          this.$.imagePanel.style.height = ih + "px";
+          this.$.imagePanel.style.width = iw + "px";
+          this.$.imagePanel.style.opacity = 1;
+          this.$.imagePanel.style.backgroundImage = 'url("' + d.href + '")';
+        }
+      }
+
+      _onKeyDown(event) {
+        switch (event.keyCode) {
+          case 37:
+            this._prev();
+            break;
+          case 39:
+            this._next();
+            break;
+          case 27:
+            this._onClose();
+            break;
+        }
+      }
+
+      _prev() {
+        if (this.data) {
+          let prev = this.selected - 1;
+          if (prev < 0) {
+            prev = this.data.length - 1;
+          }
+          this.set("selected", prev);
+        }
+      }
+
+      _next() {
+        if (this.data) {
+          let next = this.selected + 1;
+          if (next >= this.data.length) {
+            next = 0;
+          }
+          this.set("selected", next);
+        }
+      }
+    }
+    window.customElements.define(StoryGalleryViewer.is, StoryGalleryViewer);
+  </script>
+</dom-module>

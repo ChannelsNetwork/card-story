@@ -1,0 +1,99 @@
+<dom-module id="story-gallery-item">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+        overflow: hidden;
+        background-color: #f0f0f0;
+        background-size: cover;
+        background-origin: border-box;
+        background-position: 50% 35%;
+        border-radius: 3px;
+      }
+    </style>
+  </template>
+  <script>
+    class StoryGalleryItem extends Polymer.Element {
+      static get is() { return "story-gallery-item"; }
+      static get properties() {
+        return {
+          direction: {
+            type: String,
+            value: 'horizontal'
+          },
+          data: {
+            type: Object,
+            observer: '_refresh'
+          }
+        }
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this._connected = true;
+        requestAnimationFrame(() => {
+          this._refresh();
+        });
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        this._connected = false;
+      }
+
+      _refresh() {
+        if (this._connected && this.data) {
+          this._ensureLaidOut().then(() => {
+            if (this.direction == 'horizontal') {
+              this._horizontalLayout();
+            } else {
+              this._verticalLayout();
+            }
+            this.style.backgroundImage = 'url("' + this.data.href + '")';
+          });
+        }
+      }
+
+      _horizontalLayout() {
+        let h = this.offsetHeight;
+        let imRatio = this.data.width / this.data.height;
+        let w = h * imRatio;
+        this.style.minWidth = w + "px";
+        this.style.minHeight = null;
+        this.classList.add('horizontal');
+        this.classList.remove('vertical');
+      }
+
+      _verticalLayout() {
+
+      }
+
+      _ensureLaidOut() {
+        this._sizeAttempts = 0;
+        return new Promise((resolve, reject) => {
+          let w = (this.direction == 'horizontal') ? this.offsetHeight : this.offsetWidth;
+          if (w) {
+            resolve();
+          } else {
+            var cb = () => {
+              this._sizeAttempts++;
+              let w = (this.direction == 'horizontal') ? this.offsetHeight : this.offsetWidth;
+              if (w) {
+                resolve();
+              } else {
+                if (this._sizeAttempts > 20) {
+                  reject();
+                } else {
+                  setTimeout(cb, 50);
+                }
+              }
+            };
+            setTimeout(cb, 50);
+          }
+        });
+      }
+    }
+    window.customElements.define(StoryGalleryItem.is, StoryGalleryItem);
+  </script>
+</dom-module>
