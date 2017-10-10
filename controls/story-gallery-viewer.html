@@ -1,0 +1,178 @@
+<link rel="import" href="story-gallery-thumbnail.html">
+<dom-module id="story-gallery-viewer">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      :host {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.99);
+        display: none;
+      }
+
+      .container {
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+      }
+
+      .bottomBar {
+        background: #f0f0f0;
+        padding: 10px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      story-gallery-thumbnail {
+        height: 85px;
+        width: 85px;
+        min-width: 85px;
+        margin: 10px 5px;
+        cursor: pointer;
+        box-sizing: border-box;
+        transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0.75;
+      }
+
+      story-gallery-thumbnail.selected {
+        transform: translateY(-9px) scale(1.12);
+        border-radius: 5px;
+        opacity: 1;
+        box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 8px 0 rgba(0, 0, 0, 0.12), 0 3px 3px -2px rgba(0, 0, 0, 0.4);
+      }
+
+      .notSelected:hover {
+        box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.24);
+        opacity: 1;
+      }
+
+      .icon {
+        display: block;
+        cursor: pointer;
+        width: 44px;
+        height: 44px;
+        padding: 0px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 100%;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+
+      #panel {
+        position: relative;
+      }
+
+      #imagePanel {
+        opacity: 0;
+        margin: 0 auto;
+        background-color: #f0f0f0;
+        background-size: cover;
+        background-origin: border-box;
+        background-position: 50% 50%;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px, rgba(0, 0, 0, 0.2) 0px 3px 1px -2px;
+      }
+    </style>
+    <div class="container vertical layout">
+      <div id="panel" class="flex horizontal layout center">
+        <div id="imagePanel"></div>
+      </div>
+      <div class="bottomBar horizontal layout center">
+        <dom-repeat items="[[data]]">
+          <template>
+            <story-gallery-thumbnail data-index$="[[index]]" class="notSelected" src="[[item.href]]" on-click="_onThumbnailClick"></story-gallery-thumbnail>
+          </template>
+        </dom-repeat>
+      </div>
+      <img on-click="_onClose" class="icon icons8-Cancel" width="50" height="50" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAD4UlEQVRoQ92ajZEMQRTH30WACBABIkAEiAARIAJEgAgQASJABIgAESAC6rfV/613PdPTrz/ubG1XTe3u3cy8/r3v7pkTO5JxciQcNhPkopndNLPrZnbLzK6kw+vqh5lxfDKzr2b22cx+z1DmDJD7ZnY3HT1zem9mHG97LtY1IyBPzexBpnU0jLY50DRa9wNrYTksxoEFNbDUSzN71QPUA8IEXjsAJv8mabXVTYDCmo/N7FoCAOhhUkaYqRXkRRKKgG/pO9qfMVAQFhEQ359EbxwFQXMfUyD/MbNnSWhUTst5WIf7X0iueTuSECIg+DWuxCdWIC5y32+ZaORcZOGuWAdZuNqmzBqItwQQmL81DiITXzsH2bitYDYtUwP54ixxnhACy2FulLSyBUKwPUru9D8g1mBIzcTQYpRAmDjBTWDz/axjouZ+xAxuRgLAxRaZsgTyPdUJ0h+WOYSBJUj/1Jmr+YTWQEh9VG2CG00c0sAzCP6FgtdAZI1VE2ZUJANGKNcXNKLMyL+LwZyulcsvrJKDUCOoGbQdXFQb0hCfPTA+vbfKpLZQa3YjB6ELvZMK0P6kDZqmXJ/dp7dGSdkffMftQbjxryTsUkPh64HphWB6q/P0IHSh7xrcyiu4BWYEQjJJvywB7qWu+5RrKVs9T01bLT7y/0dgZkAgdzFXbxFRRrJVCXILZhYEshfe40GUdkmBI5V8DQbhWgbMaD6pb6R+5rlL2R7kbyGTtbqYAtJ3rvxNy4BZfdup+Z4VSA7D7xmW8Eo9VxC5ExPoLZoljzgXkDywmUxogdTgx0UQ+pfLKXhGgz0PbOYXXu0FYBTs+8b2LNJvKTtF6kyAYXeKmsd9f+ZBZhTEWoqdBbNZEEdblBqEtD0DZrNFGWkaoxAzYKpNI0J62vhWiFGYahuPAJ20L/2V6BvdLgpv97h5SObmworzlYYjzaPS9EjbIRi1MVu6U7b6mT97WVuza7ciapVoypxx3qo18qbRC5JVDnE7aGGNLRCZkH1eXGyk0s+wBJWcpIIbNm3QIVxbprObvVYw37c1b5lK2Oh2T+uk8/Pz5rO4YVjbjZ9RhXthmpbGNRClxKaHLr0zd9c1P1yKgHB/bxkSAE1b19PXACSPMrg/MsOryiiI5CsB8Jv4IT3PfBjKbrvioBjYa8poBdFaAFdjESYgANnCbH0sh9bZoqUIC4A6QavUpKAeECkE4RwC4u96WYBPHhKtvTDAwxq9MOA3ygFAIV3PY0ZABIT2WMug2Z6BJem6I5vmxfvPANHNcRM07F+q8dbiPIIX99NLNXrVo0cBp66ZCTI8mZEbHA3IPxjPOEJIew9zAAAAAElFTkSuQmCC">
+    </div>
+  </template>
+  <script>
+    class StoryGalleryViewer extends Polymer.Element {
+      static get is() { return "story-gallery-viewer"; }
+      static get properties() {
+        return {
+          data: Array,
+          selected: {
+            type: Number,
+            observer: '_refreshSelection'
+          },
+          open: {
+            type: Boolean,
+            observer: '_onOpen'
+          }
+        };
+      }
+
+      _onOpen() {
+        this.style.display = this.open ? "block" : "none";
+        if (this.open) {
+          this._refreshSelection();
+        }
+      }
+
+      _onClose() {
+        this.set("open", false);
+      }
+
+      _refreshSelection() {
+        if (!this.open) {
+          return;
+        }
+        if (this._selectedThumbnail) {
+          this._selectedThumbnail.classList.remove("selected");
+          this._selectedThumbnail.classList.add("notSelected");
+          this._selectedThumbnail = null;
+        }
+        let selected = this.selected || 0;
+        let thumbnail = this.shadowRoot.querySelector('story-gallery-thumbnail[data-index="' + selected + '"');
+        thumbnail.classList.add("selected");
+        thumbnail.classList.remove("notSelected");
+        this._selectedThumbnail = thumbnail;
+        setTimeout(() => {
+          this._refreshImage();
+        }, 100);
+      }
+
+      _onThumbnailClick(event) {
+        this.set("selected", event.model.index);
+      }
+
+      _refreshImage() {
+        let pw = this.$.panel.offsetWidth - 10;
+        let ph = this.$.panel.offsetHeight - 10;
+        let selected = this.selected || 0;
+        let d = this.data[selected];
+        if (d) {
+          let r = d.width / d.height;
+          let iw = 0;
+          let ih = 0;
+          if (r >= 1) {
+            iw = Math.min(pw, d.width);
+            ih = iw / r;
+            if (ih > ph) {
+              ih = ph;
+              iw = r * ih;
+            }
+          } else {
+            ih = Math.min(d.height, ph);
+            iw = r * ih;
+            if (iw > pw) {
+              iw = pw;
+              ih = iw / r;
+            }
+          }
+          this.$.imagePanel.style.height = ih + "px";
+          this.$.imagePanel.style.width = iw + "px";
+          this.$.imagePanel.style.opacity = 1;
+          this.$.imagePanel.style.backgroundImage = 'url("' + d.href + '")';
+        }
+      }
+    }
+    window.customElements.define(StoryGalleryViewer.is, StoryGalleryViewer);
+  </script>
+</dom-module>

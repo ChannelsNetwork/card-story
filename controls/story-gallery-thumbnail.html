@@ -1,0 +1,34 @@
+<dom-module id="story-gallery-thumbnail">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+        vertical-align: middle;
+        background-color: #f0f0f0;
+        background-size: cover;
+        background-origin: border-box;
+        background-position: 50% 50%;
+        border: 1px solid transparent;
+      }
+    </style>
+  </template>
+  <script>
+    class StoryGalleryThumbnail extends Polymer.Element {
+      static get is() { return "story-gallery-thumbnail"; }
+      static get properties() {
+        return {
+          src: {
+            type: String,
+            observer: '_refresh'
+          }
+        };
+      }
+      _refresh() {
+        if (this.src) {
+          this.style.backgroundImage = 'url("' + this.src + '")';
+        }
+      }
+    }
+    window.customElements.define(StoryGalleryThumbnail.is, StoryGalleryThumbnail);
+  </script>
+</dom-module>

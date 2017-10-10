@@ -1,6 +1,7 @@
 <link rel="import" href="../../polymer/lib/elements/dom-repeat.html">
 <link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="story-gallery-item.html">
+<link rel="import" href="story-gallery-viewer.html">
 <dom-module id="card-story-gallery">
   <template>
     <style is="custom-style" include="iron-flex iron-flex-alignment">
@@ -38,10 +39,11 @@
     <div id="container" class="horizontal layout wrap">
       <dom-repeat items="[[data]]">
         <template>
-          <story-gallery-item data="[[item]]" class="flex"></story-gallery-item>
+          <story-gallery-item data="[[item]]" class="flex" on-click="_onItemClick"></story-gallery-item>
         </template>
       </dom-repeat>
     </div>
+    <story-gallery-viewer data="[[data]]" id="viewer"></story-gallery-viewer>
   </template>
   <script>
     class CardStoryGallery extends Polymer.Element {
@@ -50,6 +52,10 @@
         return {
           data: Array
         };
+      }
+      _onItemClick(event) {
+        this.$.viewer.selected = event.model.index;
+        this.$.viewer.open = true;
       }
     }
     window.customElements.define(CardStoryGallery.is, CardStoryGallery);
