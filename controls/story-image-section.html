@@ -1,7 +1,7 @@
 <dom-module id="story-image-section">
   <template>
     <style>
-       :host {
+      :host {
         display: block;
         min-height: 100vh;
         width: 100vw;
@@ -22,6 +22,11 @@
       .content {
         padding: 16px;
       }
+
+      .floating {
+        position: fixed;
+        opacity: 0;
+      }
     </style>
     <div id="panel" class="panel">
       <div class="content">
@@ -35,15 +40,31 @@
       static get properties() {
         return {
           top: Number,
-          left: Number
+          left: Number,
+          floating: {
+            type: Boolean,
+            value: false
+          }
         };
       }
 
       handleIntersection(entry) {
         if (entry.isIntersecting) {
           let ir = entry.intersectionRatio;
-          let opacity = (ir < 0.3) ? (10 / 3) * ir : 1;
+          let opacity = 0;
+          if (this.floating) {
+            this.$.panel.classList.add("floating");
+            let entering = entry.boundingClientRect.y >= 0;
+            if (entering) {
+              opacity = (ir < 0.3) ? (10 / 3) * ir : 1;
+            }
+          } else {
+            this.$.panel.classList.remove("floating");
+            opacity = (ir < 0.3) ? (10 / 3) * ir : 1;
+          }
           this.$.panel.style.opacity = opacity;
+        } else {
+          this.$.panel.classList.remove("floating");
         }
       }
 
