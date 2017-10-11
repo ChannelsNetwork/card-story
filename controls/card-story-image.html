@@ -108,6 +108,7 @@
                 pStyle.margin = "0 auto";
                 break;
               case "page":
+              case "page-fit":
                 pStyle.width = "100vw";
                 pStyle.height = "100vh";
                 break;
@@ -186,6 +187,30 @@
             this._imageIsPortrait = imgHeight > panelHeight;
             break;
           }
+          case "page-fit": {
+            let iw = 0;
+            let ih = 0;
+            if (imgRatio >= 1) {
+              iw = panelWidth;
+              ih = iw / imgRatio;
+              if (ih > panelHeight) {
+                ih = panelHeight;
+                iw = r * ih;
+              }
+            } else {
+              ih = panelHeight;
+              iw = r * ih;
+              if (iw > panelWidth) {
+                iw = panelWidth;
+                ih = iw / r;
+              }
+            }
+            image.style.width = iw + "px";
+            image.style.height = ih + "px";
+            this._pageFitOffset = [-(panelWidth - iw) / 2, -(panelHeight - ih) / 2];
+            image.style.transform = "translate3d(" + (-this._pageFitOffset[0] + "px") + "," + (-this._pageFitOffset[1] + "px") + ",0)";
+            break;
+          }
           case "page":
           case "sized": {
             image.classList.add("sizedImage");
@@ -232,6 +257,9 @@
                 scrollDiff = imgHeight - panelHeight;
               }
               break;
+            case "page-fit":
+              scrollDirection = 0;
+              break;
             case "page":
             case "sized":
               scrollDirection = this._imageIsPortrait ? 1 : 2;
@@ -274,6 +302,9 @@
               this._image.style.transform = "translate3d(" + (-offset + "px") + ",0,0)";
               this._lastTranslate[0] = offset;
             }
+          } if (this._pageFitOffset) {
+            this._lastTranslate[0] = this._pageFitOffset[0];
+            this._lastTranslate[1] = this._pageFitOffset[1];
           }
           let opacity = (ir < 0.4) ? ((9 / 4) * ir + 0.1) : 1;
           this._image.style.opacity = opacity;
