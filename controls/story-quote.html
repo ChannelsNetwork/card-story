@@ -1,0 +1,125 @@
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
+<dom-module id="story-quote">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+        position: relative;
+        font-family: 'Raleway', 'Open Sans', 'Roboto', sans-serif;
+        line-height: 1.5;
+        color: #242424;
+        font-weight: bold;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px 0;
+      }
+
+      .qpanel {
+        box-sizing: border-box;
+      }
+
+      .qimage {
+        display: block;
+        height: 70px;
+        width: auto;
+        padding: 0 20px;
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 1.5s ease, opacity 1s ease;
+      }
+
+      #openQuote {
+        transform: translateY(-60px);
+      }
+
+      #openQuote.intersecting {
+        transform: translateY(-20px);
+        opacity: 0.3;
+      }
+
+      #closeQuote {
+        transform: translateY(60px);
+      }
+
+      #closeQuote.intersecting {
+        transform: translateY(20px);
+        opacity: 0.3;
+      }
+
+      .quote {
+        font-size: 30px;
+        color: #242424;
+      }
+
+      .author {
+        letter-spacing: 0.1em;
+        text-align: right;
+        padding: 10px;
+        font-size: 20px;
+        font-style: italic;
+      }
+
+      .author::before {
+        content: '-  '
+      }
+
+      @media (max-width: 600px) {
+        .qimage {
+          padding: 0 10px 0 5px;
+          height: 40px;
+        }
+        .quote {
+          font-size: 18px;
+        }
+        .author {
+          font-size: 15px;
+        }
+      }
+    </style>
+    <div class="container horizontal layout">
+      <div class="qpanel">
+        <img id="openQuote" class="qimage" src$="[[importPath]]images/oquote.png">
+      </div>
+      <div class="flex content">
+        <div class="quote">[[data.quote]]</div>
+        <div class="author">[[data.author]]</div>
+      </div>
+      <div class="qpanel vertical layout">
+        <span class="flex"></span>
+        <img id="closeQuote" class="qimage" src$="[[importPath]]images/cquote.png">
+      </div>
+    </div>
+  </template>
+  <script>
+    class StoryQuote extends Polymer.Element {
+      static get is() { return "story-quote"; }
+      static get properties() {
+        return {
+          data: Object,
+          delegate: {
+            type: Object,
+            observer: '_onDelegate'
+          }
+        };
+      }
+
+      _onDelegate() {
+        this.delegate.addIntersectionHandler(this, this._handleIntersection.bind(this));
+      }
+
+      _handleIntersection(entry) {
+        if (entry.isIntersecting && entry.intersectionRatio == 1) {
+          this.$.openQuote.classList.add("intersecting");
+          this.$.closeQuote.classList.add("intersecting");
+        } else {
+          this.$.openQuote.classList.remove("intersecting");
+          this.$.closeQuote.classList.remove("intersecting");
+        }
+      }
+    }
+    window.customElements.define(StoryQuote.is, StoryQuote);
+  </script>
+</dom-module>
