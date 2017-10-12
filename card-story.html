@@ -4,6 +4,7 @@
 <link rel="import" href="controls/story-image-section.html">
 <link rel="import" href="controls/card-story-gallery.html">
 <link rel="import" href="controls/story-quote.html">
+<link rel="import" href="controls/story-video.html">
 
 <dom-module id="card-story">
   <template>
@@ -78,10 +79,14 @@
       </card-story-image>
       <card-story-text></card-story-text> -->
 
-      <card-story-text></card-story-text>
-      <card-story-gallery data="[[gallery]]"></card-story-gallery>
+      <!-- <card-story-text></card-story-text>
+      <card-story-gallery data="[[gallery]]"></card-story-gallery> -->
       <card-story-text></card-story-text>
       <story-quote delegate="[[delegate]]" data="[[quote]]"></story-quote>
+      <card-story-text></card-story-text>
+      <story-video data="[[video2]]" delegate="[[delegate]]"></story-video>
+      <card-story-text></card-story-text>
+      <story-video type="page" data="[[video2]]" delegate="[[delegate]]"></story-video>
       <card-story-text></card-story-text>
 
 
@@ -168,6 +173,24 @@
               return {
                 quote: "I'm not a Business-Man! I'm a Business... man! Let me handle my business, damn!",
                 author: "Jay Z"
+              };
+            }
+          },
+          video: {
+            type: Object,
+            value: function () {
+              return {
+                src: "images/small.mp4",
+                autoplay: true
+              };
+            }
+          },
+          video2: {
+            type: Object,
+            value: function () {
+              return {
+                src: "images/large.mp4",
+                autoplay: true
               };
             }
           },
