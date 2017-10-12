@@ -81,10 +81,12 @@
 
       <!-- <card-story-text></card-story-text>
       <card-story-gallery data="[[gallery]]"></card-story-gallery> -->
+      <!-- <card-story-text></card-story-text>
+      <story-quote delegate="[[delegate]]" data="[[quote]]"></story-quote> -->
       <card-story-text></card-story-text>
-      <story-quote delegate="[[delegate]]" data="[[quote]]"></story-quote>
+      <story-video data="[[video3]]" delegate="[[delegate]]"></story-video>
       <card-story-text></card-story-text>
-      <story-video data="[[video2]]" delegate="[[delegate]]"></story-video>
+      <story-video type="fit" data="[[video3]]" delegate="[[delegate]]"></story-video>
       <card-story-text></card-story-text>
       <story-video type="page" data="[[video2]]" delegate="[[delegate]]"></story-video>
       <card-story-text></card-story-text>
@@ -181,6 +183,15 @@
             value: function () {
               return {
                 src: "images/small.mp4",
+                autoplay: true
+              };
+            }
+          },
+          video3: {
+            type: Object,
+            value: function () {
+              return {
+                src: "images/long.mp4",
                 autoplay: true
               };
             }

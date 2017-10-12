@@ -21,16 +21,23 @@
       iron-icon {
         padding: 3px 5px;
         cursor: pointer;
+        width: 24px;
+        height: 24px;
       }
 
       .slider {
         -webkit-appearance: none;
         background: rgba(0, 0, 0, 0.2);
         height: 3px;
-        margin: 0 5px;
         border-radius: 5px;
         outline: none;
         border: none;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .sliderCell {
+        padding: 0 5px;
       }
 
       input[type=range]::-webkit-slider-thumb {
@@ -41,19 +48,35 @@
         border-radius: 20px;
       }
 
-      #volume {
+      .volumeCell {
         max-width: 120px;
+      }
+
+      @media (max-width: 600px) {
+        .volumeCell {
+          max-width: 65px;
+        }
       }
     </style>
     <div id="bar" class="horizontal layout center">
-      <iron-icon icon="[[playIcon]]" on-click="_togglePlay"></iron-icon>
+      <div>
+        <iron-icon icon="[[playIcon]]" on-click="_togglePlay"></iron-icon>
+      </div>
       <span>[[currentTime]]</span>
       <span>/</span>
       <span>[[duration]]</span>
-      <input id="progress" class="flex slider" value="0" type="range" min="0" step="0.1">
-      <iron-icon icon="[[volIcon]]" on-click="_toggleMute"></iron-icon>
-      <input id="volume" class="flex slider" value="0" type="range" min="0" max="100" step="1" on-change="_setVolume" on-input="_setVolume">
-      <iron-icon icon="story:fullscreen" on-click="_openFullScreen"></iron-icon>
+      <div class="flex sliderCell">
+        <input id="progress" class="slider" value="0" type="range" min="0" step="1" on-change="_seek" on-mousedown="_seekDown" on-mouseup="_seekUp">
+      </div>
+      <div>
+        <iron-icon icon="[[volIcon]]" on-click="_toggleMute"></iron-icon>
+      </div>
+      <div class="flex sliderCell volumeCell">
+        <input id="volume" class="slider" value="0" type="range" min="0" max="100" step="1" on-change="_setVolume" on-input="_setVolume">
+      </div>
+      <div>
+        <iron-icon icon="story:fullscreen" on-click="_openFullScreen"></iron-icon>
+      </div>
     </div>
   </template>
   <script>
@@ -99,12 +122,15 @@
       }
 
       _refreshTimestamp() {
-        let ct = this.video.currentTime || 0;
-        this.currentTime = this._readableTimestamp(ct);
-        this.$.progress.value = ct;
+        if (!this._seeking) {
+          let ct = this.video.currentTime || 0;
+          this.currentTime = this._readableTimestamp(ct);
+          this.$.progress.value = ct;
+        }
       }
 
       _refreshPlayMode() {
+        this._seeking = false;
         this._playing = !this.video.paused;
         this.playIcon = this._playing ? "story:pause" : "story:play-arrow";
       }
@@ -124,6 +150,7 @@
       }
 
       _togglePlay() {
+        this._seeking = false;
         let nowPlaying = !this._playing;
         if (this._playing) {
           this.video.pause();
@@ -147,6 +174,20 @@
         if (fn) {
           fn.call(this.video);
         }
+      }
+
+      _seekDown() {
+        this._seeking = true;
+      }
+
+      _seekUp() {
+        this._seeking = false;
+      }
+
+      _seek() {
+        this._seeking = false;
+        let value = this.$.progress.value;
+        this.video.currentTime = value;
       }
     }
     window.customElements.define(StoryVideoControls.is, StoryVideoControls);
