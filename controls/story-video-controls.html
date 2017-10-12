@@ -53,7 +53,7 @@
       <input id="progress" class="flex slider" value="0" type="range" min="0" step="0.1">
       <iron-icon icon="[[volIcon]]" on-click="_toggleMute"></iron-icon>
       <input id="volume" class="flex slider" value="0" type="range" min="0" max="100" step="1" on-change="_setVolume" on-input="_setVolume">
-      <iron-icon icon="story:fullscreen"></iron-icon>
+      <iron-icon icon="story:fullscreen" on-click="_openFullScreen"></iron-icon>
     </div>
   </template>
   <script>
@@ -140,6 +140,13 @@
       _setVolume() {
         let value = (this.$.volume.value || 0) / 100;
         this.video.volume = value;
+      }
+
+      _openFullScreen() {
+        let fn = this.video.requestFullscreen || this.video.mozRequestFullScreen || this.video.webkitRequestFullscreen;
+        if (fn) {
+          fn.call(this.video);
+        }
       }
     }
     window.customElements.define(StoryVideoControls.is, StoryVideoControls);
