@@ -2,7 +2,7 @@
   <template>
     <style>
       #panel {
-        background: rgba(0, 0, 0, 0.6);
+        background: rgba(0, 0, 0, 0.9);
         color: white;
         border-radius: 3px;
         max-width: 40vw;
@@ -33,7 +33,8 @@
       static get is() { return "story-video-popup"; }
       static get properties() {
         return {
-          data: Object,
+          timestamp: Number,
+          duration: Number,
           video: {
             type: Object,
             observer: '_onVideo'
@@ -48,7 +49,7 @@
       }
 
       _onTimeUpdate() {
-        if (this.data) {
+        if (this.timestamp) {
           let ct = this.video.currentTime || 0;
           if (this._showing) {
             if (this._hideTime) {
@@ -59,10 +60,10 @@
               this._hidePanel();
             }
           } else {
-            if (ct >= this.data.timestamp) {
+            this._hideTime = Math.min(this.timestamp + (this.duration || 3), this.video.duration);
+            if ((ct >= this.timestamp) && (ct < this._hideTime)) {
               this._showPanel();
             }
-            this._hideTime = this.data.timestamp + (this.data.duration || 3);
           }
         }
       }

@@ -5,6 +5,7 @@
 <link rel="import" href="controls/card-story-gallery.html">
 <link rel="import" href="controls/story-quote.html">
 <link rel="import" href="controls/story-video.html">
+<link rel="import" href="controls/story-video-popup.html">
 
 <dom-module id="card-story">
   <template>
@@ -81,15 +82,29 @@
 
       <!-- <card-story-text></card-story-text>
       <card-story-gallery data="[[gallery]]"></card-story-gallery> -->
-      <!-- <card-story-text></card-story-text>
-      <story-quote delegate="[[delegate]]" data="[[quote]]"></story-quote> -->
       <card-story-text></card-story-text>
-      <story-video data="[[video3]]" delegate="[[delegate]]"></story-video>
+      <story-quote delegate="[[delegate]]" data="[[quote]]"></story-quote>
       <card-story-text></card-story-text>
-      <story-video type="fit" data="[[video3]]" delegate="[[delegate]]"></story-video>
+      <story-video data="[[video3]]" delegate="[[delegate]]">
+      </story-video>
       <card-story-text></card-story-text>
-      <story-video type="page" data="[[video2]]" delegate="[[delegate]]"></story-video>
+      <story-video type="fit" data="[[video3]]" delegate="[[delegate]]">
+        <story-video-popup timestamp="16" duration="5">
+          <p>This bird's name is PoPo. he loves to sing in E minor</p>
+        </story-video-popup>
+        <story-video-popup timestamp="33" duration="5">
+          <p>Here's the rabbit. He will yawn in a few seconds.</p>
+        </story-video-popup>
+        <story-video-popup timestamp="49" duration="5">
+          <h3>YAWN!!!</h3>
+          <h3>YAWN!!!</h3>
+          <h3>YAWN!!!</h3>
+        </story-video-popup>
+      </story-video>
       <card-story-text></card-story-text>
+      <story-video type="cover" data="[[video2]]" delegate="[[delegate]]"></story-video>
+      <card-story-text></card-story-text>
+
 
 
       <!-- <card-story-text></card-story-text>

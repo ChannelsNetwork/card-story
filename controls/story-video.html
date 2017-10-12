@@ -60,6 +60,7 @@
         <story-video-controls id="bar" class="hidden" on-play-change="_onUserPlayChange"></story-video-controls>
       </div>
     </div>
+    <slot on-slotchange="_onSlotChange"></slot>
   </template>
   <script>
     class StoryVideo extends Polymer.Element {
@@ -149,7 +150,7 @@
             this.$.bar.classList.remove("hidden");
             break;
           }
-          case "page": {
+          case "cover": {
             this.$.videoPanel.style.width = "100%";
             this.$.videoPanel.style.height = ph + "px";
             let imw = pw;
@@ -201,6 +202,15 @@
               this.$.v.pause();
             }
           }
+        }
+      }
+
+      _onSlotChange() {
+        let sections = this.shadowRoot.querySelector('slot').assignedNodes({ flatten: true }).filter(n => n.nodeType === Node.ELEMENT_NODE);
+        if (sections && sections.length) {
+          sections.forEach((s) => {
+            s.video = this.$.v;
+          });
         }
       }
     }
