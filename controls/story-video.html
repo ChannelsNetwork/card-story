@@ -55,7 +55,7 @@
         <video id="v" src$="[[data.src]]" controls$="[[controls]]" preload="metadata" loop playsinline on-loadedmetadata="_onMetadata"
           on-canplay="_canPlay" on-play="_onPlay" on-pause="_onPause">
         </video>
-        <story-video-controls id="bar" class="hidden"></story-video-controls>
+        <story-video-controls id="bar" class="hidden" on-play-change="_onUserPlayChange"></story-video-controls>
       </div>
     </div>
   </template>
@@ -79,6 +79,7 @@
 
       connectedCallback() {
         super.connectedCallback();
+        this._userPausedOnce = false;
         this._connected = true;
         requestAnimationFrame(() => {
           if (this._connected) {
@@ -112,6 +113,12 @@
 
       _onPause() {
         this._playing = false;
+      }
+
+      _onUserPlayChange(event) {
+        if (!event.detail.playing) {
+          this._userPausedOnce = true;
+        }
       }
 
       _onMetadata() {
@@ -158,9 +165,11 @@
             let ir = entry.intersectionRatio;
             if (entering) {
               if (ir >= 0.8) {
-                if (!this._playing) {
-                  this.$.v.muted = true;
-                  this.$.v.play();
+                if (!this._userPausedOnce) {
+                  if (!this._playing) {
+                    this.$.v.muted = true;
+                    this.$.v.play();
+                  }
                 }
               }
             } else {

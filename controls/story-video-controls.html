@@ -124,11 +124,13 @@
       }
 
       _togglePlay() {
+        let nowPlaying = !this._playing;
         if (this._playing) {
           this.video.pause();
         } else {
           this.video.play();
         }
+        this.dispatchEvent(new CustomEvent('play-change', { bubbles: true, composed: true, detail: { playing: nowPlaying } }));
       }
 
       _toggleMute() {
