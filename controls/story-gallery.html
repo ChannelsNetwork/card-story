@@ -2,7 +2,7 @@
 <link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="story-gallery-item.html">
 <link rel="import" href="story-gallery-viewer.html">
-<dom-module id="card-story-gallery">
+<dom-module id="story-gallery">
   <template>
     <style is="custom-style" include="iron-flex iron-flex-alignment">
       :host {
@@ -46,8 +46,8 @@
     <story-gallery-viewer data="[[data]]" id="viewer"></story-gallery-viewer>
   </template>
   <script>
-    class CardStoryGallery extends Polymer.Element {
-      static get is() { return "card-story-gallery"; }
+    class StoryGallery extends Polymer.Element {
+      static get is() { return "story-gallery"; }
       static get properties() {
         return {
           data: Array
@@ -58,6 +58,6 @@
         this.$.viewer.open = true;
       }
     }
-    window.customElements.define(CardStoryGallery.is, CardStoryGallery);
+    window.customElements.define(StoryGallery.is, StoryGallery);
   </script>
 </dom-module>

@@ -1,4 +1,4 @@
-<dom-module id="card-story-image">
+<dom-module id="story-image">
   <template>
     <style>
       :host {
@@ -45,8 +45,8 @@
     </section>
   </template>
   <script>
-    class CardStoryImage extends Polymer.Element {
-      static get is() { return "card-story-image" }
+    class StoryImage extends Polymer.Element {
+      static get is() { return "story-image" }
       static get properties() {
         return {
           data: {
@@ -195,18 +195,19 @@
               ih = iw / imgRatio;
               if (ih > panelHeight) {
                 ih = panelHeight;
-                iw = r * ih;
+                iw = imgRatio * ih;
               }
             } else {
               ih = panelHeight;
-              iw = r * ih;
+              iw = imgRatio * ih;
               if (iw > panelWidth) {
                 iw = panelWidth;
-                ih = iw / r;
+                ih = iw / imgRatio;
               }
             }
             image.style.width = iw + "px";
             image.style.height = ih + "px";
+            image.style.margin = "0";
             this._pageFitOffset = [-(panelWidth - iw) / 2, -(panelHeight - ih) / 2];
             image.style.transform = "translate3d(" + (-this._pageFitOffset[0] + "px") + "," + (-this._pageFitOffset[1] + "px") + ",0)";
             break;
@@ -362,15 +363,15 @@
               let transform = "translate3d(" + (ox + dx * gain) + "px," + (oy + dy * gain) + "px,0) scale(" + scale + ")";
               this._image.style.transform = transform;
             } else {
-              // if (entering) {
-              //   let transform = "translate3d(" + (-this._lastTranslate[0]) + "px," + (-this._lastTranslate[1]) + "px,0) scale(" + 1 + ")";
-              //   this._image.style.transform = transform;
-              // }
+              if (entering && this.type == "page-fit") {
+                let transform = "translate3d(" + (-this._lastTranslate[0]) + "px," + (-this._lastTranslate[1]) + "px,0) scale(" + 1 + ")";
+                this._image.style.transform = transform;
+              }
             }
           }
         }
       }
     }
-    window.customElements.define(CardStoryImage.is, CardStoryImage);
+    window.customElements.define(StoryImage.is, StoryImage);
   </script>
 </dom-module>
