@@ -1,0 +1,63 @@
+<link rel="import" href="../../polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="story-gallery-item.html">
+<link rel="import" href="story-gallery-viewer.html">
+<dom-module id="story-gallery">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+        position: relative;
+      }
+
+      #container {
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+
+      story-gallery-item {
+        height: 300px;
+        margin: 10px;
+        max-width: 100%;
+        box-sizing: border-box;
+        transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      story-gallery-item:hover {
+        box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12), 0 5px 5px -3px rgba(0, 0, 0, 0.4);
+      }
+
+      @media (max-width: 600px) {
+        story-gallery-item {
+          height: 200px;
+        }
+        story-gallery-item:hover {
+          box-shadow: none;
+        }
+      }
+    </style>
+    <div id="container" class="horizontal layout wrap">
+      <dom-repeat items="[[data]]">
+        <template>
+          <story-gallery-item data="[[item]]" class="flex" on-click="_onItemClick"></story-gallery-item>
+        </template>
+      </dom-repeat>
+    </div>
+    <story-gallery-viewer data="[[data]]" id="viewer"></story-gallery-viewer>
+  </template>
+  <script>
+    class StoryGallery extends Polymer.Element {
+      static get is() { return "story-gallery"; }
+      static get properties() {
+        return {
+          data: Array
+        };
+      }
+      _onItemClick(event) {
+        this.$.viewer.selected = event.model.index;
+        this.$.viewer.open = true;
+      }
+    }
+    window.customElements.define(StoryGallery.is, StoryGallery);
+  </script>
+</dom-module>

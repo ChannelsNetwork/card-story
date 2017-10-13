@@ -1,0 +1,377 @@
+<dom-module id="story-image">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+      }
+
+      #imgPanel {
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .background {
+        background: rgba(0, 0, 255, 0.02);
+      }
+
+      img {
+        display: block;
+        box-sizing: border-box;
+        margin: 0 auto;
+        transform-origin: 0 0 0;
+        transition: transform 0.6s ease, opacity 0.2s ease;
+      }
+
+      .flowingImage {
+        max-width: 100%;
+      }
+
+      .fullWidthImage {
+        width: 100%;
+      }
+
+      .floating {
+        position: fixed;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: -1;
+      }
+    </style>
+    <div id="imgPanel" class="background"></div>
+    <section id="overlay">
+      <slot on-slotchange="_onSlotChange"></slot>
+    </section>
+  </template>
+  <script>
+    class StoryImage extends Polymer.Element {
+      static get is() { return "story-image" }
+      static get properties() {
+        return {
+          data: {
+            type: Object,
+            observer: '_refresh'
+          },
+          delegate: {
+            type: Object,
+            observer: '_onDelegate'
+          },
+          width: {
+            type: String,
+            value: "300px",
+          },
+          height: {
+            type: String,
+            value: "300px",
+          },
+          type: String
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this._connected = true;
+        this._lastTranslate = [0, 0];
+        requestAnimationFrame(() => {
+          if (this._connected) {
+            this._refresh();
+          }
+        });
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        this._connected = false;
+      }
+
+      _onDelegate() {
+        this._refresh();
+      }
+
+      _refresh() {
+        if (this.data && this.delegate && this._connected) {
+          this._ensureLaidOut().then(() => {
+            let pStyle = this.$.imgPanel.style;
+            let imgRatio = this.data.width / this.data.height;
+            switch (this.type) {
+              case "fullWidth": {
+                pStyle.width = "100%;";
+                let w = this.delegate.scrollPanel.offsetWidth;
+                let h = Math.min(w / imgRatio, this.delegate.scrollPanel.offsetHeight);
+                pStyle.height = h + "px";
+                break;
+              }
+              case "sized":
+                pStyle.width = this.width
+                pStyle.height = this.height;
+                pStyle.margin = "0 auto";
+                break;
+              case "page":
+              case "page-fit":
+                pStyle.width = "100vw";
+                pStyle.height = "100vh";
+                break;
+              default:
+                break;
+            }
+            this._attachIntersectionObserver();
+          });
+        }
+      }
+
+      _ensureLaidOut() {
+        this._sizeAttempts = 0;
+        return new Promise((resolve, reject) => {
+          let w = this.offsetWidth;
+          if (w) {
+            resolve();
+          } else {
+            var cb = () => {
+              this._sizeAttempts++;
+              let w = this.offsetWidth;
+              if (w) {
+                resolve();
+              } else {
+                if (this._sizeAttempts > 20) {
+                  reject();
+                } else {
+                  setTimeout(cb, 50);
+                }
+              }
+            };
+            setTimeout(cb, 50);
+          }
+        });
+      }
+
+      _buildThresholds(steps) {
+        let thresholds = [0];
+        for (let i = 1.0; i <= steps; i++) {
+          thresholds.push(i / steps);
+        }
+        return thresholds;
+      }
+
+      _attachIntersectionObserver() {
+        this.delegate.addIntersectionHandler(this.$.imgPanel, this._handleIntersection.bind(this));
+      }
+
+      _handleIntersection(entry) {
+        this._lastIntersectionEntry = entry;
+        if (entry.isIntersecting) {
+          if (!(this._imageLoaded || this._imageLoading)) {
+            this._loadImage();
+            return;
+          } else {
+            if (this._imageLoaded) {
+              this._applyScrollToImage(entry);
+            }
+          }
+        }
+      }
+
+      _loadImage() {
+        if (this._imageLoading || this._imageLoaded) {
+          return;
+        }
+        this._imageLoading = true;
+        let image = new Image();
+        let panelWidth = this.$.imgPanel.offsetWidth;
+        let panelHeight = this.$.imgPanel.offsetHeight;
+        let imgRatio = this.data.width / this.data.height;
+        switch (this.type) {
+          case "fullWidth": {
+            image.classList.add("fullWidthImage")
+            let imgHeight = panelWidth / imgRatio;
+            this._imageIsPortrait = imgHeight > panelHeight;
+            break;
+          }
+          case "page-fit": {
+            let iw = 0;
+            let ih = 0;
+            if (imgRatio >= 1) {
+              iw = panelWidth;
+              ih = iw / imgRatio;
+              if (ih > panelHeight) {
+                ih = panelHeight;
+                iw = imgRatio * ih;
+              }
+            } else {
+              ih = panelHeight;
+              iw = imgRatio * ih;
+              if (iw > panelWidth) {
+                iw = panelWidth;
+                ih = iw / imgRatio;
+              }
+            }
+            image.style.width = iw + "px";
+            image.style.height = ih + "px";
+            image.style.margin = "0";
+            this._pageFitOffset = [-(panelWidth - iw) / 2, -(panelHeight - ih) / 2];
+            image.style.transform = "translate3d(" + (-this._pageFitOffset[0] + "px") + "," + (-this._pageFitOffset[1] + "px") + ",0)";
+            break;
+          }
+          case "page":
+          case "sized": {
+            image.classList.add("sizedImage");
+            let imW = panelWidth;
+            let imH = imW / imgRatio;
+            this._imageIsPortrait = true;
+            if (imH < panelHeight) {
+              imH = panelHeight;
+              imW = imH * imgRatio;
+              this._imageIsPortrait = false;
+            }
+            image.style.width = imW + "px";
+            image.style.height = "auto";
+            break;
+          }
+          default:
+            image.classList.add("flowingImage");
+            break;
+        }
+        this._image = image;
+        image.addEventListener("load", () => {
+          this._imageLoading = false;
+          this._imageLoaded = true;
+          this.$.imgPanel.classList.remove("background");
+          this.$.imgPanel.appendChild(image);
+          this._applyScrollToImage(this._lastIntersectionEntry);
+        });
+        image.src = this.data.href;
+      }
+
+      _applyScrollToImage(entry) {
+        if (entry && entry.isIntersecting && this._image && (!this._imageFloating)) {
+          let entering = entry.boundingClientRect.y >= 0;
+          let panelWidth = this.$.imgPanel.offsetWidth;
+          let panelHeight = this.$.imgPanel.offsetHeight;
+          let imgRatio = this.data.width / this.data.height;
+          let scrollDirection = 0;
+          let scrollDiff = 0;
+          switch (this.type) {
+            case "fullWidth":
+              if (this._imageIsPortrait) {
+                scrollDirection = 1;
+                let imgHeight = panelWidth / imgRatio;
+                scrollDiff = imgHeight - panelHeight;
+              }
+              break;
+            case "page-fit":
+              scrollDirection = 0;
+              break;
+            case "page":
+            case "sized":
+              scrollDirection = this._imageIsPortrait ? 1 : 2;
+              if (this._imageIsPortrait) {
+                let imgHeight = panelWidth / imgRatio;
+                scrollDiff = imgHeight - panelHeight;
+              } else {
+                let imgWidth = panelHeight * imgRatio;
+                scrollDiff = imgWidth - panelWidth;
+              }
+              break;
+            default:
+              break;
+          }
+          let ir = entry.intersectionRatio;
+          if (scrollDirection) {
+            let diff = scrollDiff;
+            let gain = 0;
+            if (entering) {
+              if (ir > 0.2 && ir <= 0.9) {
+                gain = (5 / 7) * ir - (1 / 7);
+              } else if (ir > 0.9) {
+                gain = 0.5;
+              }
+            } else {
+              if (ir < 0.1) {
+                gain = 1;
+              } else if (ir >= 0.7) {
+                gain = 0.5;
+              } else {
+                gain = (-5 / 6) * ir + (13 / 12);
+              }
+            }
+            let offset = diff * gain;
+            this._lastTranslate = [0, 0];
+            if (scrollDirection == 1) {
+              this._image.style.transform = "translate3d(0," + (-offset + "px") + ",0)";
+              this._lastTranslate[1] = offset;
+            } else {
+              this._image.style.transform = "translate3d(" + (-offset + "px") + ",0,0)";
+              this._lastTranslate[0] = offset;
+            }
+          } if (this._pageFitOffset) {
+            this._lastTranslate[0] = this._pageFitOffset[0];
+            this._lastTranslate[1] = this._pageFitOffset[1];
+          }
+          let opacity = (ir < 0.4) ? ((9 / 4) * ir + 0.1) : 1;
+          this._image.style.opacity = opacity;
+        }
+      }
+
+      _onSlotChange() {
+        let sections = this.shadowRoot.querySelector('slot').assignedNodes({ flatten: true }).filter(n => n.nodeType === Node.ELEMENT_NODE);
+        if (sections && sections.length) {
+          this.delegate.addVisibleIntersectionHandle(this.$.overlay, this._handleOverlayIntersection.bind(this));
+          sections.forEach((s) => {
+            this.delegate.addIntersectionHandler(s, this._handleSectionIntersection.bind(this));
+          });
+        }
+      }
+
+      _handleOverlayIntersection(entry) {
+        if (this._image) {
+          if (entry.isIntersecting) {
+            this._imageFloating = true;
+            this._image.classList.add("floating");
+          } else {
+            this._imageFloating = false;
+            this._image.classList.remove("floating");
+          }
+        }
+      }
+
+      _handleSectionIntersection(entry) {
+        if (this._image) {
+          const target = entry.target;
+          if (target.handleIntersection) {
+            target.handleIntersection(entry);
+          }
+          const focusPoint = target.focusPoint;
+          if (focusPoint) {
+            let entering = entry.boundingClientRect.y >= 0;
+            if (entry.isIntersecting && entering) {
+              let ir = entry.intersectionRatio;
+              let naturalZoom = this._image.offsetWidth / (this._image.naturalWidth);
+              let zoom = Math.min(2.0, 3 / naturalZoom);
+              let gain = (entering && (ir < 0.4)) ? (2.5 * ir) : 1;
+              let scale = 1 + (gain * (zoom - 1));
+              let imw = this._image.offsetWidth * scale;
+              let imh = this._image.offsetHeight * scale;
+              let px = (focusPoint[0] * imw);
+              let py = (focusPoint[1] * imh);
+              let cx = (this.$.imgPanel.offsetWidth * 0.6 / 2);
+              let cy = (this.$.imgPanel.offsetHeight / 2);
+              let ox = -this._lastTranslate[0];
+              let oy = -this._lastTranslate[1];
+              let dx = (cx - px) - ox;
+              let dy = (cy - py) - oy;
+
+              let transform = "translate3d(" + (ox + dx * gain) + "px," + (oy + dy * gain) + "px,0) scale(" + scale + ")";
+              this._image.style.transform = transform;
+            } else {
+              if (entering && this.type == "page-fit") {
+                let transform = "translate3d(" + (-this._lastTranslate[0]) + "px," + (-this._lastTranslate[1]) + "px,0) scale(" + 1 + ")";
+                this._image.style.transform = transform;
+              }
+            }
+          }
+        }
+      }
+    }
+    window.customElements.define(StoryImage.is, StoryImage);
+  </script>
+</dom-module>

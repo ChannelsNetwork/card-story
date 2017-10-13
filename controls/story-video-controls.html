@@ -1,0 +1,195 @@
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="story-icons.html">
+<dom-module id="story-video-controls">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+        position: relative;
+        font-family: 'Roboto', 'Open Sans', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 0.011em;
+        color: #555;
+      }
+
+      #bar {
+        background: #fafafa;
+      }
+
+      iron-icon {
+        padding: 3px 5px;
+        cursor: pointer;
+        width: 24px;
+        height: 24px;
+      }
+
+      .slider {
+        -webkit-appearance: none;
+        background: rgba(0, 0, 0, 0.2);
+        height: 3px;
+        border-radius: 5px;
+        outline: none;
+        border: none;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .sliderCell {
+        padding: 0 5px;
+      }
+
+      input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        background: #336bce;
+        width: 16px;
+        height: 16px;
+        border-radius: 20px;
+      }
+
+      .volumeCell {
+        max-width: 120px;
+      }
+
+      @media (max-width: 600px) {
+        .volumeCell {
+          max-width: 65px;
+        }
+      }
+    </style>
+    <div id="bar" class="horizontal layout center">
+      <div>
+        <iron-icon icon="[[playIcon]]" on-click="_togglePlay"></iron-icon>
+      </div>
+      <span>[[currentTime]]</span>
+      <span>/</span>
+      <span>[[duration]]</span>
+      <div class="flex sliderCell">
+        <input id="progress" class="slider" value="0" type="range" min="0" step="1" on-change="_seek" on-mousedown="_seekDown" on-mouseup="_seekUp">
+      </div>
+      <div>
+        <iron-icon icon="[[volIcon]]" on-click="_toggleMute"></iron-icon>
+      </div>
+      <div class="flex sliderCell volumeCell">
+        <input id="volume" class="slider" value="0" type="range" min="0" max="100" step="1" on-change="_setVolume" on-input="_setVolume">
+      </div>
+      <div>
+        <iron-icon icon="story:fullscreen" on-click="_openFullScreen"></iron-icon>
+      </div>
+    </div>
+  </template>
+  <script>
+    class StoryVideoControls extends Polymer.Element {
+      static get is() { return "story-video-controls"; }
+      static get properties() {
+        return {
+          video: {
+            type: Object,
+            observer: '_onVideo'
+          },
+          playIcon: {
+            type: String,
+            value: "story:play-arrow"
+          },
+          volIcon: {
+            type: String,
+            value: "story:volume-up"
+          },
+          duration: String,
+          currentTime: String
+        };
+      }
+
+      _onVideo() {
+        if (this.video) {
+          this._refreshDuration();
+          this._refreshTimestamp();
+          this._refreshPlayMode();
+          this._refreshVolume();
+          this.video.addEventListener('timeupdate', this._refreshTimestamp.bind(this));
+          this.video.addEventListener('durationchange', this._refreshDuration.bind(this));
+          this.video.addEventListener('play', this._refreshPlayMode.bind(this));
+          this.video.addEventListener('pause', this._refreshPlayMode.bind(this));
+          this.video.addEventListener('volumechange', this._refreshVolume.bind(this));
+        }
+      }
+
+      _refreshDuration() {
+        let d = this.video.duration || 0;
+        this.duration = this._readableTimestamp(d);
+        this.$.progress.max = d;
+      }
+
+      _refreshTimestamp() {
+        if (!this._seeking) {
+          let ct = this.video.currentTime || 0;
+          this.currentTime = this._readableTimestamp(ct);
+          this.$.progress.value = ct;
+        }
+      }
+
+      _refreshPlayMode() {
+        this._seeking = false;
+        this._playing = !this.video.paused;
+        this.playIcon = this._playing ? "story:pause" : "story:play-arrow";
+      }
+
+      _refreshVolume() {
+        this.volIcon = this.video.muted ? "story:volume-off" : "story:volume-up";
+        this.$.volume.value = Math.round(this.video.volume * 100);
+      }
+
+      _readableTimestamp(seconds) {
+        let sec = Math.floor(seconds);
+        let min = Math.floor(sec / 60);
+        sec = Math.floor(sec % 60);
+        min = min >= 10 ? min : '0' + min;
+        sec = sec >= 10 ? sec : '0' + sec;
+        return min + ":" + sec;
+      }
+
+      _togglePlay() {
+        this._seeking = false;
+        let nowPlaying = !this._playing;
+        if (this._playing) {
+          this.video.pause();
+        } else {
+          this.video.play();
+        }
+        this.dispatchEvent(new CustomEvent('play-change', { bubbles: true, composed: true, detail: { playing: nowPlaying } }));
+      }
+
+      _toggleMute() {
+        this.video.muted = !this.video.muted;
+      }
+
+      _setVolume() {
+        let value = (this.$.volume.value || 0) / 100;
+        this.video.volume = value;
+      }
+
+      _openFullScreen() {
+        let fn = this.video.requestFullscreen || this.video.mozRequestFullScreen || this.video.webkitRequestFullscreen;
+        if (fn) {
+          fn.call(this.video);
+        }
+      }
+
+      _seekDown() {
+        this._seeking = true;
+      }
+
+      _seekUp() {
+        this._seeking = false;
+      }
+
+      _seek() {
+        this._seeking = false;
+        let value = this.$.progress.value;
+        this.video.currentTime = value;
+      }
+    }
+    window.customElements.define(StoryVideoControls.is, StoryVideoControls);
+  </script>
+</dom-module>

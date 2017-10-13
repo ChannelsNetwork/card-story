@@ -1,0 +1,95 @@
+<dom-module id="story-video-popup">
+  <template>
+    <style>
+      #panel {
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        border-radius: 3px;
+        max-width: 40vw;
+        position: fixed;
+        top: 16px;
+        right: 20px;
+        box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+        transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0;
+      }
+
+      .content {
+        padding: 16px;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+    <div id="panel" class="hidden">
+      <div class="content">
+        <slot></slot>
+      </div>
+    </div>
+  </template>
+  <script>
+    class StoryVideoPopup extends Polymer.Element {
+      static get is() { return "story-video-popup"; }
+      static get properties() {
+        return {
+          timestamp: Number,
+          duration: Number,
+          video: {
+            type: Object,
+            observer: '_onVideo'
+          }
+        };
+      }
+
+      _onVideo() {
+        if (this.video) {
+          this.video.addEventListener('timeupdate', this._onTimeUpdate.bind(this));
+        }
+      }
+
+      _onTimeUpdate() {
+        if (this.timestamp) {
+          let ct = this.video.currentTime || 0;
+          if (this._showing) {
+            if (this._hideTime) {
+              if (ct >= this._hideTime) {
+                this._hidePanel();
+              }
+            } else {
+              this._hidePanel();
+            }
+          } else {
+            this._hideTime = Math.min(this.timestamp + (this.duration || 3), this.video.duration);
+            if ((ct >= this.timestamp) && (ct < this._hideTime)) {
+              this._showPanel();
+            }
+          }
+        }
+      }
+
+      _showPanel() {
+        if (!this._showing) {
+          this.$.panel.classList.remove("hidden");
+          this._showing = true;
+          setTimeout(() => {
+            if (this._showing) {
+              this.$.panel.style.opacity = 1;
+            }
+          }, 20);
+        }
+      }
+
+      _hidePanel() {
+        if (this._showing) {
+          this._showing = false;
+          this.$.panel.style.opacity = 0;
+          setTimeout(() => {
+            this.$.panel.classList.add("hidden");
+          }, 280);
+        }
+      }
+    }
+    window.customElements.define(StoryVideoPopup.is, StoryVideoPopup);
+  </script>
+</dom-module>

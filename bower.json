@@ -3,7 +3,10 @@
   "main": "card-story.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",
-    "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0"
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0",
+    "iron-icon": "PolymerElements/iron-icon#^2.0.1",
+    "iron-iconset-svg": "PolymerElements/iron-iconset-svg#^2.1.0",
+    "iron-iconset": "PolymerElements/iron-iconset#^2.0.0"
   },
   "devDependencies": {
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"

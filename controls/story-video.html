@@ -1,0 +1,219 @@
+<link rel="import" href="story-video-controls.html">
+<dom-module id="story-video">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+      }
+
+      #videoPanel {
+        box-sizing: border-box;
+        overflow: hidden;
+        text-align: center;
+      }
+
+      video {
+        display: block;
+        margin: 0 auto;
+        box-sizing: border-box;
+      }
+
+      .natural {
+        max-width: 100%;
+        max-height: 100vh;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .inline {
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      .floatingBar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+      }
+
+      #videoShell:hover .floatingBar {
+        opacity: 1;
+      }
+
+      #bar {
+        margin: 0 auto;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+    </style>
+    <div id="videoPanel">
+      <div id="videoShell">
+        <video id="v" src$="[[data.src]]" controls$="[[controls]]" preload="metadata" loop playsinline on-loadedmetadata="_onMetadata"
+          on-canplay="_canPlay" on-play="_onPlay" on-pause="_onPause">
+        </video>
+        <story-video-controls id="bar" class="hidden" on-play-change="_onUserPlayChange"></story-video-controls>
+      </div>
+    </div>
+    <slot on-slotchange="_onSlotChange"></slot>
+  </template>
+  <script>
+    class StoryVideo extends Polymer.Element {
+      static get is() { return "story-video"; }
+      static get properties() {
+        return {
+          data: {
+            type: Object,
+            observer: '_refresh'
+          },
+          delegate: {
+            type: Object,
+            observer: '_onDelegate'
+          },
+          controls: Boolean,
+          type: String
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this._userPausedOnce = false;
+        this._connected = true;
+        requestAnimationFrame(() => {
+          if (this._connected) {
+            this._refresh();
+          }
+        });
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        this._connected = false;
+      }
+
+      _onDelegate() {
+        this.delegate.addIntersectionHandler(this.$.videoPanel, this._handleIntersection.bind(this));
+      }
+
+      _refresh() {
+        if (this._connected && this.data) {
+
+        }
+      }
+
+      _canPlay() {
+        this._readyToPlay = true;
+      }
+
+      _onPlay() {
+        this._playing = true;
+      }
+
+      _onPause() {
+        this._playing = false;
+      }
+
+      _onUserPlayChange(event) {
+        if (!event.detail.playing) {
+          this._userPausedOnce = true;
+        }
+      }
+
+      _onMetadata() {
+        this.$.bar.video = this.$.v;
+        let vh = this.$.v.videoHeight;
+        let vw = this.$.v.videoWidth;
+        let r = vw / vh;
+        let ph = this.delegate.scrollPanel.offsetHeight;
+        let pw = this.delegate.scrollPanel.offsetWidth;
+        this._offset = [0, 0];
+        this.$.v.classList.remove("natural");
+        this.$.v.style.width = "";
+        this.$.v.style.height = "";
+        switch (this.type) {
+          case "fit": {
+            let imw = pw;
+            let imh = imw / r;
+            if (imh > (ph - 30)) {
+              imh = ph - 30;
+              imW = imh * r;
+            }
+            this.$.v.style.width = imw + "px";
+            this.$.v.style.height = "auto";
+            this.$.v.classList.add("natural");
+            this.$.bar.style.width = imw + "px";
+            this.$.bar.classList.remove("hidden");
+            break;
+          }
+          case "cover": {
+            this.$.videoPanel.style.width = "100%";
+            this.$.videoPanel.style.height = ph + "px";
+            let imw = pw;
+            let imh = imw / r;
+            if (imh < ph) {
+              imh = ph;
+              imw = imh * r;
+            }
+            this.$.v.style.width = imw + "px";
+            this.$.v.style.height = imh + "px";
+            this._offset = [(imw - pw) / 2, (imh - ph) / 2];
+            this.$.bar.classList.add("floatingBar");
+            this.$.bar.classList.remove("hidden");
+            break;
+          }
+          default:
+            this.$.v.classList.add("natural");
+            this.$.videoShell.classList.add("inline");
+            this.$.bar.classList.remove("hidden");
+            break;
+        }
+        this.$.v.style.transform = "translate3d(" + (-this._offset[0]) + "px," + (-this._offset[1]) + "px, 0)";
+        this._imageSized = true;
+      }
+
+      _handleIntersection(entry) {
+        if (this._readyToPlay && entry && this.data && this.data.autoplay) {
+          if (entry.isIntersecting) {
+            let entering = entry.boundingClientRect.y >= 0;
+            let ir = entry.intersectionRatio;
+            if (entering) {
+              if (ir >= 0.8) {
+                if (!this._userPausedOnce) {
+                  if (!this._playing) {
+                    this.$.v.muted = true;
+                    this.$.v.play();
+                  }
+                }
+              }
+            } else {
+              if (ir < 0.5) {
+                if (this._playing) {
+                  this.$.v.pause();
+                }
+              }
+            }
+          } else {
+            if (this._playing) {
+              this.$.v.pause();
+            }
+          }
+        }
+      }
+
+      _onSlotChange() {
+        let sections = this.shadowRoot.querySelector('slot').assignedNodes({ flatten: true }).filter(n => n.nodeType === Node.ELEMENT_NODE);
+        if (sections && sections.length) {
+          sections.forEach((s) => {
+            s.video = this.$.v;
+          });
+        }
+      }
+    }
+    window.customElements.define(StoryVideo.is, StoryVideo);
+  </script>
+</dom-module>

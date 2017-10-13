@@ -1,0 +1,26 @@
+<dom-module id="story-text">
+  <template>
+    <style>
+      :host {
+        display: block;
+        background: white;
+      }
+
+      section {
+        display: block;
+        padding: 10px 12px;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+    </style>
+    <section>
+      <slot></slot>
+    </section>
+  </template>
+  <script>
+    class StoryText extends Polymer.Element {
+      static get is() { return "story-text"; }
+    }
+    window.customElements.define(StoryText.is, StoryText);
+  </script>
+</dom-module>

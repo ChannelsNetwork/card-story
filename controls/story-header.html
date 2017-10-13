@@ -1,0 +1,99 @@
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
+<dom-module id="story-header">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+        background: white;
+      }
+
+      #header {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      #content {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 16px;
+        position: relative;
+      }
+
+      #content.center {
+        text-align: center;
+      }
+
+      h1 {
+        font-family: 'Raleway', sans-serif;
+        margin: 0;
+        font-weight: 400;
+        line-height: 1.4;
+        font-size: 40px;
+        text-transform: capitalize;
+      }
+
+      h2 {
+        font-family: 'Raleway', sans-serif;
+        margin: 16px 0;
+        font-weight: 400;
+        line-height: 1.4;
+        font-size: 26px;
+      }
+    </style>
+    <header id="header">
+      <img id="image" src$="[[data.image]]" on-load="_initImage" class="hidden">
+      <video id="video" src$="[[data.video]]" preload="metadata" on-loadedmetadata="_initVideo" class="hidden"></video>
+      <div id="overlay" class="hidden"></div>
+      <div id="content" class="center">
+        <h1>[[data.title]]</h1>
+        <h2>[[data.subtitle]]</h2>
+      </div>
+    </header>
+  </template>
+  <script>
+    class StoryHeader extends Polymer.Element {
+      static get is() { return "story-header"; }
+      static get properties() {
+        return {
+          data: {
+            type: Object,
+            observer: '_refresh'
+          },
+          options: {
+            type: Object,
+            observer: '_refresh'
+          }
+        }
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this._connected = true;
+        this._refresh();
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        this._connected = false;
+      }
+
+      _initImage() {
+
+      }
+
+      _initVideo() {
+
+      }
+
+      _refresh() {
+        if (this.data && this.options && this._connected) {
+        }
+      }
+    }
+    window.customElements.define(StoryHeader.is, StoryHeader);
+  </script>
+</dom-module>
