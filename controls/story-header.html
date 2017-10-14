@@ -10,6 +10,20 @@
       #header {
         position: relative;
         overflow: hidden;
+        background-color: #fff;
+        background-size: cover;
+        background-origin: border-box;
+        background-position: 50% 35%;
+      }
+
+      #header.overlayed {
+        min-height: 40vh;
+        color: white;
+      }
+
+      #header.cover {
+        min-height: 100vh;
+        color: white;
       }
 
       .hidden {
@@ -25,6 +39,18 @@
 
       #content.center {
         text-align: center;
+      }
+
+      #content.left {
+        margin: 0;
+        max-width: 800px;
+        text-align: left;
+      }
+
+      #content.right {
+        margin: 0 0 0 auto;
+        max-width: 800px;
+        text-align: right;
       }
 
       h1 {
@@ -43,15 +69,25 @@
         line-height: 1.4;
         font-size: 26px;
       }
+
+      .fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+      }
     </style>
-    <header id="header">
-      <img id="image" src$="[[data.image]]" on-load="_initImage" class="hidden">
-      <video id="video" src$="[[data.video]]" preload="metadata" on-loadedmetadata="_initVideo" class="hidden"></video>
-      <div id="overlay" class="hidden"></div>
+    <header id="header" class="vertical layout">
+      <video id="video" src$="[[data.video]]" placeholder$="[[data.image]]" preload="metadata" on-loadedmetadata="_initVideo" class="hidden"></video>
+      <div id="glassPane" class="hidden fill"></div>
+      <div id="spacerTop" class="flex"></div>
       <div id="content" class="center">
         <h1>[[data.title]]</h1>
         <h2>[[data.subtitle]]</h2>
       </div>
+      <div id="spacerBottom" class="flex hidden"></div>
     </header>
   </template>
   <script>
@@ -81,16 +117,66 @@
         this._connected = false;
       }
 
-      _initImage() {
-
-      }
-
       _initVideo() {
 
       }
 
       _refresh() {
         if (this.data && this.options && this._connected) {
+          if (this.data.image || this.data.video) {
+            let style = this.options.style || "";
+            switch (style) {
+              case "cover":
+                this.$.header.classList.add('cover');
+                break;
+              default:
+                this.$.header.classList.add('overlayed');
+                break;
+            }
+            let textLayout = this.options.textLayout || "default";
+            switch (textLayout) {
+              case "top-left":
+                this.$.spacerTop.classList.add("hidden");
+                this.$.spacerBottom.classList.add("hidden");
+                this.$.content.classList.remove("center", "right");
+                this.$.content.classList.add("left");
+                break;
+              case "bottom-left":
+                this.$.spacerTop.classList.remove("hidden");
+                this.$.spacerBottom.classList.add("hidden");
+                this.$.content.classList.remove("center", "right");
+                this.$.content.classList.add("left");
+                break;
+              case "top-right":
+                this.$.spacerTop.classList.add("hidden");
+                this.$.spacerBottom.classList.add("hidden");
+                this.$.content.classList.remove("center", "left");
+                this.$.content.classList.add("right");
+                break;
+              case "bottom-right":
+                this.$.spacerTop.classList.remove("hidden");
+                this.$.spacerBottom.classList.add("hidden");
+                this.$.content.classList.remove("center", "left");
+                this.$.content.classList.add("right");
+                break;
+              case "center":
+                this.$.spacerTop.classList.remove("hidden");
+                this.$.spacerBottom.classList.remove("hidden");
+                this.$.content.classList.remove("left", "right");
+                this.$.content.classList.add("center");
+                break;
+              default:
+                this.$.spacerTop.classList.remove("hidden");
+                this.$.spacerBottom.classList.add("hidden");
+                this.$.content.classList.remove("left", "right");
+                this.$.content.classList.add("center");
+                break;
+            }
+            this.$.glassPane.classList.remove('hidden');
+          }
+          if (this.data.image) {
+            this.$.header.style.backgroundImage = 'url("' + this.data.image + '")';
+          }
         }
       }
     }

@@ -45,6 +45,9 @@
       _onVideo() {
         if (this.video) {
           this.video.addEventListener('timeupdate', this._onTimeUpdate.bind(this));
+          this.video.addEventListener('pause', () => {
+            this._hidePanel();
+          });
         }
       }
 
