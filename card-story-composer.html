@@ -1,0 +1,185 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="composer/segment-container.html">
+<dom-module id="card-story-composer">
+  <template>
+    <style>
+      :host {
+        display: block;
+        font-family: 'Open Sans', sans-serif;
+        font-weight: 400;
+        line-height: 1.5;
+        font-size: 18px;
+        color: #292929;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      #container {
+        padding: 15px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      #addPanel {
+        padding: 40px 16px;
+        text-align: center;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      .segIcon {
+        height: 24px;
+        width: 24px;
+        padding: 5px;
+        border-radius: 100%;
+        overflow: hidden;
+        line-height: 24px;
+        display: inline-block;
+        border: 1px solid;
+        color: #777;
+        background: white;
+        cursor: pointer;
+        vertical-align: middle;
+        margin: 0 10px 0 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+
+      .segIcon:hover {
+        color: #000;
+      }
+    </style>
+    <div id="container">
+    </div>
+    <div id="addPanel" class="hidden">
+      <div style="padding: 0 0 20px; letter-spacing: 0.03em;">Add a section</div>
+      <iron-icon class="segIcon" icon="composer:text-format" on-click="_onAddText"></iron-icon>
+      <iron-icon class="segIcon" icon="composer:photo-camera" on-click="_onAddPhoto"></iron-icon>
+      <iron-icon class="segIcon" icon="composer:play-arrow" on-click="_onAddVideo"></iron-icon>
+      <iron-icon class="segIcon" icon="composer:collections" on-click="_onAddGallery"></iron-icon>
+    </div>
+  </template>
+  <script>
+    class CardStoryComposer extends Polymer.Element {
+      static get is() { return "card-story-composer"; }
+      static get properties() {
+        return {
+          segments: Array
+        };
+      }
+
+      constructor() {
+        super();
+        this.segments = [];
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        if (this.segments.length === 0) {
+          this._prependSegment("text");
+        }
+        this._refreshAddPanelVisibility();
+      }
+
+      _onAddText() {
+        this._prependSegment("text");
+      }
+
+      _refreshAddPanelVisibility() {
+        if (this.segments.length) {
+          this.$.addPanel.classList.add("hidden");
+        } else {
+          this.$.addPanel.classList.remove("hidden");
+        }
+      }
+
+      _prependSegment(type) {
+        let s = this._createSegment(type);
+        s.node = this._insertSegment(0, s, true);
+        this.segments.push(s);
+        this._refreshAddPanelVisibility();
+      }
+
+      _addSegment(event) {
+        let detail = event.detail;
+        if (detail.type && event.target) {
+          let target = event.target;
+          let ix = -1;
+          for (let i = 0; i < this.segments.length; i++) {
+            if (this.segments[i].node == target) {
+              ix = i;
+              break;
+            }
+          }
+          let s = this._createSegment(detail.type);
+          s.node = this._insertAfter(target, s, true);
+          this.segments.splice(ix + 1, 0, s);
+          this._refreshAddPanelVisibility();
+        }
+      }
+
+      _removeSegment(event) {
+        let target = event.target;
+        if (target) {
+          let ix = -1;
+          for (let i = 0; i < this.segments.length; i++) {
+            if (this.segments[i].node == target) {
+              ix = i;
+              break;
+            }
+          }
+          this.$.container.removeChild(event.target);
+          this.segments.splice(ix, 1);
+          this._refreshAddPanelVisibility();
+        }
+      }
+
+      _createSegment(type) {
+        return {
+          type: type,
+          data: {}
+        };
+      }
+
+      _createSegmentNode(segment, editing) {
+        let node = document.createElement("segment-container");
+        node.segment = segment;
+        node.editing = editing;
+        node.addEventListener('add-segment', this._addSegment.bind(this));
+        node.addEventListener('remove-segment', this._removeSegment.bind(this));
+        return node;
+      }
+
+      _insertAfter(prevNode, segment, editing) {
+        let node = this._createSegmentNode(segment, editing);
+        if (prevNode.nextSibling) {
+          this.$.container.insertBefore(node, prevNode.nextSibling);
+        } else {
+          this.$.container.appendChild(node);
+        }
+        return node;
+      }
+
+      _insertSegment(index, segment, editing) {
+        let node = this._createSegmentNode(segment, editing);
+        this._insertSegmentNode(index, node);
+        return node;
+      }
+
+      _insertSegmentNode(index, node) {
+        let nodes = this.shadowRoot.querySelectorAll('segment-container');
+        index = Math.min(Math.max(0, index), nodes.length);
+        if (index == nodes.length) {
+          this.$.container.appendChild(node);
+        } else {
+          this.$.container.insertBefore(node, nodes[index]);
+        }
+      }
+    }
+    window.customElements.define(CardStoryComposer.is, CardStoryComposer);
+  </script>
+</dom-module>

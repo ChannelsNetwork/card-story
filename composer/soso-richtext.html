@@ -1,0 +1,91 @@
+<dom-module id="soso-richtext">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+        min-height: 1em;
+        font-family: inherit;
+        font-size: inherit;
+        line-height: inherit;
+        font-weight: inherit;
+        word-break: break-word;
+        border: 1px solid #d8d8d8;
+      }
+
+      :host([contenteditable]) {
+        outline: none;
+      }
+
+      :host::before {
+        content: var(--richtext-placeholder);
+        opacity: 0.5;
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: -1;
+      }
+    </style>
+    <slot></slot>
+  </template>
+
+  <script>
+    class SosoRichtext extends Polymer.Element {
+      static get is() { return 'soso-richtext'; }
+      static get properties() {
+        return {
+          placeholder: String,
+          editing: {
+            type: Boolean,
+            observer: '_onEditing'
+          }
+        }
+      }
+
+      constructor() {
+        super();
+        this._editing = false;
+        this.addEventListener('focus', (event) => {
+          event.stopPropagation();
+          this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
+        });
+        this.addEventListener('blur', (event) => {
+          event.stopPropagation();
+          this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true, detail: {} }));
+        });
+        this.addEventListener('input', () => {
+          let tx = this.textContent.trim();
+          if (tx) {
+            this.updateStyles({ '--richtext-placeholder': "" });
+          } else {
+            this.updateStyles({ '--richtext-placeholder': "'" + (this.placeholder || "") + "'" });
+          }
+        });
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.updateStyles({ '--richtext-placeholder': "'" + (this.placeholder || "") + "'" });
+      }
+
+      _onEditing() {
+        if (this.editing) {
+          this.contentEditable = true;
+          this.focus();
+          setTimeout(() => {
+            this.focus();
+          }, 100);
+        } else {
+          this.contentEditable = false
+        }
+      }
+
+      get value() {
+        return this.innerHTML;
+      }
+    }
+
+    window.customElements.define(SosoRichtext.is, SosoRichtext);
+  </script>
+</dom-module>

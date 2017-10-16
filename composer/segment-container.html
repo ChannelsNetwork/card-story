@@ -1,0 +1,261 @@
+<link rel="import" href="composer-icons.html">
+<link rel="import" href="soso-richtext.html">
+<dom-module id="segment-container">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      #shell {
+        position: relative;
+        padding: 0px 3px;
+        border: 2px dashed transparent;
+        transition: padding 0.3s ease, margin 0.3s ease;
+        margin: 16px 0;
+      }
+
+      #shell.editing {
+        border-color: #d8d8d8;
+        padding: 0px 3px;
+        margin: 16px 0 65px;
+      }
+
+      .editing #actions,
+      .editing #bottomActions {
+        display: block;
+      }
+
+      #actions {
+        white-space: nowrap;
+        position: absolute;
+        top: -16px;
+        right: 5px;
+        display: none;
+      }
+
+      #actions iron-icon {
+        height: 18px;
+        width: 18px;
+        padding: 5px;
+        border-radius: 100%;
+        overflow: hidden;
+        line-height: 20px;
+        display: inline-block;
+        border: 1px solid;
+        color: #777;
+        background: white;
+        cursor: pointer;
+        vertical-align: middle;
+        margin: 0 1px;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      #actions iron-icon:hover {
+        color: #000;
+      }
+
+      #bottomActions {
+        position: absolute;
+        left: 0;
+        right: 0;
+        padding: 20px 0 0;
+        display: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      #bottomActions iron-icon {
+        height: 24px;
+        width: 24px;
+        padding: 5px;
+        border-radius: 100%;
+        overflow: hidden;
+        line-height: 24px;
+        display: inline-block;
+        border: 1px solid;
+        color: #777;
+        background: white;
+        cursor: pointer;
+        vertical-align: middle;
+        margin: 0 10px 0 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+
+      .segIcon {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #bottomActions iron-icon:hover {
+        color: #000;
+      }
+
+      #bottomActions.active #add {
+        transform: rotate(45deg);
+      }
+
+      #bottomActions.active .segIcon {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      soso-richtext {
+        border: none;
+      }
+    </style>
+    <div id="shell">
+      <div id="actions">
+        <iron-icon id="noteAdd" icon="composer:note-add"></iron-icon>
+        <iron-icon id="config" icon="composer:settings"></iron-icon>
+        <iron-icon id="close" icon="composer:close" on-mousedown="_onRemove"></iron-icon>
+      </div>
+      <div id="bottomActions">
+        <iron-icon id="add" icon="composer:add" on-mousedown="_toggleAddComponent"></iron-icon>
+        <iron-icon class="segIcon" icon="composer:text-format" on-mousedown="_onAddText"></iron-icon>
+        <iron-icon class="segIcon" icon="composer:photo-camera" on-mousedown="_onAddPhoto"></iron-icon>
+        <iron-icon class="segIcon" icon="composer:play-arrow" on-mousedown="_onAddVideo"></iron-icon>
+        <iron-icon class="segIcon" icon="composer:collections" on-mousedown="_onAddGallery"></iron-icon>
+      </div>
+    </div>
+  </template>
+  <script>
+    class SegmentContainer extends Polymer.Element {
+      static get is() { return "segment-container"; }
+      static get properties() {
+        return {
+          segment: Object,
+          editing: {
+            type: Boolean,
+            observer: '_onEditing'
+          }
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.shell = this.$.shell;
+        this.shell.addEventListener('click', this._onFocus.bind(this));
+        this.shell.addEventListener('focus', this._onFocus.bind(this));
+        this.shell.addEventListener('blur', this._onBlur.bind(this));
+        this.shell.addEventListener('focused', this._onFocus.bind(this));
+        this.shell.addEventListener('blurred', this._onBlur.bind(this));
+
+        this._loadComponent();
+      }
+
+      _onEditing() {
+        if (!this.shell) {
+          return;
+        }
+        if (this.editing) {
+          this.shell.classList.add('editing');
+        } else {
+          this.shell.classList.remove('editing');
+          this._updateData();
+        }
+        if (this.component) {
+          this.component.editing = this.editing;
+        }
+        if (this._addingComponent) {
+          this._toggleAddComponent();
+        }
+      }
+
+      _onFocus() {
+        if (!this.editing) {
+          this.set("editing", true);
+        }
+      }
+
+      _onBlur() {
+        if (this.editing) {
+          this.set("editing", false);
+        }
+      }
+
+      _loadComponent() {
+        let type = this.segment.type;
+        if (this.component) {
+          this.shell.removeChild(this.component);
+          this.component = null;
+        }
+        switch (type) {
+          case "text":
+            this.component = document.createElement("soso-richtext");
+            this.component.placeholder = "Start writing...";
+            this.$.noteAdd.classList.add("hidden");
+            this.$.config.classList.add("hidden");
+            break;
+          default:
+            break;
+        }
+
+        if (this.component) {
+          this.shell.insertBefore(this.component, this.shell.childNodes[0]);
+          this._onEditing();
+        }
+      }
+
+      _updateData() {
+        if (this.component) {
+          switch (this.segment.type) {
+            case "text":
+              let html = this.component.value;
+              this.segment.data.html = html;
+              break;
+            default:
+              break;
+          }
+        }
+      }
+
+      _toggleAddComponent(event) {
+        if (event)
+          event.preventDefault();
+        if (!this._addingComponent) {
+          this._addingComponent = true;
+          this.$.bottomActions.classList.add("active");
+        } else {
+          this._addingComponent = false;
+          this.$.bottomActions.classList.remove("active");
+        }
+      }
+
+      _onAddText(event) {
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'text' } }));
+      }
+
+      _onAddPhoto(event) {
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'text' } }));
+      }
+
+      _onAddVideo(event) {
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'text' } }));
+      }
+
+      _onAddGallery(event) {
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'text' } }));
+      }
+
+      _onRemove(event) {
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent('remove-segment', { bubbles: true, composed: true, detail: {} }));
+      }
+    }
+    window.customElements.define(SegmentContainer.is, SegmentContainer);
+  </script>
+</dom-module>
