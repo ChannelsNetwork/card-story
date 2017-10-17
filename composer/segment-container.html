@@ -1,10 +1,13 @@
 <link rel="import" href="composer-icons.html">
 <link rel="import" href="soso-richtext.html">
+<link rel="import" href="header-composer.html">
+
 <dom-module id="segment-container">
   <template>
     <style>
       :host {
         display: block;
+        margin: 0 auto;
       }
 
       .hidden {
@@ -189,12 +192,21 @@
           this.shell.removeChild(this.component);
           this.component = null;
         }
+        this.$.shell.style.margin = "";
         switch (type) {
           case "text":
             this.component = document.createElement("soso-richtext");
             this.component.placeholder = "Start writing...";
             this.$.noteAdd.classList.add("hidden");
             this.$.config.classList.add("hidden");
+            this.style.maxWidth = "710px";
+            break;
+          case "header":
+            this.component = document.createElement("header-composer");
+            this.$.noteAdd.classList.add("hidden");
+            this.$.close.classList.add("hidden");
+            this.$.bottomActions.classList.add("hidden");
+            this.$.shell.style.margin = "16px 0";
             break;
           default:
             break;

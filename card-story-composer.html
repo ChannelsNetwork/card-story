@@ -15,7 +15,6 @@
 
       #container {
         padding: 15px;
-        max-width: 900px;
         margin: 0 auto;
       }
 
@@ -80,26 +79,27 @@
       connectedCallback() {
         super.connectedCallback();
         if (this.segments.length === 0) {
-          this._prependSegment("text");
+          this._addSegmentAtIndex(0, "header", false);
+          this._addSegmentAtIndex(1, "text", true);
         }
         this._refreshAddPanelVisibility();
       }
 
       _onAddText() {
-        this._prependSegment("text");
+        this._addSegmentAtIndex(1, "text", true);
       }
 
       _refreshAddPanelVisibility() {
-        if (this.segments.length) {
+        if (this.segments.length > 1) {
           this.$.addPanel.classList.add("hidden");
         } else {
           this.$.addPanel.classList.remove("hidden");
         }
       }
 
-      _prependSegment(type) {
+      _addSegmentAtIndex(index, type, editing) {
         let s = this._createSegment(type);
-        s.node = this._insertSegment(0, s, true);
+        s.node = this._insertSegment(index, s, editing);
         this.segments.push(s);
         this._refreshAddPanelVisibility();
       }

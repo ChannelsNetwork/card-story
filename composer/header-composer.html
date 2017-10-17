@@ -1,0 +1,135 @@
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="soso-textarea.html">
+<dom-module id="header-composer">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+        background: white;
+      }
+
+      #header {
+        position: relative;
+        overflow: hidden;
+        background-color: #fff;
+        background-size: cover;
+        background-origin: border-box;
+        background-position: 50% 35%;
+        outline: none;
+      }
+
+      #header.overlayed {
+        min-height: 40vh;
+        color: white;
+      }
+
+      #header.cover {
+        min-height: 100vh;
+        color: white;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      #content {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 16px;
+        position: relative;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      #content.center {
+        text-align: center;
+      }
+
+      #content.left {
+        margin: 0;
+        max-width: 800px;
+        text-align: left;
+      }
+
+      #content.right {
+        margin: 0 0 0 auto;
+        max-width: 800px;
+        text-align: right;
+      }
+
+      #title {
+        font-family: 'Raleway', sans-serif;
+        margin: 0;
+        font-weight: 400;
+        line-height: 1.4;
+        font-size: 40px;
+        text-transform: capitalize;
+      }
+
+      #subtitle {
+        font-family: 'Raleway', sans-serif;
+        margin: 16px 0;
+        font-weight: 400;
+        line-height: 1.4;
+        font-size: 26px;
+      }
+
+      .fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+      }
+
+      soso-textarea {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+      }
+    </style>
+    <header id="header" class="vertical layout" tabindex="0" on-blur="_onBlur">
+      <div id="glassPane" class="hidden fill"></div>
+      <div id="spacerTop" class="flex"></div>
+      <div id="content" class="center">
+        <soso-textarea placeholder="Title" id="title" on-focus="_onFocus" on-blur="_onBlur"></soso-textarea>
+        <soso-textarea placeholder="Subtitle" id="subtitle" on-focus="_onFocus" on-blur="_onBlur"></soso-textarea>
+      </div>
+      <div id="spacerBottom" class="flex hidden"></div>
+    </header>
+  </template>
+  <script>
+    class HeaderComposer extends Polymer.Element {
+      static get is() { return "header-composer"; }
+      static get properties() {
+        return {
+          data: Object
+        };
+      }
+      connectedCallback() {
+        super.connectedCallback();
+        this._refresh();
+      }
+
+      _refresh() {
+        let data = this.data || {};
+        if (!data.options) {
+          data.options = {};
+        }
+        this.data = data;
+      }
+
+      _onFocus(event) {
+        event.stopPropagation();
+        this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
+      }
+
+      _onBlur(event) {
+        event.stopPropagation();
+        this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true, detail: {} }));
+      }
+    }
+    window.customElements.define(HeaderComposer.is, HeaderComposer);
+  </script>
+</dom-module>
