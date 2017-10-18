@@ -83,6 +83,10 @@
       get value() {
         return this.innerHTML;
       }
+
+      set value(v) {
+        this.innerHTML = v;
+      }
     }
 
     window.customElements.define(SosoRichtext.is, SosoRichtext);

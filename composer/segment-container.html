@@ -1,6 +1,6 @@
 <link rel="import" href="composer-icons.html">
-<link rel="import" href="soso-richtext.html">
 <link rel="import" href="header-composer.html">
+<link rel="import" href="text-composer.html">
 
 <dom-module id="segment-container">
   <template>
@@ -111,10 +111,6 @@
         opacity: 1;
         pointer-events: auto;
       }
-
-      soso-richtext {
-        border: none;
-      }
     </style>
     <div id="shell">
       <div id="actions">
@@ -137,6 +133,7 @@
       static get properties() {
         return {
           segment: Object,
+          services: Object,
           editing: {
             type: Boolean,
             observer: '_onEditing'
@@ -195,7 +192,7 @@
         this.$.shell.style.margin = "";
         switch (type) {
           case "text":
-            this.component = document.createElement("soso-richtext");
+            this.component = document.createElement("text-composer");
             this.component.placeholder = "Start writing...";
             this.$.noteAdd.classList.add("hidden");
             this.$.config.classList.add("hidden");
@@ -213,6 +210,8 @@
         }
 
         if (this.component) {
+          this.component.data = this.segment.data;
+          this.component.services = this.services;
           this.shell.insertBefore(this.component, this.shell.childNodes[0]);
           this._onEditing();
         }
@@ -240,14 +239,7 @@
 
       _updateData() {
         if (this.component) {
-          switch (this.segment.type) {
-            case "text":
-              let html = this.component.value;
-              this.segment.data.html = html;
-              break;
-            default:
-              break;
-          }
+          this.segment.data = this.component.data;
         }
       }
 

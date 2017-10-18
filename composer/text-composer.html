@@ -1,0 +1,54 @@
+<link rel="import" href="soso-richtext.html">
+<dom-module id="text-composer">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      soso-richtext {
+        border: none;
+        min-height: 27px;
+      }
+    </style>
+    <soso-richtext id="text" editing="[[editing]]" placeholder="[[placeholder]]" on-blurred="_onBlur"></soso-richtext>
+  </template>
+  <script>
+    class TextComposer extends Polymer.Element {
+      static get is() { return 'text-composer'; }
+      static get properties() {
+        return {
+          placeholder: String,
+          data: Object,
+          editing: Boolean
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this._refresh();
+        this.addEventListener('click', (event) => {
+
+        });
+      }
+
+      _refresh() {
+        let data = this.data || {};
+        if (!data.options) {
+          data.options = {};
+        }
+        this.data = data;
+        if (this.data.html) {
+          this.$.text.value = this.data.html;
+        }
+      }
+
+      _onBlur() {
+        if (this.data) {
+          this.data.html = this.$.text.value;
+        }
+      }
+    }
+    window.customElements.define(TextComposer.is, TextComposer);
+  </script>
+</dom-module>

@@ -138,6 +138,8 @@
 
       _onBlur(event) {
         event.stopPropagation();
+        this.data.title = this.$.title.value.trim();
+        this.data.subtitle = this.$.subtitle.value.trim();
         this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true, detail: {} }));
       }
 

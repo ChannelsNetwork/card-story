@@ -113,6 +113,11 @@
         };
       }
 
+      connectedCallback() {
+        super.connectedCallback();
+        this.value = "";
+      }
+
       get textarea() {
         return this.$.textarea;
       }
