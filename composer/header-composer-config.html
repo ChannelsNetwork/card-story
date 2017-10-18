@@ -213,6 +213,9 @@
 
       _onFile(event) {
         let file = event.detail.file;
+        if (!file) {
+          return;
+        }
         if (file.type.indexOf('image/') != 0) {
           this.fileStatus = "Invalid image";
           this.$.fileStatus.classList.add("error");
@@ -220,13 +223,13 @@
           this.$.fileStatus.classList.remove("error");
           this.fileStatus = "Uploading image...";
           this._uploadImage(file).then((response) => {
+            console.log("upload response", response);
             // TODO: update image response
             this.options.image = "https://channelsnetwork.github.io/card-story-demo/images/header.jpg";
             this.fileStatus = "";
             this._showImageOptions();
             this._fireOptionsChanged();
           });
-          console.log("Services", this.services);
         }
       }
 
@@ -235,9 +238,13 @@
       }
 
       _uploadImage(file) {
-        return new Promise((resolve, reject) => {
-          resolve();
-        });
+        if (this.services) {
+          return this.services.upload(file);
+        } else {
+          return new Promise((resolve, reject) => {
+            resolve();
+          });
+        }
       }
 
       _fireOptionsChanged() {

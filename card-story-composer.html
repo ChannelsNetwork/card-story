@@ -130,6 +130,7 @@
       static get is() { return "card-story-composer"; }
       static get properties() {
         return {
+          services: Object,
           segments: Array
         };
       }
@@ -210,6 +211,7 @@
 
       _createSegmentNode(segment, editing) {
         let node = document.createElement("segment-container");
+        node.services = this.services;
         node.segment = segment;
         node.editing = editing;
         node.addEventListener('add-segment', this._addSegment.bind(this));
@@ -260,6 +262,7 @@
             this._clearNode(this.$.configContainer);
             let node = document.createElement(info.nodeName);
             node.options = info.delegate.options;
+            node.services = this.services;
             this._configNode = node;
             this._configInfo = info;
             if (!this._optionsListener) {

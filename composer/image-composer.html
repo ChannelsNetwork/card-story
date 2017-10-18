@@ -1,0 +1,19 @@
+<dom-module id="image-composer">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+  </template>
+  <script>
+    class ImageComposer extends Polymer.Element {
+      static get is() { return 'image-composer'; }
+      static get properties() {
+        return {
+        };
+      }
+    }
+    window.customElements.define(ImageComposer.is, ImageComposer);
+  </script>
+</dom-module>
