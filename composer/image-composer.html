@@ -1,3 +1,5 @@
+<link rel="import" href="../../soso-file-picker/soso-file-picker.html">
+
 <dom-module id="image-composer">
   <template>
     <style>
@@ -5,8 +7,64 @@
         display: block;
         outline: none;
       }
+
+      #filePicker {
+        min-height: 120px;
+        box-sizing: border-box;
+        --soso-link-color: #388E3C;
+      }
+
+      .noborder {
+        border: none;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      #noImage {
+        position: relative;
+      }
+
+      #fileMessage {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        padding: 5px 10px;
+        background: #E8F5E9;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        pointer-events: none;
+      }
+
+      #imgPanel {
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      img {
+        display: block;
+        box-sizing: border-box;
+        margin: 0 auto;
+        transform-origin: 0 0 0;
+        transition: transform 0.6s ease, opacity 0.2s ease;
+      }
+
+      .flowingImage {
+        max-width: 100%;
+      }
+
+      .fullWidthImage {
+        width: 100%;
+      }
     </style>
-    <div>Image composer goes here</div>
+    <div id="noImage">
+      <soso-file-picker class="noborder" id="filePicker" label="Drag an image file" accept="image/*" on-files="_onFile"></soso-file-picker>
+      <div id="fileMessage" class="hidden">[[fileMessage]]</div>
+    </div>
+    <div id="hasImage" class="hidden">
+      <div id="imgPanel"></div>
+    </div>
   </template>
   <script>
     class ImageComposer extends Polymer.Element {
@@ -18,7 +76,8 @@
           editing: {
             type: Boolean,
             observer: '_onEditing'
-          }
+          },
+          fileMessage: String
         };
       }
 
@@ -27,12 +86,135 @@
         this.setAttribute("tabIndex", "-1");
         this.addEventListener("focus", this._onFocus.bind(this));
         this.addEventListener("blur", this._onBlur.bind(this));
+        this._refresh();
+      }
+
+      _refresh() {
+        let data = this.data || {};
+        if (!data.options) {
+          data.options = {};
+        }
+        this.data = data;
+        this._refreshImage();
+      }
+
+      _refreshImage() {
+        if (this.data.image) {
+          this.$.noImage.classList.add("hidden");
+          this.$.hasImage.classList.remove("hidden");
+          this._refreshImagePanel();
+        } else {
+          this.$.noImage.classList.remove("hidden");
+          this.$.hasImage.classList.add("hidden");
+        }
+      }
+
+      _refreshImagePanel() {
+        let pStyle = this.$.imgPanel.style;
+        let imgRatio = this.data.width / this.data.height;
+        let options = this.data.options || {};
+        let style = options.style || "";
+        switch (style) {
+          case "fullWidth":
+            pStyle.width = "100%;";
+            let w = this.offsetWidth;
+            let h = Math.min(w / imgRatio, window.innerHeight); // TODO: panel height 
+            pStyle.height = h + "px";
+            break;
+          case "sized":
+            pStyle.width = options.width
+            pStyle.height = options.height;
+            pStyle.margin = "0 auto";
+            break;
+          case "cover":
+          case "cover-fit":
+            pStyle.width = "100vw"; // TODO: panel size
+            pStyle.height = "100vh";
+            break;
+          default:
+            break;
+        }
+        setTimeout(() => {
+          this._insertImage();
+        }, 300);
+      }
+
+      _insertImage() {
+        if (!this._image) {
+          this._image = new Image();
+          this._image.src = this.data.image;
+          this.$.imgPanel.appendChild(this._image);
+        }
+        let image = this._image;
+        let panelWidth = this.$.imgPanel.offsetWidth;
+        let panelHeight = this.$.imgPanel.offsetHeight;
+        let imgRatio = this.data.width / this.data.height;
+        let options = this.data.options || {};
+        let style = options.style || "";
+
+        image.classList.remove("fullWidthImage")
+        image.classList.remove("sizedImage");
+        image.classList.remove("flowingImage");
+        image.style.width = "";
+        image.style.height = "";
+        image.style.margin = "";
+        image.style.transform = "";
+
+        switch (this.type) {
+          case "fullWidth": {
+            image.classList.add("fullWidthImage")
+            break;
+          }
+          case "cover-fit": {
+            let iw = 0;
+            let ih = 0;
+            if (imgRatio >= 1) {
+              iw = panelWidth;
+              ih = iw / imgRatio;
+              if (ih > panelHeight) {
+                ih = panelHeight;
+                iw = imgRatio * ih;
+              }
+            } else {
+              ih = panelHeight;
+              iw = imgRatio * ih;
+              if (iw > panelWidth) {
+                iw = panelWidth;
+                ih = iw / imgRatio;
+              }
+            }
+            image.style.width = iw + "px";
+            image.style.height = ih + "px";
+            image.style.margin = "0";
+            let _pageFitOffset = [-(panelWidth - iw) / 2, -(panelHeight - ih) / 2];
+            image.style.transform = "translate3d(" + (-_pageFitOffset[0] + "px") + "," + (-_pageFitOffset[1] + "px") + ",0)";
+            break;
+          }
+          case "cover":
+          case "sized": {
+            image.classList.add("sizedImage");
+            let imW = panelWidth;
+            let imH = imW / imgRatio;
+            if (imH < panelHeight) {
+              imH = panelHeight;
+              imW = imH * imgRatio;
+            }
+            image.style.width = imW + "px";
+            image.style.height = "auto";
+            break;
+          }
+          default:
+            image.classList.add("flowingImage");
+            break;
+        }
       }
 
       _onEditing() {
         if (this.editing) {
+          this.$.filePicker.classList.add('noborder');
           this.focus();
         } else {
+          this.$.filePicker.classList.remove('noborder');
           this.blur();
         }
       }
@@ -45,6 +227,89 @@
       _onBlur(event) {
         event.stopPropagation();
         this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true, detail: {} }));
+      }
+
+      _setFileMessage(message) {
+        if (message) {
+          this.$.fileMessage.classList.remove("hidden");
+        } else {
+          this.$.fileMessage.classList.add("hidden");
+        }
+        this.fileMessage = message;
+      }
+
+      _onFile() {
+        let file = event.detail.file;
+        if (!file) {
+          return;
+        }
+
+        if (file.type.indexOf('image/') != 0) {
+          this._setFileMessage("Invalid image file");
+        } else {
+          this._readFile(file).then((dataUrl) => {
+            this._loadImage(dataUrl).then((imageData) => {
+              this._setFileMessage("Uploading image...");
+              this._uploadImage(file, dataUrl).then((response) => {
+                this.data.image = response.url;
+                this.data.width = imageData.width;
+                this.data.height = imageData.height;
+                this._setFileMessage(null);
+                this._refreshImage();
+              });
+            });
+          }).catch((err) => {
+            this._setFileMessage("Failed to load image");
+          });
+        }
+      }
+
+      _loadImage(url) {
+        return new Promise((resolve, reject) => {
+          let image = new Image();
+          image.addEventListener('load', () => {
+            resolve({
+              width: image.width,
+              height: image.height
+            });
+          });
+          image.addEventListener("error", () => {
+            reject();
+          });
+          image.addEventListener("abort", () => {
+            reject();
+          });
+          image.src = url;
+        });
+      }
+
+      _readFile(file) {
+        return new Promise((resolve, reject) => {
+          let reader = new FileReader();
+          reader.addEventListener('load', () => {
+            resolve(reader.result);
+          });
+          reader.addEventListener("error", () => {
+            reject();
+          });
+          reader.addEventListener("abort", () => {
+            reject();
+          });
+          reader.readAsDataURL(file);
+        });
+      }
+
+      _uploadImage(file, dataUrl) {
+        if (this.services) {
+          return this.services.upload(file);
+        } else {
+          return new Promise((resolve, reject) => {
+            resolve({
+              fileId: "some-file-id",
+              url: dataUrl
+            });
+          });
+        }
       }
     }
     window.customElements.define(ImageComposer.is, ImageComposer);
