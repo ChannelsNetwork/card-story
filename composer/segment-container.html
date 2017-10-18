@@ -1,6 +1,7 @@
 <link rel="import" href="composer-icons.html">
 <link rel="import" href="header-composer.html">
 <link rel="import" href="text-composer.html">
+<link rel="import" href="image-composer.html">
 
 <dom-module id="segment-container">
   <template>
@@ -205,6 +206,9 @@
             this.$.bottomActions.classList.add("hidden");
             this.$.shell.style.margin = "16px 0";
             break;
+          case "image":
+            this.component = document.createElement("image-composer");
+            break;
           default:
             break;
         }
@@ -262,7 +266,7 @@
 
       _onAddPhoto(event) {
         event.preventDefault();
-        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'text' } }));
+        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'image' } }));
       }
 
       _onAddVideo(event) {

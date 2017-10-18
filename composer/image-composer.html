@@ -3,15 +3,48 @@
     <style>
       :host {
         display: block;
+        outline: none;
       }
     </style>
+    <div>Image composer goes here</div>
   </template>
   <script>
     class ImageComposer extends Polymer.Element {
       static get is() { return 'image-composer'; }
       static get properties() {
         return {
+          services: Object,
+          data: Object,
+          editing: {
+            type: Boolean,
+            observer: '_onEditing'
+          }
         };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.setAttribute("tabIndex", "-1");
+        this.addEventListener("focus", this._onFocus.bind(this));
+        this.addEventListener("blur", this._onBlur.bind(this));
+      }
+
+      _onEditing() {
+        if (this.editing) {
+          this.focus();
+        } else {
+          this.blur();
+        }
+      }
+
+      _onFocus(event) {
+        event.stopPropagation();
+        this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
+      }
+
+      _onBlur(event) {
+        event.stopPropagation();
+        this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true, detail: {} }));
       }
     }
     window.customElements.define(ImageComposer.is, ImageComposer);

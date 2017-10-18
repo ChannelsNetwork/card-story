@@ -223,9 +223,7 @@
           this.$.fileStatus.classList.remove("error");
           this.fileStatus = "Uploading image...";
           this._uploadImage(file).then((response) => {
-            console.log("upload response", response);
-            // TODO: update image response
-            this.options.image = "https://channelsnetwork.github.io/card-story-demo/images/header.jpg";
+            this.options.image = response.url;
             this.fileStatus = "";
             this._showImageOptions();
             this._fireOptionsChanged();
@@ -242,7 +240,10 @@
           return this.services.upload(file);
         } else {
           return new Promise((resolve, reject) => {
-            resolve();
+            resolve({
+              fileId: "some-file-id",
+              url: "https://channelsnetwork.github.io/card-story-demo/images/header.jpg"
+            });
           });
         }
       }

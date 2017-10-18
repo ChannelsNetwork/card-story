@@ -153,6 +153,10 @@
         this._addSegmentAtIndex(1, "text", true);
       }
 
+      _onAddPhoto() {
+        this._addSegmentAtIndex(1, "image", true);
+      }
+
       _refreshAddPanelVisibility() {
         if (this.segments.length > 1) {
           this.$.addPanel.classList.add("hidden");
