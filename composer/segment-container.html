@@ -119,7 +119,7 @@
     <div id="shell">
       <div id="actions">
         <iron-icon id="noteAdd" icon="composer:note-add"></iron-icon>
-        <iron-icon id="config" icon="composer:settings"></iron-icon>
+        <iron-icon id="config" icon="composer:settings" on-mousedown="_onConfig"></iron-icon>
         <iron-icon id="close" icon="composer:close" on-mousedown="_onRemove"></iron-icon>
       </div>
       <div id="bottomActions">
@@ -215,6 +215,26 @@
         if (this.component) {
           this.shell.insertBefore(this.component, this.shell.childNodes[0]);
           this._onEditing();
+        }
+      }
+
+      _onConfig(event) {
+        event.preventDefault();
+        let type = this.segment.type;
+        let configInfo = null;
+        switch (type) {
+          case "header":
+            configInfo = {
+              path: this.importPath + "header-composer-config.html",
+              nodeName: "header-composer-config",
+              delegate: this.component
+            };
+            break;
+          default:
+            break;
+        }
+        if (configInfo) {
+          this.dispatchEvent(new CustomEvent('show-config', { bubbles: true, composed: true, detail: configInfo }));
         }
       }
 

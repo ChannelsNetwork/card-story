@@ -51,6 +51,59 @@
       .segIcon:hover {
         color: #000;
       }
+
+      .barIcon {
+        margin: 0;
+        height: 18px;
+        width: 18px;
+        background: transparent;
+      }
+
+      #configPanel {
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        padding: 10px 20px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        outline: none;
+        -webkit-overflow-scrolling: touch;
+        -ms-flex-direction: row;
+        -webkit-flex-direction: row;
+        flex-direction: row;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -ms-flex-pack: end;
+        -webkit-justify-content: flex-end;
+        justify-content: flex-end;
+      }
+
+      #configCell {
+        width: 280px;
+      }
+
+      #configShell {
+        background: #f0f0f0;
+        padding: 10px;
+        border-radius: 3px;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      #configBar {
+        -ms-flex-direction: row;
+        -webkit-flex-direction: row;
+        flex-direction: row;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -ms-flex-pack: end;
+        -webkit-justify-content: flex-end;
+        justify-content: flex-end;
+      }
     </style>
     <div id="container">
     </div>
@@ -60,6 +113,16 @@
       <iron-icon class="segIcon" icon="composer:photo-camera" on-click="_onAddPhoto"></iron-icon>
       <iron-icon class="segIcon" icon="composer:play-arrow" on-click="_onAddVideo"></iron-icon>
       <iron-icon class="segIcon" icon="composer:collections" on-click="_onAddGallery"></iron-icon>
+    </div>
+    <div id="configPanel" class="hidden" tabindex="-1">
+      <div id="configCell">
+        <div id="configShell">
+          <div id="configBar">
+            <iron-icon class="segIcon barIcon" icon="composer:close" on-click="_closeConfig"></iron-icon>
+          </div>
+          <div id="configContainer"></div>
+        </div>
+      </div>
     </div>
   </template>
   <script>
@@ -151,6 +214,7 @@
         node.editing = editing;
         node.addEventListener('add-segment', this._addSegment.bind(this));
         node.addEventListener('remove-segment', this._removeSegment.bind(this));
+        node.addEventListener('show-config', this._showSegmentConfig.bind(this));
         return node;
       }
 
@@ -177,6 +241,53 @@
           this.$.container.appendChild(node);
         } else {
           this.$.container.insertBefore(node, nodes[index]);
+        }
+      }
+
+      _clearNode(node) {
+        while (node.hasChildNodes()) {
+          node.removeChild(node.lastChild);
+        }
+      }
+
+      _showSegmentConfig(event) {
+        let info = event.detail;
+        if (info) {
+          Polymer.importHref(info.path, () => {
+            if (this._configNode && this._optionsListener) {
+              this._configNode.removeEventListener("options-change", this._optionsListener);
+            }
+            this._clearNode(this.$.configContainer);
+            let node = document.createElement(info.nodeName);
+            node.options = info.delegate.options;
+            this._configNode = node;
+            this._configInfo = info;
+            if (!this._optionsListener) {
+              this._optionsListener = this._onOptionsChange.bind(this);
+            }
+            node.addEventListener("options-change", this._optionsListener);
+
+            this.$.configContainer.appendChild(node);
+            this.$.configPanel.classList.remove("hidden");
+            this.$.configPanel.focus();
+          });
+        }
+      }
+
+      _closeConfig() {
+        if (this._configNode && this._optionsListener) {
+          this._configNode.removeEventListener("options-change", this._optionsListener);
+        }
+        this._configNode = null;
+        this._configInfo = null;
+        this.$.configPanel.blur();
+        this.$.configPanel.classList.add("hidden");
+        this._clearNode(this.$.configContainer);
+      }
+
+      _onOptionsChange(event) {
+        if (this._configInfo) {
+          this._configInfo.delegate.options = event.detail.options;
         }
       }
     }
