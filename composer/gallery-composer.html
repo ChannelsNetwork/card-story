@@ -1,0 +1,232 @@
+<link rel="import" href="../../polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="gallery-composer-item.html">
+
+<dom-module id="gallery-composer">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+        outline: none;
+        position: relative;
+      }
+
+      #container {
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      #filePicker {
+        height: 300px;
+        max-width: 300px;
+        min-width: 190px;
+        box-sizing: border-box;
+        --soso-link-color: #388E3C;
+      }
+
+      #pickerPanel {
+        margin: 10px;
+        position: relative;
+      }
+
+      #fileMessage {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        padding: 5px 10px;
+        background: #E8F5E9;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        pointer-events: none;
+      }
+
+      gallery-composer-item {
+        height: 300px;
+        margin: 10px;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      @media (max-width: 600px) {
+        #filePicker {
+          height: 200px;
+        }
+      }
+    </style>
+    <div id="container" class="horizontal layout wrap">
+      <dom-repeat items="[[items]]">
+        <template>
+          <gallery-composer-item data="[[item]]" class="flex" on-remove="_onRemoveItem"></gallery-composer-item>
+        </template>
+      </dom-repeat>
+      <div id="pickerPanel" class="flex">
+        <soso-file-picker class="flex" id="filePicker" label="Drag an image file" accept="image/*" on-files="_onFile"></soso-file-picker>
+        <div id="fileMessage" class="hidden">[[fileMessage]]</div>
+      </div>
+    </div>
+  </template>
+  <script>
+    class GalleryComposer extends Polymer.Element {
+      static get is() { return 'gallery-composer'; }
+      static get properties() {
+        return {
+          services: Object,
+          data: Object,
+          items: Array,
+          editing: {
+            type: Boolean,
+            observer: '_onEditing'
+          },
+          fileMessage: String
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.setAttribute("tabIndex", "-1");
+        this.addEventListener("focus", this._onFocus.bind(this));
+        this.addEventListener("blur", this._onBlur.bind(this));
+        this._refresh();
+      }
+
+      _onEditing() {
+        if (this.editing) {
+          this.$.filePicker.classList.add('noborder');
+          this.focus();
+        } else {
+          this.$.filePicker.classList.remove('noborder');
+          this.blur();
+        }
+      }
+
+      _onFocus(event) {
+        event.stopPropagation();
+        this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
+      }
+
+      _onBlur(event) {
+        event.stopPropagation();
+        this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true, detail: {} }));
+      }
+
+      _refresh() {
+        let data = this.data || {};
+        if (!data.options) {
+          data.options = {};
+        }
+        if (!data.items) {
+          data.items = [];
+        }
+        this.data = data;
+        this.items = data.items;
+      }
+
+      get options() {
+        return this.data.options || {};
+      }
+
+      set options(value) {
+        this.data.options = value;
+      }
+
+      _setFileMessage(message) {
+        if (message) {
+          this.$.fileMessage.classList.remove("hidden");
+        } else {
+          this.$.fileMessage.classList.add("hidden");
+        }
+        this.fileMessage = message;
+      }
+
+      _onRemoveItem(event) {
+        let index = event.model.index;
+        this.splice("items", index, 1);
+        this.data.items = this.items;
+      }
+
+      _onFile() {
+        let file = event.detail.file;
+        if (!file) {
+          return;
+        }
+        if (file.type.indexOf('image/') != 0) {
+          this._setFileMessage("Invalid image file");
+        } else {
+          this._readFile(file).then((dataUrl) => {
+            this._loadImage(dataUrl).then((imageData) => {
+              this._setFileMessage("Uploading image...");
+              this._uploadImage(file, dataUrl).then((response) => {
+                let item = {
+                  url: response.url,
+                  width: imageData.width,
+                  height: imageData.height
+                };
+                this.push('items', item);
+                this.data.items = this.items;
+                this._setFileMessage(null);
+                setTimeout(() => {
+                  this.$.filePicker.clear();
+                }, 1);
+              });
+            });
+          }).catch((err) => {
+            this._setFileMessage("Failed to load image");
+          });
+        }
+      }
+
+      _loadImage(url) {
+        return new Promise((resolve, reject) => {
+          let image = new Image();
+          image.addEventListener('load', () => {
+            resolve({
+              width: image.width,
+              height: image.height
+            });
+          });
+          image.addEventListener("error", () => {
+            reject();
+          });
+          image.addEventListener("abort", () => {
+            reject();
+          });
+          image.src = url;
+        });
+      }
+
+      _readFile(file) {
+        return new Promise((resolve, reject) => {
+          let reader = new FileReader();
+          reader.addEventListener('load', () => {
+            resolve(reader.result);
+          });
+          reader.addEventListener("error", () => {
+            reject();
+          });
+          reader.addEventListener("abort", () => {
+            reject();
+          });
+          reader.readAsDataURL(file);
+        });
+      }
+
+      _uploadImage(file, dataUrl) {
+        if (this.services) {
+          return this.services.upload(file);
+        } else {
+          return new Promise((resolve, reject) => {
+            resolve({
+              fileId: "some-file-id",
+              url: dataUrl
+            });
+          });
+        }
+      }
+    }
+    window.customElements.define(GalleryComposer.is, GalleryComposer);
+  </script>
+</dom-module>

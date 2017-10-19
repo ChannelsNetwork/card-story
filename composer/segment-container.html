@@ -3,6 +3,7 @@
 <link rel="import" href="text-composer.html">
 <link rel="import" href="image-composer.html">
 <link rel="import" href="video-composer.html">
+<link rel="import" href="gallery-composer.html">
 
 <dom-module id="segment-container">
   <template>
@@ -213,6 +214,11 @@
           case "video":
             this.component = document.createElement("video-composer");
             break;
+          case "gallery":
+            this.component = document.createElement("gallery-composer");
+            this.$.noteAdd.classList.add("hidden");
+            this.$.config.classList.add("hidden");
+            break;
           default:
             break;
         }
@@ -294,7 +300,7 @@
 
       _onAddGallery(event) {
         event.preventDefault();
-        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'text' } }));
+        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'gallery' } }));
       }
 
       _onRemove(event) {

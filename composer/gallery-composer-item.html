@@ -1,0 +1,109 @@
+<dom-module id="gallery-composer-item">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+        overflow: hidden;
+        background-color: #f0f0f0;
+        background-size: cover;
+        background-origin: border-box;
+        background-position: 50% 35%;
+        border-radius: 3px;
+      }
+
+      #removeIcon {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        display: block;
+        padding: 5px;
+        border-radius: 100%;
+        border: 2px solid;
+        color: white;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        background: rgba(0, 0, 0, 0.6);
+      }
+    </style>
+    <iron-icon id="removeIcon" icon="composer:close" on-click="_onRemove"></iron-icon>
+  </template>
+  <script>
+    class GalleryComposerItem extends Polymer.Element {
+      static get is() { return 'gallery-composer-item'; }
+      static get properties() {
+        return {
+          data: {
+            type: Object,
+            observer: '_refresh'
+          }
+        };
+      }
+
+      constructor() {
+        super();
+        this.direction = "horizontal";
+      }
+
+      _onRemove(event) {
+        event.stopPropagation();
+        this.dispatchEvent(new CustomEvent('remove', { bubbles: true, composed: true, detail: {} }));
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this._connected = true;
+        requestAnimationFrame(() => {
+          this._refresh();
+        });
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        this._connected = false;
+      }
+
+      _refresh() {
+        this._ensureLaidOut().then(() => {
+          this._horizontalLayout();
+          this.style.backgroundImage = 'url("' + this.data.url + '")';
+        });
+      }
+
+      _horizontalLayout() {
+        let h = this.offsetHeight;
+        let imRatio = this.data.width / this.data.height;
+        let w = h * imRatio;
+        this.style.minWidth = w + "px";
+        this.style.minHeight = null;
+      }
+
+      _ensureLaidOut() {
+        this._sizeAttempts = 0;
+        return new Promise((resolve, reject) => {
+          let w = (this.direction == 'horizontal') ? this.offsetHeight : this.offsetWidth;
+          if (w) {
+            resolve();
+          } else {
+            var cb = () => {
+              this._sizeAttempts++;
+              let w = (this.direction == 'horizontal') ? this.offsetHeight : this.offsetWidth;
+              if (w) {
+                resolve();
+              } else {
+                if (this._sizeAttempts > 20) {
+                  reject();
+                } else {
+                  setTimeout(cb, 50);
+                }
+              }
+            };
+            setTimeout(cb, 50);
+          }
+        });
+      }
+    }
+    window.customElements.define(GalleryComposerItem.is, GalleryComposerItem);
+  </script>
+</dom-module>

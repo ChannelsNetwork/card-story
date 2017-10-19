@@ -161,6 +161,10 @@
         this._addSegmentAtIndex(1, "video", true);
       }
 
+      _onAddGallery() {
+        this._addSegmentAtIndex(1, "gallery", true);
+      }
+
       _refreshAddPanelVisibility() {
         if (this.segments.length > 1) {
           this.$.addPanel.classList.add("hidden");
