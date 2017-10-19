@@ -1,0 +1,146 @@
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="soso-textarea.html">
+<dom-module id="quote-composer">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+        outline: none;
+        position: relative;
+        font-family: 'Raleway', 'Open Sans', 'Roboto', sans-serif;
+        line-height: 1.5;
+        color: #242424;
+        font-weight: bold;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px 0;
+      }
+
+      .qpanel {
+        box-sizing: border-box;
+      }
+
+      .qimage {
+        display: block;
+        height: 70px;
+        width: auto;
+        padding: 0 20px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #openQuote {
+        transform: translateY(-20px);
+        opacity: 0.3;
+      }
+
+      #closeQuote {
+        transform: translateY(20px);
+        opacity: 0.3;
+      }
+
+      .quote {
+        font-size: 30px;
+        color: #242424;
+      }
+
+      .author {
+        letter-spacing: 0.1em;
+        text-align: right;
+        margin-top: 10px;
+        font-size: 20px;
+        font-style: italic;
+      }
+
+      soso-textarea {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+      }
+
+      .content {
+        max-width: 640px;
+      }
+
+      @media (max-width: 600px) {
+        .qimage {
+          padding: 0 10px 0 5px;
+          height: 40px;
+        }
+        .quote {
+          font-size: 18px;
+        }
+        .author {
+          font-size: 15px;
+        }
+        .content {
+          max-width: 400px;
+        }
+      }
+    </style>
+    <div class="container horizontal layout">
+      <div class="qpanel">
+        <img id="openQuote" class="qimage" src$="[[importPath]]../controls/images/oquote.png">
+      </div>
+      <div class="flex content">
+        <soso-textarea placeholder="Quote text" id="quote" class="quote" on-focus="_onFocus" on-blur="_onBlur"></soso-textarea>
+        <soso-textarea placeholder="Author's name" id="author" class="author" on-focus="_onFocus" on-blur="_onBlur"></soso-textarea>
+      </div>
+      <div class="qpanel vertical layout">
+        <span class="flex"></span>
+        <img id="closeQuote" class="qimage" src$="[[importPath]]../controls/images/cquote.png">
+      </div>
+    </div>
+  </template>
+  <script>
+    class QuoteComposer extends Polymer.Element {
+      static get is() { return 'quote-composer'; }
+      static get properties() {
+        return {
+          data: Object,
+          editing: {
+            type: Boolean,
+            observer: '_onEditing'
+          }
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.setAttribute("tabIndex", "0");
+        this.addEventListener("focus", this._onFocus.bind(this));
+        this.addEventListener("blur", this._onBlur.bind(this));
+        this._refresh();
+      }
+
+      _onEditing() {
+        if (this.editing) {
+          this.focus();
+        } else {
+          this.blur();
+        }
+      }
+
+      _onFocus(event) {
+        event.stopPropagation();
+        this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
+      }
+
+      _onBlur(event) {
+        event.stopPropagation();
+        this.data.quote = this.$.quote.value.trim();
+        this.data.author = this.$.author.value.trim();
+        this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true, detail: {} }));
+      }
+
+      _refresh() {
+        let data = this.data || {};
+        this.data = data;
+      }
+    }
+    window.customElements.define(QuoteComposer.is, QuoteComposer);
+  </script>
+</dom-module>

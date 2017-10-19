@@ -1,0 +1,293 @@
+<link rel="import" href="../../soso-checkbox/soso-checkbox.html">
+<link rel="import" href="../../soso-file-picker/soso-file-picker.html">
+<link rel="import" href="../../soso-slider/soso-slider.html">
+
+<dom-module id="header-composer-config">
+  <template>
+    <style>
+      :host {
+        display: block;
+        font-size: 14px;
+      }
+
+      h3 {
+        font-family: 'Raleway', sans-serif;
+        margin: 0;
+        line-height: 1.4;
+        font-size: 20px;
+        color: #000;
+        font-weight: 400;
+        letter-spacing: 0.05em;
+      }
+
+      #content {
+        padding: 10px 0;
+      }
+
+      #imagePanel {
+        margin: 20px 0 0;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      soso-checkbox {
+        --soso-checkbox-color: #4CAF50;
+      }
+
+      #filePicker {
+        min-height: 70px;
+        box-sizing: border-box;
+        --soso-link-color: #388E3C;
+      }
+
+      #fileStatus {
+        margin-top: 5px;
+        color: #388E3C;
+      }
+
+      .error {
+        color: #C62828 !important;
+      }
+
+      .horizontal {
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -ms-flex-direction: row;
+        -webkit-flex-direction: row;
+        flex-direction: row;
+        -ms-flex-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+      }
+
+      .flex {
+        -ms-flex: 1 1 0.000000001px;
+        -webkit-flex: 1;
+        flex: 1;
+        -webkit-flex-basis: 0.000000001px;
+        flex-basis: 0.000000001px;
+      }
+
+      .row {
+        margin-top: 5px;
+      }
+
+      section {
+        margin-top: 15px;
+      }
+
+      h4 {
+        margin: 0;
+        color: #777;
+        text-transform: uppercase;
+        font-weight: 400;
+        letter-spacing: 0.06em;
+      }
+
+      .inputCell {
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: inherit;
+        width: 150px;
+        outline: none;
+        padding: 1px 5px;
+        border: 1px solid #aaa;
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      .inputCell:focus {
+        border-color: #4CAF50;
+      }
+
+      soso-slider {
+        --soso-knob-color: #4CAF50;
+        width: 162px;
+      }
+    </style>
+    <h3>Header</h3>
+    <div id="content">
+      <soso-checkbox id="chkImage" label="Use a background image" on-change="_onImageCheckChange"></soso-checkbox>
+      <div id="imagePanel" class="hidden">
+        <soso-file-picker id="filePicker" accept="image/*" on-files="_onFile"></soso-file-picker>
+        <div id="fileStatus">[[fileStatus]]</div>
+        <div id="imageOptionsPanel" class="hidden">
+          <section>
+            <h4>Image layout</h4>
+            <div class="row">
+              <soso-checkbox id="chkFullPage" label="Full page header" on-change="_onCoverChange"></soso-checkbox>
+            </div>
+          </section>
+          <section>
+            <h4>Image screen</h4>
+            <div class="horizontal row">
+              <label class="flex" for="bgColor">Color</label>
+              <input id="bgColor" value="#000000" class="inputCell" on-change="_onBgColorChange">
+            </div>
+            <div class="horizontal row">
+              <label class="flex">Opacity</label>
+              <soso-slider id="bgOpacity" min="0" max="1" step="0.1" label on-input="_onOpacityChange"></soso-slider>
+            </div>
+          </section>
+          <section>
+            <h4>Text</h4>
+            <div class="horizontal row">
+              <label class="flex" for="txtColor">Color</label>
+              <input id="txtColor" value="#FFFFFF" class="inputCell" on-change="_onTextColorChange">
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </template>
+  <script>
+    class HeaderComposerConfig extends Polymer.Element {
+      static get is() { return 'header-composer-config'; }
+      static get properties() {
+        return {
+          services: Object,
+          fileStatus: String,
+          options: Object
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this._loadFromOptions();
+      }
+
+      _loadFromOptions() {
+        if (!this.options) {
+          this.options = {};
+        }
+        this.$.chkImage.checked = this.options.useImage || false;
+        this._updateImagePanelVisibility();
+        if (this.options.image) {
+          this.$.filePicker.label = this._trimUrl(this.options.image, 60);
+          this._showImageOptions();
+        }
+        this.$.chkFullPage.checked = this.options.style === 'cover';
+        this.$.bgColor.value = this.options.bgColor || "#000000";
+        this.$.bgOpacity.value = this.options.bgOpacity || 0.6;
+        this.$.txtColor.value = this.options.txtColor || "#FFFFFF";
+      }
+
+      _trimUrl(input, length) {
+        if (input.length <= length) {
+          return input;
+        }
+        let li = input.lastIndexOf("/");
+        if (li > 0) {
+          let s = input.substring(li);
+          if (s.length > length) {
+            return s.substring(0, length - 3) + "...";
+          } else {
+            s = "..." + s;
+            if (s.length < length) {
+              let left = input.substring(0, li);
+              s = left.substring(0, length - s.length) + s;
+            }
+            return s;
+          }
+        } else {
+          return input.substring(0, length - 3) + "...";
+        }
+      }
+
+      _onOpacityChange() {
+        this.options.bgOpacity = this.$.bgOpacity.immediateValue;
+        this._fireOptionsChanged();
+      }
+
+      _onBgColorChange() {
+        this.options.bgColor = this.$.bgColor.value.trim() || "#000000";
+        this._fireOptionsChanged();
+      }
+
+      _onTextColorChange() {
+        this.options.txtColor = this.$.txtColor.value.trim() || "#FFFFFF";
+        this._fireOptionsChanged();
+      }
+
+      _onCoverChange() {
+        this.options.style = this.$.chkFullPage.checked ? "cover" : "";
+        this.options.textLayout = this.$.chkFullPage.checked ? "center" : "";
+        this._fireOptionsChanged();
+      }
+
+      _onImageCheckChange() {
+        this.options.useImage = this.$.chkImage.checked;
+        this._updateImagePanelVisibility();
+        this._fireOptionsChanged();
+      }
+
+      _updateImagePanelVisibility() {
+        if (this.$.chkImage.checked) {
+          this.$.imagePanel.classList.remove("hidden");
+        } else {
+          this.$.imagePanel.classList.add("hidden");
+        }
+      }
+
+      _onFile(event) {
+        let file = event.detail.file;
+        if (!file) {
+          return;
+        }
+        if (file.type.indexOf('image/') != 0) {
+          this.fileStatus = "Invalid image";
+          this.$.fileStatus.classList.add("error");
+        } else {
+          this.$.fileStatus.classList.remove("error");
+          this.fileStatus = "Uploading image...";
+          this._uploadImage(file).then((response) => {
+            this.options.image = response.url;
+            this.fileStatus = "";
+            this._showImageOptions();
+            this._fireOptionsChanged();
+          });
+        }
+      }
+
+      _showImageOptions() {
+        this.$.imageOptionsPanel.classList.remove("hidden");
+      }
+
+      _uploadImage(file) {
+        if (this.services) {
+          return this.services.upload(file);
+        } else {
+          return this._readFile(file).then((dataUrl) => {
+            return {
+              fileId: "some-file-id",
+              url: dataUrl
+            };
+          });
+        }
+      }
+
+      _readFile(file) {
+        return new Promise((resolve, reject) => {
+          let reader = new FileReader();
+          reader.addEventListener('load', () => {
+            resolve(reader.result);
+          });
+          reader.addEventListener("error", () => {
+            reject();
+          });
+          reader.addEventListener("abort", () => {
+            reject();
+          });
+          reader.readAsDataURL(file);
+        });
+      }
+
+      _fireOptionsChanged() {
+        this.dispatchEvent(new CustomEvent('options-change', { bubbles: true, composed: true, detail: { options: this.options } }));
+      }
+    }
+    window.customElements.define(HeaderComposerConfig.is, HeaderComposerConfig);
+  </script>
+</dom-module>

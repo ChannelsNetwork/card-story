@@ -1,0 +1,361 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="composer/segment-container.html">
+<dom-module id="card-story-composer">
+  <template>
+    <style>
+      :host {
+        display: block;
+        font-family: 'Open Sans', sans-serif;
+        font-weight: 400;
+        line-height: 1.5;
+        font-size: 18px;
+        color: #292929;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      #container {
+        padding: 10px;
+        margin: 0 auto;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      #addPanel {
+        padding: 40px 16px;
+        text-align: center;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      #previewPanel {
+        padding: 16px;
+        text-align: center;
+        margin-top: 100px;
+      }
+
+      button {
+        font-family: inherit;
+        font-size: 16px;
+        text-transform: uppercase;
+        background: none;
+        border: 1px solid;
+        padding: 5px 15px;
+        outline: 0;
+        color: inherit;
+        cursor: pointer;
+      }
+
+      .segIcon {
+        height: 24px;
+        width: 24px;
+        padding: 5px;
+        border-radius: 100%;
+        overflow: hidden;
+        line-height: 24px;
+        display: inline-block;
+        border: 1px solid;
+        color: #777;
+        background: white;
+        cursor: pointer;
+        vertical-align: middle;
+        margin: 0 10px 0 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+
+      .segIcon:hover {
+        color: #000;
+      }
+
+      .barIcon {
+        margin: 0;
+        height: 18px;
+        width: 18px;
+        background: transparent;
+      }
+
+      #configPanel {
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        padding: 10px 20px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        outline: none;
+        -webkit-overflow-scrolling: touch;
+        -ms-flex-direction: row;
+        -webkit-flex-direction: row;
+        flex-direction: row;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -ms-flex-pack: end;
+        -webkit-justify-content: flex-end;
+        justify-content: flex-end;
+      }
+
+      #configCell {
+        width: 280px;
+      }
+
+      #configShell {
+        background: #f0f0f0;
+        padding: 10px;
+        border-radius: 3px;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      #configBar {
+        -ms-flex-direction: row;
+        -webkit-flex-direction: row;
+        flex-direction: row;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -ms-flex-pack: end;
+        -webkit-justify-content: flex-end;
+        justify-content: flex-end;
+      }
+    </style>
+    <div id="container"></div>
+    <div id="addPanel" class="hidden">
+      <div style="padding: 0 0 20px; letter-spacing: 0.03em;">Add a section</div>
+      <iron-icon class="segIcon" icon="composer:text-format" title="Add a new text section" on-click="_onAddText"></iron-icon>
+      <iron-icon class="segIcon" icon="composer:photo-camera" title="Add an image" on-click="_onAddPhoto"></iron-icon>
+      <iron-icon class="segIcon" icon="composer:play-arrow" title="Add a video" on-click="_onAddVideo"></iron-icon>
+      <iron-icon class="segIcon" icon="composer:collections" title="Add a photo gallery" on-click="_onAddGallery"></iron-icon>
+      <iron-icon class="segIcon" icon="composer:format-quote" title="Add a quote" on-click="_onAddQuote"></iron-icon>
+    </div>
+    <div id="previewPanel">
+      <button on-click="_onPreview">Preview</button>
+    </div>
+    <div id="configPanel" class="hidden" tabindex="-1">
+      <div id="configCell">
+        <div id="configShell">
+          <div id="configBar">
+            <iron-icon class="segIcon barIcon" icon="composer:close" on-click="_closeConfig"></iron-icon>
+          </div>
+          <div id="configContainer"></div>
+        </div>
+      </div>
+    </div>
+    <card-story-preview id="preview" class="hidden" on-close="_closePreview"></card-story-preview>
+  </template>
+  <script>
+    class CardStoryComposer extends Polymer.Element {
+      static get is() { return "card-story-composer"; }
+      static get properties() {
+        return {
+          services: Object,
+          segments: Array
+        };
+      }
+
+      constructor() {
+        super();
+        this.segments = [];
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        if (this.segments.length === 0) {
+          this._addSegmentAtIndex(0, "header", false);
+          this._addSegmentAtIndex(1, "text", true);
+        }
+        this._refreshAddPanelVisibility();
+      }
+
+      _onAddText() {
+        this._addSegmentAtIndex(1, "text", true);
+      }
+
+      _onAddPhoto() {
+        this._addSegmentAtIndex(1, "image", true);
+      }
+
+      _onAddVideo() {
+        this._addSegmentAtIndex(1, "video", true);
+      }
+
+      _onAddGallery() {
+        this._addSegmentAtIndex(1, "gallery", true);
+      }
+
+      _onAddQuote() {
+        this._addSegmentAtIndex(1, "quote", true);
+      }
+
+      _refreshAddPanelVisibility() {
+        if (this.segments.length > 1) {
+          this.$.addPanel.classList.add("hidden");
+        } else {
+          this.$.addPanel.classList.remove("hidden");
+        }
+      }
+
+      _addSegmentAtIndex(index, type, editing) {
+        let s = this._createSegment(type);
+        s.node = this._insertSegment(index, s, editing);
+        this.segments.push(s);
+        this._refreshAddPanelVisibility();
+      }
+
+      _addSegment(event) {
+        let detail = event.detail;
+        if (detail.type && event.target) {
+          let target = event.target;
+          let ix = -1;
+          for (let i = 0; i < this.segments.length; i++) {
+            if (this.segments[i].node == target) {
+              ix = i;
+              break;
+            }
+          }
+          let s = this._createSegment(detail.type);
+          s.node = this._insertAfter(target, s, true);
+          this.segments.splice(ix + 1, 0, s);
+          this._refreshAddPanelVisibility();
+        }
+      }
+
+      _removeSegment(event) {
+        let target = event.target;
+        if (target) {
+          let ix = -1;
+          for (let i = 0; i < this.segments.length; i++) {
+            if (this.segments[i].node == target) {
+              ix = i;
+              break;
+            }
+          }
+          this.$.container.removeChild(event.target);
+          this.segments.splice(ix, 1);
+          this._refreshAddPanelVisibility();
+        }
+      }
+
+      _createSegment(type) {
+        return {
+          type: type,
+          data: {}
+        };
+      }
+
+      _createSegmentNode(segment, editing) {
+        let node = document.createElement("segment-container");
+        node.services = this.services;
+        node.segment = segment;
+        node.editing = editing;
+        node.addEventListener('add-segment', this._addSegment.bind(this));
+        node.addEventListener('remove-segment', this._removeSegment.bind(this));
+        node.addEventListener('show-config', this._showSegmentConfig.bind(this));
+        return node;
+      }
+
+      _insertAfter(prevNode, segment, editing) {
+        let node = this._createSegmentNode(segment, editing);
+        if (prevNode.nextSibling) {
+          this.$.container.insertBefore(node, prevNode.nextSibling);
+        } else {
+          this.$.container.appendChild(node);
+        }
+        return node;
+      }
+
+      _insertSegment(index, segment, editing) {
+        let node = this._createSegmentNode(segment, editing);
+        this._insertSegmentNode(index, node);
+        return node;
+      }
+
+      _insertSegmentNode(index, node) {
+        let nodes = this.shadowRoot.querySelectorAll('segment-container');
+        index = Math.min(Math.max(0, index), nodes.length);
+        if (index == nodes.length) {
+          this.$.container.appendChild(node);
+        } else {
+          this.$.container.insertBefore(node, nodes[index]);
+        }
+      }
+
+      _clearNode(node) {
+        while (node.hasChildNodes()) {
+          node.removeChild(node.lastChild);
+        }
+      }
+
+      _showSegmentConfig(event) {
+        let info = event.detail;
+        if (info) {
+          Polymer.importHref(info.path, () => {
+            if (this._configNode && this._optionsListener) {
+              this._configNode.removeEventListener("options-change", this._optionsListener);
+            }
+            this._clearNode(this.$.configContainer);
+            let node = document.createElement(info.nodeName);
+            node.options = info.delegate.options;
+            node.services = this.services;
+            this._configNode = node;
+            this._configInfo = info;
+            if (!this._optionsListener) {
+              this._optionsListener = this._onOptionsChange.bind(this);
+            }
+            node.addEventListener("options-change", this._optionsListener);
+
+            this.$.configContainer.appendChild(node);
+            this.$.configPanel.classList.remove("hidden");
+            this.$.configPanel.focus();
+          });
+        }
+      }
+
+      _closeConfig() {
+        if (this._configNode && this._optionsListener) {
+          this._configNode.removeEventListener("options-change", this._optionsListener);
+        }
+        this._configNode = null;
+        this._configInfo = null;
+        this.$.configPanel.blur();
+        this.$.configPanel.classList.add("hidden");
+        this._clearNode(this.$.configContainer);
+      }
+
+      _onOptionsChange(event) {
+        if (this._configInfo) {
+          this._configInfo.delegate.options = event.detail.options;
+        }
+      }
+
+      _closePreview() {
+        document.body.style.overflow = "";
+        this.$.preview.classList.add("hidden");
+      }
+
+      _onPreview() {
+        let story = {
+          segments: []
+        };
+        for (let i = 0; i < this.segments.length; i++) {
+          let s = this.segments[i];
+          story.segments.push({
+            type: s.type,
+            data: s.data
+          });
+        }
+        console.log("Segments", story);
+        Polymer.importHref(this.importPath + 'card-story-preview.html', () => {
+          this.$.preview.data = story;
+          this.$.preview.classList.remove("hidden");
+          document.body.style.overflow = "hidden";
+        });
+      }
+    }
+    window.customElements.define(CardStoryComposer.is, CardStoryComposer);
+  </script>
+</dom-module>

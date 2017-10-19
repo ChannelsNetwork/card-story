@@ -134,7 +134,7 @@
       <div class="bottomBar horizontal layout center">
         <dom-repeat items="[[data]]">
           <template>
-            <story-gallery-thumbnail data-index$="[[index]]" class="notSelected" src="[[item.href]]" on-click="_onThumbnailClick"></story-gallery-thumbnail>
+            <story-gallery-thumbnail data-index$="[[index]]" class="notSelected" src="[[item.url]]" on-click="_onThumbnailClick"></story-gallery-thumbnail>
           </template>
         </dom-repeat>
       </div>
@@ -245,7 +245,7 @@
           this.$.imagePanel.style.height = ih + "px";
           this.$.imagePanel.style.width = iw + "px";
           this.$.imagePanel.style.opacity = 1;
-          this.$.imagePanel.style.backgroundImage = 'url("' + d.href + '")';
+          this.$.imagePanel.style.backgroundImage = 'url("' + d.url + '")';
         }
       }
 

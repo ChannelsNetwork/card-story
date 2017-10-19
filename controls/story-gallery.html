@@ -37,21 +37,30 @@
       }
     </style>
     <div id="container" class="horizontal layout wrap">
-      <dom-repeat items="[[data]]">
+      <dom-repeat items="[[items]]">
         <template>
           <story-gallery-item data="[[item]]" class="flex" on-click="_onItemClick"></story-gallery-item>
         </template>
       </dom-repeat>
     </div>
-    <story-gallery-viewer data="[[data]]" id="viewer"></story-gallery-viewer>
+    <story-gallery-viewer data="[[items]]" id="viewer"></story-gallery-viewer>
   </template>
   <script>
     class StoryGallery extends Polymer.Element {
       static get is() { return "story-gallery"; }
       static get properties() {
         return {
-          data: Array
+          data: {
+            type: Object,
+            observer: '_refresh'
+          },
+          items: Array
         };
+      }
+      _refresh() {
+        if (this.data) {
+          this.set("items", this.data.items || []);
+        }
       }
       _onItemClick(event) {
         this.$.viewer.selected = event.model.index;

@@ -1,0 +1,75 @@
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="card-story.html">
+<dom-module id="card-story-preview">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+      }
+
+      #shell {
+        position: fixed;
+        z-index: 100;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: white;
+      }
+
+      .content {
+        position: relative;
+      }
+
+      #bar {
+        padding: 5px 16px;
+        background: #f0f0f0;
+        color: #000;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 15px;
+        border-bottom: 1px solid #d8d8d8;
+      }
+
+      .barIcon {
+        margin: 0;
+        height: 18px;
+        width: 18px;
+        background: transparent;
+        padding: 5px;
+        border-radius: 100%;
+        overflow: hidden;
+        display: inline-block;
+        border: 2px solid;
+        color: #555;
+        cursor: pointer;
+      }
+    </style>
+    <div id="shell" class="vertical layout">
+      <div id="bar" class="horizontal layout center">
+        <div class="flex">Preview</div>
+        <div>
+          <iron-icon class="barIcon" icon="composer:close" on-click="_close"></iron-icon>
+        </div>
+      </div>
+      <div class="flex content">
+        <card-story id="viewer" shared-state="[[data]]"></card-story>
+      </div>
+    </div>
+  </template>
+  <script>
+    class CardStoryPreview extends Polymer.Element {
+      static get is() { return 'card-story-preview'; }
+      static get properties() {
+        return {
+          data: Object
+        };
+      }
+
+      _close() {
+        this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true, detail: {} }));
+      }
+    }
+    window.customElements.define(CardStoryPreview.is, CardStoryPreview);
+  </script>
+</dom-module>

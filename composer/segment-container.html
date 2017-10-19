@@ -1,0 +1,325 @@
+<link rel="import" href="composer-icons.html">
+<link rel="import" href="header-composer.html">
+<link rel="import" href="text-composer.html">
+<link rel="import" href="image-composer.html">
+<link rel="import" href="video-composer.html">
+<link rel="import" href="gallery-composer.html">
+<link rel="import" href="quote-composer.html">
+
+<dom-module id="segment-container">
+  <template>
+    <style>
+      :host {
+        display: block;
+        margin: 0 auto;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      #shell {
+        position: relative;
+        padding: 0px 3px;
+        border: 2px dashed transparent;
+        transition: padding 0.3s ease, margin 0.3s ease;
+        margin: 16px 0;
+      }
+
+      #shell.editing {
+        border-color: #d8d8d8;
+        padding: 0px 3px;
+        margin: 16px 0 65px;
+      }
+
+      .editing #actions,
+      .editing #bottomActions {
+        display: block;
+      }
+
+      #actions {
+        white-space: nowrap;
+        position: absolute;
+        top: -16px;
+        right: 5px;
+        display: none;
+      }
+
+      #actions iron-icon {
+        height: 18px;
+        width: 18px;
+        padding: 5px;
+        border-radius: 100%;
+        overflow: hidden;
+        line-height: 20px;
+        display: inline-block;
+        border: 1px solid;
+        color: #777;
+        background: white;
+        cursor: pointer;
+        vertical-align: middle;
+        margin: 0 1px;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      #actions iron-icon:hover {
+        color: #000;
+      }
+
+      #bottomActions {
+        position: absolute;
+        left: 0;
+        right: 0;
+        padding: 20px 0 0;
+        display: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      #bottomActions iron-icon {
+        height: 24px;
+        width: 24px;
+        padding: 5px;
+        border-radius: 100%;
+        overflow: hidden;
+        line-height: 24px;
+        display: inline-block;
+        border: 1px solid;
+        color: #777;
+        background: white;
+        cursor: pointer;
+        vertical-align: middle;
+        margin: 0 10px 0 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+
+      .segIcon {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #bottomActions iron-icon:hover {
+        color: #000;
+      }
+
+      #bottomActions.active #add {
+        transform: rotate(45deg);
+      }
+
+      #bottomActions.active .segIcon {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    </style>
+    <div id="shell">
+      <div id="actions">
+        <iron-icon id="noteAdd" icon="composer:note-add"></iron-icon>
+        <iron-icon id="config" icon="composer:settings" on-mousedown="_onConfig"></iron-icon>
+        <iron-icon id="close" icon="composer:close" on-mousedown="_onRemove"></iron-icon>
+      </div>
+      <div id="bottomActions">
+        <iron-icon id="add" icon="composer:add" on-mousedown="_toggleAddComponent"></iron-icon>
+        <iron-icon class="segIcon" icon="composer:text-format" title="Add a new text section" on-mousedown="_onAddText"></iron-icon>
+        <iron-icon class="segIcon" icon="composer:photo-camera" title="Add an image" on-mousedown="_onAddPhoto"></iron-icon>
+        <iron-icon class="segIcon" icon="composer:play-arrow" title="Add a video" on-mousedown="_onAddVideo"></iron-icon>
+        <iron-icon class="segIcon" icon="composer:collections" title="Add a photo gallery" on-mousedown="_onAddGallery"></iron-icon>
+        <iron-icon class="segIcon" icon="composer:format-quote" title="Add a quote" on-mousedown="_onAddQuote"></iron-icon>
+      </div>
+    </div>
+  </template>
+  <script>
+    class SegmentContainer extends Polymer.Element {
+      static get is() { return "segment-container"; }
+      static get properties() {
+        return {
+          segment: Object,
+          services: Object,
+          editing: {
+            type: Boolean,
+            observer: '_onEditing'
+          }
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.shell = this.$.shell;
+        this.shell.addEventListener('click', this._onFocus.bind(this));
+        this.shell.addEventListener('focus', this._onFocus.bind(this));
+        this.shell.addEventListener('blur', this._onBlur.bind(this));
+        this.shell.addEventListener('focused', this._onFocus.bind(this));
+        this.shell.addEventListener('blurred', this._onBlur.bind(this));
+
+        this._loadComponent();
+      }
+
+      _onEditing() {
+        if (!this.shell) {
+          return;
+        }
+        if (this.editing) {
+          this.shell.classList.add('editing');
+        } else {
+          this.shell.classList.remove('editing');
+          this._updateData();
+        }
+        if (this.component) {
+          this.component.editing = this.editing;
+        }
+        if (this._addingComponent) {
+          this._toggleAddComponent();
+        }
+      }
+
+      _onFocus() {
+        if (!this.editing) {
+          this.set("editing", true);
+        }
+      }
+
+      _onBlur() {
+        if (this.editing) {
+          this.set("editing", false);
+        }
+      }
+
+      _loadComponent() {
+        let type = this.segment.type;
+        if (this.component) {
+          this.shell.removeChild(this.component);
+          this.component = null;
+        }
+        this.$.shell.style.margin = "";
+        switch (type) {
+          case "text":
+            this.component = document.createElement("text-composer");
+            this.component.placeholder = "Start writing...";
+            this.$.noteAdd.classList.add("hidden");
+            this.$.config.classList.add("hidden");
+            this.style.maxWidth = "710px";
+            break;
+          case "header":
+            this.component = document.createElement("header-composer");
+            this.$.noteAdd.classList.add("hidden");
+            this.$.close.classList.add("hidden");
+            this.$.bottomActions.classList.add("hidden");
+            this.$.shell.style.margin = "16px 0";
+            break;
+          case "image":
+            this.component = document.createElement("image-composer");
+            break;
+          case "video":
+            this.component = document.createElement("video-composer");
+            break;
+          case "gallery":
+            this.component = document.createElement("gallery-composer");
+            this.$.noteAdd.classList.add("hidden");
+            this.$.config.classList.add("hidden");
+            break;
+          case "quote":
+            this.component = document.createElement("quote-composer");
+            this.$.noteAdd.classList.add("hidden");
+            this.$.config.classList.add("hidden");
+            break;
+          default:
+            break;
+        }
+
+        if (this.component) {
+          this.component.data = this.segment.data;
+          this.component.services = this.services;
+          this.shell.insertBefore(this.component, this.shell.childNodes[0]);
+          this._onEditing();
+        }
+      }
+
+      _onConfig(event) {
+        event.preventDefault();
+        let type = this.segment.type;
+        let configInfo = null;
+        switch (type) {
+          case "header":
+            configInfo = {
+              path: this.importPath + "header-composer-config.html",
+              nodeName: "header-composer-config",
+              delegate: this.component
+            };
+            break;
+          case "image":
+            configInfo = {
+              path: this.importPath + "image-composer-config.html",
+              nodeName: "image-composer-config",
+              delegate: this.component
+            };
+            break;
+          case "video":
+            configInfo = {
+              path: this.importPath + "video-composer-config.html",
+              nodeName: "video-composer-config",
+              delegate: this.component
+            };
+            break;
+          default:
+            break;
+        }
+        if (configInfo) {
+          this.dispatchEvent(new CustomEvent('show-config', { bubbles: true, composed: true, detail: configInfo }));
+        }
+      }
+
+      _updateData() {
+        if (this.component) {
+          this.segment.data = this.component.data;
+        }
+      }
+
+      _toggleAddComponent(event) {
+        if (event)
+          event.preventDefault();
+        if (!this._addingComponent) {
+          this._addingComponent = true;
+          this.$.bottomActions.classList.add("active");
+        } else {
+          this._addingComponent = false;
+          this.$.bottomActions.classList.remove("active");
+        }
+      }
+
+      _onAddText(event) {
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'text' } }));
+      }
+
+      _onAddPhoto(event) {
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'image' } }));
+      }
+
+      _onAddVideo(event) {
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'video' } }));
+      }
+
+      _onAddGallery(event) {
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'gallery' } }));
+      }
+
+      _onAddQuote(event) {
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'quote' } }));
+      }
+
+      _onRemove(event) {
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent('remove-segment', { bubbles: true, composed: true, detail: {} }));
+      }
+    }
+    window.customElements.define(SegmentContainer.is, SegmentContainer);
+  </script>
+</dom-module>

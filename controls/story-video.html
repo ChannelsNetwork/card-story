@@ -54,7 +54,7 @@
     </style>
     <div id="videoPanel">
       <div id="videoShell">
-        <video id="v" src$="[[data.src]]" controls$="[[controls]]" preload="metadata" loop playsinline on-loadedmetadata="_onMetadata"
+        <video id="v" src$="[[data.video]]" controls$="[[controls]]" preload="metadata" loop playsinline on-loadedmetadata="_onMetadata"
           on-canplay="_canPlay" on-play="_onPlay" on-pause="_onPause">
         </video>
         <story-video-controls id="bar" class="hidden" on-play-change="_onUserPlayChange"></story-video-controls>
@@ -75,8 +75,7 @@
             type: Object,
             observer: '_onDelegate'
           },
-          controls: Boolean,
-          type: String
+          controls: Boolean
         };
       }
 
@@ -102,7 +101,7 @@
 
       _refresh() {
         if (this._connected && this.data) {
-
+          this.options = this.data.options || {};
         }
       }
 
@@ -135,7 +134,8 @@
         this.$.v.classList.remove("natural");
         this.$.v.style.width = "";
         this.$.v.style.height = "";
-        switch (this.type) {
+        let style = this.options.style || "default";
+        switch (style) {
           case "fit": {
             let imw = pw;
             let imh = imw / r;
@@ -177,7 +177,8 @@
       }
 
       _handleIntersection(entry) {
-        if (this._readyToPlay && entry && this.data && this.data.autoplay) {
+        let autoPlay = this.options.autoPlay || true;
+        if (this._readyToPlay && entry && this.data && autoPlay) {
           if (entry.isIntersecting) {
             let entering = entry.boundingClientRect.y >= 0;
             let ir = entry.intersectionRatio;
