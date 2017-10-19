@@ -162,18 +162,16 @@
         if (!this.options) {
           this.options = {};
         }
-        if (this.options) {
-          this.$.chkImage.checked = this.options.useImage || false;
-          this._updateImagePanelVisibility();
-          if (this.options.image) {
-            this.$.filePicker.label = this._trimUrl(this.options.image, 60);
-            this._showImageOptions();
-          }
-          this.$.chkFullPage.checked = this.options.style === 'cover';
-          this.$.bgColor.value = this.options.bgColor || "#000000";
-          this.$.bgOpacity.value = this.options.bgOpacity || 0.6;
-          this.$.txtColor.value = this.options.txtColor || "#FFFFFF";
+        this.$.chkImage.checked = this.options.useImage || false;
+        this._updateImagePanelVisibility();
+        if (this.options.image) {
+          this.$.filePicker.label = this._trimUrl(this.options.image, 60);
+          this._showImageOptions();
         }
+        this.$.chkFullPage.checked = this.options.style === 'cover';
+        this.$.bgColor.value = this.options.bgColor || "#000000";
+        this.$.bgOpacity.value = this.options.bgOpacity || 0.6;
+        this.$.txtColor.value = this.options.txtColor || "#FFFFFF";
       }
 
       _trimUrl(input, length) {

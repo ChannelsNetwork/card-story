@@ -9,7 +9,9 @@
     "iron-iconset": "PolymerElements/iron-iconset#^2.0.0",
     "soso-checkbox": "SosoElements/soso-checkbox#^0.1.0",
     "soso-file-picker": "SosoElements/soso-file-picker#^0.1.0",
-    "soso-slider": "SosoElements/soso-slider#^0.1.0"
+    "soso-slider": "SosoElements/soso-slider#^0.1.0",
+    "soso-radio-group": "SosoElements/soso-radio-group#^0.1.0",
+    "soso-radio-button": "SosoElements/soso-radio-button#^0.1.0"
   },
   "devDependencies": {
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"

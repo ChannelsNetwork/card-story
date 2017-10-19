@@ -98,6 +98,15 @@
         this._refreshImage();
       }
 
+      get options() {
+        return this.data.options || {};
+      }
+
+      set options(value) {
+        this.data.options = value;
+        this._refreshImage();
+      }
+
       _refreshImage() {
         if (this.data.image) {
           this.$.noImage.classList.add("hidden");
@@ -114,21 +123,23 @@
         let imgRatio = this.data.width / this.data.height;
         let options = this.data.options || {};
         let style = options.style || "";
+        pStyle.width = "";
+        pStyle.height = "";
         switch (style) {
           case "fullWidth":
-            pStyle.width = "100%;";
+            pStyle.width = "100%";
             let w = this.offsetWidth;
             let h = Math.min(w / imgRatio, window.innerHeight); // TODO: panel height 
             pStyle.height = h + "px";
             break;
           case "sized":
-            pStyle.width = options.width
-            pStyle.height = options.height;
+            pStyle.width = options.width + "px";
+            pStyle.height = options.height + "px";
             pStyle.margin = "0 auto";
             break;
           case "cover":
           case "cover-fit":
-            pStyle.width = "100vw"; // TODO: panel size
+            pStyle.width = "100%"; // TODO: panel size
             pStyle.height = "100vh";
             break;
           default:
@@ -160,7 +171,7 @@
         image.style.margin = "";
         image.style.transform = "";
 
-        switch (this.type) {
+        switch (style) {
           case "fullWidth": {
             image.classList.add("fullWidthImage")
             break;

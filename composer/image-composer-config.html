@@ -1,3 +1,6 @@
+<link rel="import" href="../../soso-radio-button/soso-radio-button.html">
+<link rel="import" href="../../soso-radio-group/soso-radio-group.html">
+
 <dom-module id="image-composer-config">
   <template>
     <style>
@@ -59,16 +62,140 @@
         font-weight: 400;
         letter-spacing: 0.06em;
       }
+
+      .inputCell {
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: inherit;
+        width: 150px;
+        outline: none;
+        padding: 1px 5px;
+        border: 1px solid #aaa;
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      .inputCell:focus {
+        border-color: #4CAF50;
+      }
+
+      .info {
+        font-size: 12px;
+        margin: 10px 0 0;
+      }
+
+      soso-radio-button {
+        --soso-radio-color: #4CAF50;
+      }
     </style>
-    <h3>Image</h3>
-    <div id="content"></div>
+    <h3>Image layout</h3>
+    <div id="content">
+      <section>
+        <div class="row">
+          <soso-radio-group id="imgStyle" on-select="_onStyleSelect">
+            <soso-radio-button name="default" label="Default"></soso-radio-button>
+            <soso-radio-button name="fullWidth" label="Full width"></soso-radio-button>
+            <soso-radio-button name="cover" label="Cover"></soso-radio-button>
+            <soso-radio-button name="cover-fit" label="Cover - fit"></soso-radio-button>
+            <soso-radio-button name="sized" label="Fixed size"></soso-radio-button>
+          </soso-radio-group>
+        </div>
+        <div class="row info">[[infoText]]</div>
+      </section>
+      <section id="sizePanel" class="hidden">
+        <h4>Image size</h4>
+        <div class="horizontal row">
+          <label class="flex" for="txtWidth">Width (px)</label>
+          <input id="txtWidth" type="number" class="inputCell" on-change="_onWidthChange">
+        </div>
+        <div class="horizontal row">
+          <label class="flex" for="txtWidth">Height (px)</label>
+          <input id="txtHeight" type="number" class="inputCell" on-change="_onHeightChange">
+        </div>
+      </section>
+    </div>
   </template>
   <script>
     class ImageComposerConfig extends Polymer.Element {
       static get is() { return 'image-composer-config'; }
       static get properties() {
         return {
+          infoText: String,
+          options: Object
         };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this._loadFromOptions();
+      }
+
+      _loadFromOptions() {
+        if (!this.options) {
+          this.options = {};
+        }
+        this.$.txtWidth.value = this.options.width || 300;
+        this.$.txtHeight.value = this.options.height || 300;
+        setTimeout(() => {
+          this.$.imgStyle.selected = this.options.style || "default";
+          this._refreshSizePanel();
+          this._refreshInfo();
+        }, 200);
+      }
+
+      _onWidthChange() {
+        this._fireOptionsChanged();
+      }
+
+      _onHeightChange() {
+        this._fireOptionsChanged();
+      }
+
+      _onStyleSelect() {
+        if (!this.$.imgStyle.selected) {
+          setTimeout(() => {
+            this.$.imgStyle.selected = this.options.style || "default";
+          }, 10);
+          return;
+        }
+        this.options.style = this.$.imgStyle.selected;
+        this._fireOptionsChanged();
+        this._refreshSizePanel();
+        this._refreshInfo();
+      }
+
+      _fireOptionsChanged() {
+        this.options.width = +(this.$.txtWidth.value);
+        this.options.height = +(this.$.txtHeight.value);
+        this.dispatchEvent(new CustomEvent('options-change', { bubbles: true, composed: true, detail: { options: this.options } }));
+      }
+
+
+      _refreshInfo() {
+        switch (this.options.style) {
+          case "fullWidth":
+            this.infoText = "The image will take up all horizontal space. Height will vary maintaining the aspect ratio."
+            break;
+          case "cover":
+            this.infoText = "Image will be sized to the window.";
+            break;
+          case "cover-fit":
+            this.infoText = "Image will be fit insde a window sized panel.";
+            break;
+          case "sized":
+            this.infoText = "Use the specified image size.";
+            break;
+          default:
+            this.infoText = "Natural size of the image is used, but restricted to the width of the window.";
+            break;
+        }
+      }
+
+      _refreshSizePanel() {
+        if (this.options.style === "sized") {
+          this.$.sizePanel.classList.remove("hidden");
+        } else {
+          this.$.sizePanel.classList.add("hidden");
+        }
       }
     }
     window.customElements.define(ImageComposerConfig.is, ImageComposerConfig);
