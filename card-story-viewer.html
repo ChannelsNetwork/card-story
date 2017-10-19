@@ -1,0 +1,19 @@
+<dom-module id="card-story-viewer">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+  </template>
+  <script>
+    class CardStoryViewer extends Polymer.Element {
+      static get is() { return 'card-story-viewer'; }
+      static get properties() {
+        return {
+        };
+      }
+    }
+    window.customElements.define(CardStoryViewer.is, CardStoryViewer);
+  </script>
+</dom-module>

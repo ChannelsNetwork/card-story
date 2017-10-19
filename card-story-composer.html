@@ -145,6 +145,7 @@
         </div>
       </div>
     </div>
+    <card-story-preview id="preview" class="hidden" on-close="_closePreview"></card-story-preview>
   </template>
   <script>
     class CardStoryComposer extends Polymer.Element {
@@ -331,11 +332,28 @@
         }
       }
 
+      _closePreview() {
+        document.body.style.overflow = "";
+        this.$.preview.classList.add("hidden");
+      }
+
       _onPreview() {
         let story = {
-          segments: this.segments
+          segments: []
         };
+        for (let i = 0; i < this.segments.length; i++) {
+          let s = this.segments[i];
+          story.segments.push({
+            type: s.type,
+            data: s.data
+          });
+        }
         console.log("Segments", story);
+        Polymer.importHref(this.importPath + 'card-story-preview.html', () => {
+          this.$.preview.data = story;
+          this.$.preview.classList.remove("hidden");
+          document.body.style.overflow = "hidden";
+        });
       }
     }
     window.customElements.define(CardStoryComposer.is, CardStoryComposer);

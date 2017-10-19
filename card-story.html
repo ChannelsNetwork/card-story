@@ -1,13 +1,4 @@
 <link rel="import" href="../polymer/polymer-element.html">
-<link rel="import" href="controls/story-text.html">
-<link rel="import" href="controls/story-image.html">
-<link rel="import" href="controls/story-image-section.html">
-<link rel="import" href="controls/story-gallery.html">
-<link rel="import" href="controls/story-quote.html">
-<link rel="import" href="controls/story-video.html">
-<link rel="import" href="controls/story-video-popup.html">
-<link rel="import" href="controls/story-header.html">
-
 <dom-module id="card-story">
   <template>
     <style>
@@ -21,26 +12,6 @@
         -webkit-font-smoothing: antialiased;
       }
 
-      h1,
-      h2,
-      h3,
-      h4 {
-        font-family: 'Raleway', sans-serif;
-        margin: 0;
-        font-weight: 400;
-        line-height: 1.4;
-      }
-
-      h1 {
-        font-size: 36px;
-        text-transform: capitalize;
-        text-align: center;
-      }
-
-      h3 {
-        font-weight: bold;
-      }
-
       #article {
         position: absolute;
         top: 0;
@@ -52,155 +23,7 @@
         -webkit-overflow-scrolling: touch;
       }
     </style>
-    <article id="article">
-      <story-header data="[[header]]" options="[[headerOptions]]"></story-header>
-
-      <story-text>
-        <p> Just a week ago, talk in Sonoma’s wine country bemoaned the vagaries of Mother Nature. It was the finish to a difficult
-          harvest, when record heat shriveled grapes and forced a mad scramble to salvage the crop.</p>
-        <p>How naïve that seems now. If only we had known.</p>
-        <p>On Sunday night, fierce wind gusts whipped up a firestorm that roared down the hill from Napa into Sonoma and destroyed
-          thousands of homes in a few hours. Fingers of fire from blazes burning all at once lit up the sky. And it had come
-          out of nowhere, without warning, in the dead of night.</p>
-        <p>For those first hours, it was panic and chaos. Some got out because they smelled smoke. Others because a neighbor
-          pounded on the door. For us, it was a call from the newspaper where I work. Traffic at 2 a.m. was like rush hour.
-          But it wasn’t until we rounded a corner that we got the full view of the ridgeline behind the city glowing red
-          against the night sky. And it stretched forever.</p>
-        <p>In an instant, I was back in my childhood home seeing the same terrifying glow behind those same hills. It was the
-          big fire of 1964, until this week Sonoma’s worst. A police officer was pounding on the door and my mother, usually
-          a rule follower, was defying his order to leave right that minute. She smiled sweetly, but grabbed her silver and
-          threw it in a pillowcase before escaping. We drove through that long ago night to safety at my aunt’s house and
-          our home survived the fire that burned to the backyard hill. But in another version of that scene, one that lives
-          on for me in a recurring nightmare, we run in place with hearts pounding while the flames close in around us.</p>
-      </story-text>
-
-      <story-image type="page" data="[[fire1]]" delegate="[[delegate]]">
-        <story-image-section>
-          <p>Houses in the Coffey Park neighborhood of Santa Rosa, Calif., destroyed by fire.</p>
-          <p>
-            <i>Credit Jim Wilson/The New York Times</i>
-          </p>
-        </story-image-section>
-      </story-image>
-
-      <story-text>
-        <p>It is a bit like that here now. Fires continue to burn in the surrounding hills, nowhere near control. Tens of thousands
-          of people have been forced from their homes and don’t know when they can go back. Many don’t know what they will
-          return to. Many more know that their homes are gone. As we try to pull together, those of us whose homes didn’t
-          burn can’t find the words for those whose homes did. We feed them, we console them, we take them into our homes.
-          But we can’t know their loss. Sonoma County has about 500,000 residents, and it is not exaggerating to say that
-          everyone knows someone who has lost a home. This isn’t a one-news cycle disaster in which sympathy comes readily,
-          evaporates quickly and doesn’t really translate to your life.</p>
-        <story-quote delegate="[[delegate]]" data="[[quote1]]"></story-quote>
-        <p>Everyone is growing tired: tired of being displaced, tired of not knowing if their homes have been incinerated, tired
-          of staying with well-meaning friends. The same questions are circulating: Why were there no warnings? Where were
-          the planes to attack the flames from the air? Where were the firefighters that first night? How did the fire start?</p>
-        <p>Still, life is beginning to return to downtown Santa Rosa, which for three days was empty. The mall has reopened
-          and at the Clinique counter in Macy’s they are offering receipts for your insurance company. Smoke hangs low and
-          thick, still spreading across the San Francisco Bay Area. Face masks are a common accessory.</p>
-      </story-text>
-
-      <story-image type="page-fit" data="[[fire2]]" delegate="[[delegate]]">
-        <story-image-section>
-          <h3>Map of the affected area</h3>
-          <p>There are three major affected regions.</p>
-        </story-image-section>
-        <story-image-section top="0.14315" left="0.51833" floating>
-          <h3>Tubbs Fire</h3>
-          <p>Approx. extent of fire as of 11:27 p.m., Sunday, Oct. 8</p>
-        </story-image-section>
-        <story-image-section top="0.511247" left="0.6021" floating>
-          <h3>Sonoma Fire</h3>
-          <p>Approx. extent of fire as of 11:27 p.m., Sunday, Oct. 8</p>
-        </story-image-section>
-        <story-image-section top="0.6135" left="0.83439" floating>
-          <h3>Napa Fire</h3>
-          <p>Approx. extent of fire as of 11:27 p.m., Sunday, Oct. 8</p>
-        </story-image-section>
-      </story-image>
-
-      <story-text>
-        <p>We think we are adapting and then we choke at the silliest things. For me, it was the charred cross atop the skeletal
-          beams still standing at the Catholic school our sons attended, the misshapen child-crafted ceramic trinket my cousin
-          pulled from the rubble that was her home or the pizzas sent by editors in Boston and Salt Lake City to feed a newsroom
-          working around the clock.</p>
-        <p>The worst day was Monday. Two neighborhoods that burned in Santa Rosa, the county seat and largest metro area between
-          San Francisco and Portland, tell a story of unexpected and indiscriminate destruction.
-        </p>
-        <story-quote delegate="[[delegate]]" data="[[quote2]]"></story-quote>
-        <p>
-          One was Fountaingrove, the upscale hilltop subdivision that was home to doctors, lawyers and community leaders. The fire
-          there was capricious in that way of natural disasters, one home taken but another spared. Yesterday afternoon,
-          a fawn limped across the moonscape between one of each. Those who believe recurring wildfires make it folly to
-          develop California’s wooded hillsides said so Monday, pointing to Fountaingrove as a disaster waiting to happen.
-          The 1964 fire raced through this area, but there were no homes built yet. Planning scenarios devised in the intervening
-          years have often raised the specter of death and disaster if another blaze were to burn along the same path. On
-          Monday, a new fire station atop the ridge was engulfed in flames by 6 a.m.
-        </p>
-      </story-text>
-
-      <story-video data="[[fvideo1]]" delegate="[[delegate]]"></story-video>
-
-      <story-text>
-        <p>
-          One was Fountaingrove, the upscale hilltop subdivision that was home to doctors, lawyers and community leaders. The fire
-          there was capricious in that way of natural disasters, one home taken but another spared. Yesterday afternoon,
-          a fawn limped across the moonscape between one of each. Those who believe recurring wildfires make it folly to
-          develop California’s wooded hillsides said so Monday, pointing to Fountaingrove as a disaster waiting to happen.
-          The 1964 fire raced through this area, but there were no homes built yet. Planning scenarios devised in the intervening
-          years have often raised the specter of death and disaster if another blaze were to burn along the same path. On
-          Monday, a new fire station atop the ridge was engulfed in flames by 6 a.m.
-        </p>
-      </story-text>
-
-      <story-text>
-        <h1 style="text-align: center;">Images tell a story of ruin</h1>
-      </story-text>
-
-      <story-gallery data="[[gallery]]"></story-gallery>
-
-      <story-text>
-        <p>
-          One was Fountaingrove, the upscale hilltop subdivision that was home to doctors, lawyers and community leaders. The fire
-          there was capricious in that way of natural disasters, one home taken but another spared. Yesterday afternoon,
-          a fawn limped across the moonscape between one of each. Those who believe recurring wildfires make it folly to
-          develop California’s wooded hillsides said so Monday, pointing to Fountaingrove as a disaster waiting to happen.
-          The 1964 fire raced through this area, but there were no homes built yet. Planning scenarios devised in the intervening
-          years have often raised the specter of death and disaster if another blaze were to burn along the same path. On
-          Monday, a new fire station atop the ridge was engulfed in flames by 6 a.m.
-        </p>
-      </story-text>
-
-      <story-video type="fit" data="[[fvideo1]]" delegate="[[delegate]]">
-        <story-video-popup timestamp="5" duration="5">
-          <p>Here's some text that pops up at 5 second mark</p>
-        </story-video-popup>
-        <story-video-popup timestamp="12" duration="5">
-          <p>Here's some text that pops up at 12 second mark</p>
-        </story-video-popup>
-      </story-video>
-
-      <story-text>
-        <p>
-          One was Fountaingrove, the upscale hilltop subdivision that was home to doctors, lawyers and community leaders. The fire
-          there was capricious in that way of natural disasters, one home taken but another spared. Yesterday afternoon,
-          a fawn limped across the moonscape between one of each. Those who believe recurring wildfires make it folly to
-          develop California’s wooded hillsides said so Monday, pointing to Fountaingrove as a disaster waiting to happen.
-          The 1964 fire raced through this area, but there were no homes built yet. Planning scenarios devised in the intervening
-          years have often raised the specter of death and disaster if another blaze were to burn along the same path. On
-          Monday, a new fire station atop the ridge was engulfed in flames by 6 a.m.
-        </p>
-        <p>
-          One was Fountaingrove, the upscale hilltop subdivision that was home to doctors, lawyers and community leaders. The fire
-          there was capricious in that way of natural disasters, one home taken but another spared. Yesterday afternoon,
-          a fawn limped across the moonscape between one of each. Those who believe recurring wildfires make it folly to
-          develop California’s wooded hillsides said so Monday, pointing to Fountaingrove as a disaster waiting to happen.
-          The 1964 fire raced through this area, but there were no homes built yet. Planning scenarios devised in the intervening
-          years have often raised the specter of death and disaster if another blaze were to burn along the same path. On
-          Monday, a new fire station atop the ridge was engulfed in flames by 6 a.m.
-        </p>
-      </story-text>
-    </article>
+    <article id="article"></article>
   </template>
 
   <script>
@@ -208,118 +31,107 @@
       static get is() { return 'card-story'; }
       static get properties() {
         return {
-          header: {
+          delegate: Object,
+          sharedState: {
             type: Object,
-            value: () => {
-              return {
-                title: "In California’s Wine Country, Reckoning With an Inferno",
-                subtitle: "Cadaver dogs look for victims. Chimneys stand like tombstones in incinerated neighborhoods. Smoke hangs thick and low.",
-                image: "images/header.jpg"
-              };
-            }
-          },
-          headerOptions: {
-            type: Object,
-            value: () => {
-              return {
-                style: "cover",
-                textLayout: "center"
-              };
-            }
-          },
-          fire1: {
-            type: Object,
-            value: function () {
-              return {
-                href: "images/fire1.jpg",
-                width: 2048,
-                height: 1365
-              }
-            }
-          },
-          fire2: {
-            type: Object,
-            value: function () {
-              return {
-                href: "images/fire2.jpg",
-                width: 2100,
-                height: 1298
-              }
-            }
-          },
-          quote1: {
-            type: Object,
-            value: function () {
-              return {
-                quote: "We’ve never seen anything like this",
-                author: "Trina Grant"
-              };
-            }
-          },
-          quote2: {
-            type: Object,
-            value: function () {
-              return {
-                quote: "Power lines are definitely one of the causes we’re looking into. One thing we’ll be looking at is whether the fires started before the lines went down, or after.",
-                author: "Cal Fire director"
-              };
-            }
-          },
-          fvideo1: {
-            type: Object,
-            value: function () {
-              return {
-                src: "images/fvideo1.mp4",
-                autoplay: true
-              };
-            }
-          },
-          gallery: Array,
-          delegate: Object
+            observer: '_refresh'
+          }
         };
       }
 
       connectedCallback() {
         super.connectedCallback();
+        this.article = this.$.article;
         this.delegate = this;
-        this.gallery = [
-          this.fire1,
-          {
-            href: "images/fire3.jpg",
-            width: 2048,
-            height: 1365
-          },
-          {
-            href: "images/fire4.jpg",
-            width: 2048,
-            height: 1366
-          },
-          {
-            href: "images/fire5.jpg",
-            width: 1996,
-            height: 1331
-          },
-          {
-            href: "images/fire6.jpg",
-            width: 2048,
-            height: 1365
-          },
-          {
-            href: "images/fire7.jpg",
-            width: 2048,
-            height: 1365
-          },
-          {
-            href: "images/fire9.jpg",
-            width: 1996,
-            height: 1331
-          },
-          {
-            href: "images/fire10.jpg",
-            width: 2048,
-            height: 1365
+        this._refresh();
+      }
+
+      _refresh() {
+        if (this.delegate && this.sharedState) {
+          this._clearNode(this.article);
+          this._segmentIndex = -1;
+          this._segments = this.sharedState.segments || [];
+          this._addNextSegment();
+        }
+      }
+
+      _addNextSegment() {
+        this._segmentIndex++;
+        if (this._segmentIndex < this._segments.length) {
+          this._appendSegment(this._segments[this._segmentIndex]).then(() => {
+            this._addNextSegment();
+          }).catch((err) => {
+            console.error("failed to add story segment", err);
+            this._addNextSegment();
+          });
+        }
+      }
+
+      _appendSegment(segment) {
+        let nodeInfo = null;
+        switch (segment.type) {
+          case "header":
+            nodeInfo = {
+              href: "controls/story-header.html",
+              name: "story-header"
+            };
+            break;
+          case "text":
+            nodeInfo = {
+              href: "controls/story-text.html",
+              name: "story-text"
+            };
+            break;
+          case "image":
+            nodeInfo = {
+              href: "controls/story-image.html",
+              name: "story-image"
+            };
+            break;
+          case "video":
+            nodeInfo = {
+              href: "controls/story-video.html",
+              name: "story-video"
+            };
+            break;
+          case "gallery":
+            nodeInfo = {
+              href: "controls/story-gallery.html",
+              name: "story-gallery"
+            };
+            break;
+          case "quote":
+            nodeInfo = {
+              href: "controls/story-quote.html",
+              name: "story-quote"
+            };
+            break;
+          default:
+            break;
+        }
+
+        return new Promise((resolve, reject) => {
+          if (nodeInfo) {
+            let path = this.importPath + nodeInfo.href;
+            Polymer.importHref(path, () => {
+              let node = document.createElement(nodeInfo.name);
+              node.delegate = this.delegate;
+              node.data = segment.data;
+              this.article.appendChild(node);
+              resolve();
+            }, (err) => {
+              reject(err);
+            });
+          } else {
+            reject("Imvalid segment type");
           }
-        ];
+        });
+      }
+
+      _clearNode(node) {
+        while (node.hasChildNodes()) {
+          node.removeChild(node.lastChild);
+        }
       }
 
       get scrollPanel() {
