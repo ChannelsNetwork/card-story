@@ -2,6 +2,7 @@
 <link rel="import" href="header-composer.html">
 <link rel="import" href="text-composer.html">
 <link rel="import" href="image-composer.html">
+<link rel="import" href="video-composer.html">
 
 <dom-module id="segment-container">
   <template>
@@ -209,6 +210,9 @@
           case "image":
             this.component = document.createElement("image-composer");
             break;
+          case "video":
+            this.component = document.createElement("video-composer");
+            break;
           default:
             break;
         }
@@ -237,6 +241,13 @@
             configInfo = {
               path: this.importPath + "image-composer-config.html",
               nodeName: "image-composer-config",
+              delegate: this.component
+            };
+            break;
+          case "video":
+            configInfo = {
+              path: this.importPath + "video-composer-config.html",
+              nodeName: "video-composer-config",
               delegate: this.component
             };
             break;
@@ -278,7 +289,7 @@
 
       _onAddVideo(event) {
         event.preventDefault();
-        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'text' } }));
+        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'video' } }));
       }
 
       _onAddGallery(event) {

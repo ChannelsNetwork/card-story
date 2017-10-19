@@ -1,0 +1,270 @@
+<link rel="import" href="../../soso-file-picker/soso-file-picker.html">
+<dom-module id="video-composer">
+  <template>
+    <style>
+      :host {
+        display: block;
+        outline: none;
+      }
+
+      #filePicker {
+        min-height: 120px;
+        box-sizing: border-box;
+        --soso-link-color: #388E3C;
+      }
+
+      .noborder {
+        border: none;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      #noFile {
+        position: relative;
+      }
+
+      #fileMessage {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        padding: 5px 10px;
+        background: #E8F5E9;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        pointer-events: none;
+      }
+
+      #videoPanel {
+        box-sizing: border-box;
+        overflow: hidden;
+        text-align: center;
+      }
+
+      #videoShell {
+        position: relative;
+      }
+
+      #playIcon {
+        position: absolute;
+        bottom: 15px;
+        left: 15px;
+        height: 32px;
+        width: 32px;
+        display: block;
+        padding: 5px;
+        border-radius: 100%;
+        border: 2px solid;
+        color: white;
+        opacity: 0.6;
+      }
+
+      video {
+        display: block;
+        margin: 0 auto;
+        box-sizing: border-box;
+      }
+
+      .natural {
+        max-width: 100%;
+        max-height: 100vh;
+      }
+
+      .inline {
+        display: inline-block;
+        vertical-align: middle;
+      }
+    </style>
+    <div id="noFile">
+      <soso-file-picker class="noborder" id="filePicker" label="Drag a video file" accept="video/*" on-files="_onFile"></soso-file-picker>
+      <div id="fileMessage" class="hidden">[[fileMessage]]</div>
+    </div>
+    <div id="hasFile" class="hidden">
+      <div id="videoPanel">
+        <div id="videoShell">
+          <video id="v" preload="metadata" loop playsinline on-loadedmetadata="_onMetadata"></video>
+          <iron-icon id="playIcon" icon="composer:play-arrow"></iron-icon>
+        </div>
+      </div>
+    </div>
+  </template>
+  <script>
+    class VideoComposer extends Polymer.Element {
+      static get is() { return 'video-composer'; }
+      static get properties() {
+        return {
+          services: Object,
+          data: Object,
+          editing: {
+            type: Boolean,
+            observer: '_onEditing'
+          },
+          fileMessage: String
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.setAttribute("tabIndex", "-1");
+        this.addEventListener("focus", this._onFocus.bind(this));
+        this.addEventListener("blur", this._onBlur.bind(this));
+        this._refresh();
+      }
+
+      _refresh() {
+        let data = this.data || {};
+        if (!data.options) {
+          data.options = {};
+        }
+        this.data = data;
+        this._refreshVideo();
+      }
+
+      get options() {
+        return this.data.options || {};
+      }
+
+      set options(value) {
+        this.data.options = value;
+        this._refreshVideo();
+      }
+
+      _onEditing() {
+        if (this.editing) {
+          this.$.filePicker.classList.add('noborder');
+          this.focus();
+        } else {
+          this.$.filePicker.classList.remove('noborder');
+          this.blur();
+        }
+      }
+
+      _onFocus(event) {
+        event.stopPropagation();
+        this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
+      }
+
+      _onBlur(event) {
+        event.stopPropagation();
+        this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true, detail: {} }));
+      }
+
+      _setFileMessage(message) {
+        if (message) {
+          this.$.fileMessage.classList.remove("hidden");
+        } else {
+          this.$.fileMessage.classList.add("hidden");
+        }
+        this.fileMessage = message;
+      }
+
+      _onFile() {
+        let file = event.detail.file;
+        if (!file) {
+          return;
+        }
+
+        if (file.type.indexOf('video/') != 0) {
+          this._setFileMessage("Invalid video file");
+        } else {
+          this._setFileMessage("Uploading video...");
+          this._uploadVideo(file).then((response) => {
+            this.data.video = response.url;
+            this.$.v.src = this.data.video;
+            this._setFileMessage(null);
+            this._refreshVideo();
+          }).catch((err) => {
+            this._setFileMessage("Failed to upload video");
+          });
+        }
+      }
+
+      _uploadVideo(file) {
+        if (this.services) {
+          return this.services.upload(file);
+        } else {
+          return new Promise((resolve, reject) => {
+            resolve({
+              fileId: "some-file-id",
+              url: "https://channelsnetwork.github.io/card-story-demo/images/fvideo1.mp4"
+            });
+          });
+        }
+      }
+
+      _refreshVideo() {
+        if (this.data.video) {
+          this.$.noFile.classList.add("hidden");
+          this.$.hasFile.classList.remove("hidden");
+          this._refreshVideoPanel();
+        } else {
+          this.$.noFile.classList.remove("hidden");
+          this.$.hasFile.classList.add("hidden");
+        }
+      }
+
+      _onMetadata() {
+        this._metadataLoaded = true;
+        this._refreshVideo();
+      }
+
+      _refreshVideoPanel() {
+        if (!this._metadataLoaded) {
+          return;
+        }
+        let vh = this.$.v.videoHeight;
+        let vw = this.$.v.videoWidth;
+        let r = vw / vh;
+        let ph = window.innerHeight;
+        let pw = this.offsetWidth;
+        this._offset = [0, 0];
+
+        this.$.v.style.transform = "";
+        this.$.v.classList.remove("natural");
+        this.$.v.style.width = "";
+        this.$.v.style.height = "";
+        this.$.videoPanel.style.width = "";
+        this.$.videoPanel.style.height = "";
+        this.$.videoShell.classList.remove("inline");
+
+        let options = this.data.options || {};
+        let style = options.style || "";
+        switch (style) {
+          case "fit": {
+            let imw = pw;
+            let imh = imw / r;
+            if (imh > (ph - 30)) {
+              imh = ph - 30;
+              imW = imh * r;
+            }
+            this.$.v.style.width = imw + "px";
+            this.$.v.style.height = "auto";
+            this.$.v.classList.add("natural");
+            break;
+          }
+          case "cover": {
+            this.$.videoPanel.style.width = "100%";
+            this.$.videoPanel.style.height = ph + "px";
+            let imw = pw;
+            let imh = imw / r;
+            if (imh < ph) {
+              imh = ph;
+              imw = imh * r;
+            }
+            this.$.v.style.width = imw + "px";
+            this.$.v.style.height = imh + "px";
+            this._offset = [(imw - pw) / 2, (imh - ph) / 2];
+            break;
+          }
+          default:
+            this.$.v.classList.add("natural");
+            this.$.videoShell.classList.add("inline");
+            break;
+        }
+        this.$.v.style.transform = "translate3d(" + (-this._offset[0]) + "px," + (-this._offset[1]) + "px, 0)";
+      }
+    }
+    window.customElements.define(VideoComposer.is, VideoComposer);
+  </script>
+</dom-module>
