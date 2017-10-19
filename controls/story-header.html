@@ -121,7 +121,7 @@
         if (this.data && this._connected) {
           this.options = this.data.options || {};
 
-          if (this.options.image || this.options.useImage) {
+          if (this.options.image && this.options.useImage) {
             let style = this.options.style || "";
             switch (style) {
               case "cover":
