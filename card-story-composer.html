@@ -31,6 +31,24 @@
         user-select: none;
       }
 
+      #previewPanel {
+        padding: 16px;
+        text-align: center;
+        margin-top: 100px;
+      }
+
+      button {
+        font-family: inherit;
+        font-size: 16px;
+        text-transform: uppercase;
+        background: none;
+        border: 1px solid;
+        padding: 5px 15px;
+        outline: 0;
+        color: inherit;
+        cursor: pointer;
+      }
+
       .segIcon {
         height: 24px;
         width: 24px;
@@ -105,8 +123,7 @@
         justify-content: flex-end;
       }
     </style>
-    <div id="container">
-    </div>
+    <div id="container"></div>
     <div id="addPanel" class="hidden">
       <div style="padding: 0 0 20px; letter-spacing: 0.03em;">Add a section</div>
       <iron-icon class="segIcon" icon="composer:text-format" title="Add a new text section" on-click="_onAddText"></iron-icon>
@@ -114,6 +131,9 @@
       <iron-icon class="segIcon" icon="composer:play-arrow" title="Add a video" on-click="_onAddVideo"></iron-icon>
       <iron-icon class="segIcon" icon="composer:collections" title="Add a photo gallery" on-click="_onAddGallery"></iron-icon>
       <iron-icon class="segIcon" icon="composer:format-quote" title="Add a quote" on-click="_onAddQuote"></iron-icon>
+    </div>
+    <div id="previewPanel">
+      <button on-click="_onPreview">Preview</button>
     </div>
     <div id="configPanel" class="hidden" tabindex="-1">
       <div id="configCell">
@@ -309,6 +329,13 @@
         if (this._configInfo) {
           this._configInfo.delegate.options = event.detail.options;
         }
+      }
+
+      _onPreview() {
+        let story = {
+          segments: this.segments
+        };
+        console.log("Segments", story);
       }
     }
     window.customElements.define(CardStoryComposer.is, CardStoryComposer);

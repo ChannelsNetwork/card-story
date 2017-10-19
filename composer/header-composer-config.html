@@ -259,13 +259,29 @@
         if (this.services) {
           return this.services.upload(file);
         } else {
-          return new Promise((resolve, reject) => {
-            resolve({
+          return this._readFile(file).then((dataUrl) => {
+            return {
               fileId: "some-file-id",
-              url: "https://channelsnetwork.github.io/card-story-demo/images/header.jpg"
-            });
+              url: dataUrl
+            };
           });
         }
+      }
+
+      _readFile(file) {
+        return new Promise((resolve, reject) => {
+          let reader = new FileReader();
+          reader.addEventListener('load', () => {
+            resolve(reader.result);
+          });
+          reader.addEventListener("error", () => {
+            reject();
+          });
+          reader.addEventListener("abort", () => {
+            reject();
+          });
+          reader.readAsDataURL(file);
+        });
       }
 
       _fireOptionsChanged() {
