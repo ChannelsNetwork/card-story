@@ -109,10 +109,11 @@
     </div>
     <div id="addPanel" class="hidden">
       <div style="padding: 0 0 20px; letter-spacing: 0.03em;">Add a section</div>
-      <iron-icon class="segIcon" icon="composer:text-format" on-click="_onAddText"></iron-icon>
-      <iron-icon class="segIcon" icon="composer:photo-camera" on-click="_onAddPhoto"></iron-icon>
-      <iron-icon class="segIcon" icon="composer:play-arrow" on-click="_onAddVideo"></iron-icon>
-      <iron-icon class="segIcon" icon="composer:collections" on-click="_onAddGallery"></iron-icon>
+      <iron-icon class="segIcon" icon="composer:text-format" title="Add a new text section" on-click="_onAddText"></iron-icon>
+      <iron-icon class="segIcon" icon="composer:photo-camera" title="Add an image" on-click="_onAddPhoto"></iron-icon>
+      <iron-icon class="segIcon" icon="composer:play-arrow" title="Add a video" on-click="_onAddVideo"></iron-icon>
+      <iron-icon class="segIcon" icon="composer:collections" title="Add a photo gallery" on-click="_onAddGallery"></iron-icon>
+      <iron-icon class="segIcon" icon="composer:format-quote" title="Add a quote" on-click="_onAddQuote"></iron-icon>
     </div>
     <div id="configPanel" class="hidden" tabindex="-1">
       <div id="configCell">
@@ -163,6 +164,10 @@
 
       _onAddGallery() {
         this._addSegmentAtIndex(1, "gallery", true);
+      }
+
+      _onAddQuote() {
+        this._addSegmentAtIndex(1, "quote", true);
       }
 
       _refreshAddPanelVisibility() {

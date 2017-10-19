@@ -4,6 +4,7 @@
 <link rel="import" href="image-composer.html">
 <link rel="import" href="video-composer.html">
 <link rel="import" href="gallery-composer.html">
+<link rel="import" href="quote-composer.html">
 
 <dom-module id="segment-container">
   <template>
@@ -123,10 +124,11 @@
       </div>
       <div id="bottomActions">
         <iron-icon id="add" icon="composer:add" on-mousedown="_toggleAddComponent"></iron-icon>
-        <iron-icon class="segIcon" icon="composer:text-format" on-mousedown="_onAddText"></iron-icon>
-        <iron-icon class="segIcon" icon="composer:photo-camera" on-mousedown="_onAddPhoto"></iron-icon>
-        <iron-icon class="segIcon" icon="composer:play-arrow" on-mousedown="_onAddVideo"></iron-icon>
-        <iron-icon class="segIcon" icon="composer:collections" on-mousedown="_onAddGallery"></iron-icon>
+        <iron-icon class="segIcon" icon="composer:text-format" title="Add a new text section" on-mousedown="_onAddText"></iron-icon>
+        <iron-icon class="segIcon" icon="composer:photo-camera" title="Add an image" on-mousedown="_onAddPhoto"></iron-icon>
+        <iron-icon class="segIcon" icon="composer:play-arrow" title="Add a video" on-mousedown="_onAddVideo"></iron-icon>
+        <iron-icon class="segIcon" icon="composer:collections" title="Add a photo gallery" on-mousedown="_onAddGallery"></iron-icon>
+        <iron-icon class="segIcon" icon="composer:format-quote" title="Add a quote" on-mousedown="_onAddQuote"></iron-icon>
       </div>
     </div>
   </template>
@@ -219,6 +221,11 @@
             this.$.noteAdd.classList.add("hidden");
             this.$.config.classList.add("hidden");
             break;
+          case "quote":
+            this.component = document.createElement("quote-composer");
+            this.$.noteAdd.classList.add("hidden");
+            this.$.config.classList.add("hidden");
+            break;
           default:
             break;
         }
@@ -301,6 +308,11 @@
       _onAddGallery(event) {
         event.preventDefault();
         this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'gallery' } }));
+      }
+
+      _onAddQuote(event) {
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'quote' } }));
       }
 
       _onRemove(event) {
