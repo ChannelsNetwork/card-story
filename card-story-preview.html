@@ -1,5 +1,5 @@
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
-<link rel="import" href="card-story.html">
+<link rel="import" href="card-story-viewer.html">
 <dom-module id="card-story-preview">
   <template>
     <style is="custom-style" include="iron-flex iron-flex-alignment">
@@ -53,7 +53,7 @@
         </div>
       </div>
       <div class="flex content">
-        <card-story id="viewer" shared-state="[[data]]"></card-story>
+        <card-story-viewer id="viewer" shared-state="[[data]]"></card-story-viewer>
       </div>
     </div>
   </template>
