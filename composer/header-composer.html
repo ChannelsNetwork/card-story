@@ -141,6 +141,17 @@
         this.data.title = this.$.title.value.trim();
         this.data.subtitle = this.$.subtitle.value.trim();
         this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true, detail: {} }));
+        this._fireSummaryChange();
+      }
+
+      _fireSummaryChange() {
+        let options = this.data.options || {};
+        let summary = {
+          title: this.$.title.value.trim(),
+          text: this.$.subtitle.value.trim(),
+          imageURL: options.image
+        };
+        this.dispatchEvent(new CustomEvent('story-summary-change', { bubbles: true, composed: true, detail: { summary: summary } }));
       }
 
       _refreshOptions() {
@@ -212,6 +223,7 @@
           this.$.glassPane.classList.add('hidden');
           this.$.header.style.color = "";
         }
+        this._fireSummaryChange();
       }
     }
     window.customElements.define(HeaderComposer.is, HeaderComposer);

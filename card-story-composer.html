@@ -154,13 +154,40 @@
       static get properties() {
         return {
           services: Object,
-          segments: Array
+          segments: Array,
         };
       }
 
       constructor() {
         super();
         this.segments = [];
+        this._summary = {};
+        this._readyState = false;
+      }
+
+      get summary() {
+        return this._summary;
+      }
+
+      get isReady() {
+        return this._readyState;
+      }
+
+      get sharedState() {
+        let collections = {
+          segments: []
+        };
+        for (let i = 0; i < this.segments.length; i++) {
+          let s = this.segments[i];
+          collections.segments.push({
+            type: s.type,
+            data: s.data
+          });
+        }
+        return {
+          properties: {},
+          collections: collections
+        };
       }
 
       connectedCallback() {
@@ -170,6 +197,25 @@
           this._addSegmentAtIndex(1, "text", true);
         }
         this._refreshAddPanelVisibility();
+
+        this._summaryListener = (event) => {
+          event.stopPropagation();
+          this._summary = event.detail.summary;
+          let rs = this._summary.title ? true : false;
+          if (this._readyState != rs) {
+            this._readyState = rs;
+            this.dispatchEvent(new CustomEvent('state-ready-change', { bubbles: true, composed: true, detail: { ready: rs } }));
+          }
+        };
+        this.addEventListener('story-summary-change', this._summaryListener);
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        if (this._summaryListener) {
+          this.removeEventListener('story-summary-change', this._summaryListener);
+          this._summaryListener = null;
+        }
       }
 
       _onAddText() {
