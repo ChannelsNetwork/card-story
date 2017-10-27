@@ -175,11 +175,13 @@
 
       get sharedState() {
         let collections = {
-          segments: []
+          segments: {
+            records: []
+          }
         };
         for (let i = 0; i < this.segments.length; i++) {
           let s = this.segments[i];
-          collections.segments.push({
+          collections.segments.records.push({
             type: s.type,
             data: s.data
           });

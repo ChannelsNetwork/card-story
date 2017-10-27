@@ -47,10 +47,10 @@
       }
 
       _refresh() {
-        if (this.delegate && this.sharedState) {
+        if (this.delegate && this.sharedState && this.sharedState.collections && this.sharedState.collections.segments) {
           this._clearNode(this.article);
           this._segmentIndex = -1;
-          this._segments = this.sharedState.segments || [];
+          this._segments = this.sharedState.collections.segments.records || [];
           this._addNextSegment();
         }
       }
