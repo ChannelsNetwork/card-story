@@ -47,7 +47,7 @@
       }
 
       _refresh() {
-        if (this.delegate && this.sharedState && this.sharedState.collections && this.sharedState.collections.segments) {
+        if (this.article && this.delegate && this.sharedState && this.sharedState.collections && this.sharedState.collections.segments) {
           this._clearNode(this.article);
           this._segmentIndex = -1;
           this._segments = this.sharedState.collections.segments.records || [];
@@ -129,7 +129,7 @@
       }
 
       _clearNode(node) {
-        while (node.hasChildNodes()) {
+        while (node && node.hasChildNodes()) {
           node.removeChild(node.lastChild);
         }
       }
