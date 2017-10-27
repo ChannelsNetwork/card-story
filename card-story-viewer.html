@@ -31,26 +31,36 @@
       static get is() { return 'card-story-viewer'; }
       static get properties() {
         return {
-          delegate: Object,
           sharedState: {
             type: Object,
-            observer: '_refresh'
+            observer: '_sharedStateSet'
           }
         };
+      }
+
+      constructor() {
+        super();
+        this._delegate = this;
       }
 
       connectedCallback() {
         super.connectedCallback();
         this.article = this.$.article;
-        this.delegate = this;
         this._refresh();
       }
 
+      _sharedStateSet() {
+        if (this.article && this.sharedState) {
+          this._refresh();
+        }
+      }
+
       _refresh() {
-        if (this.article && this.delegate && this.sharedState && this.sharedState.collections && this.sharedState.collections.segments) {
+        let data = (this.sharedState && this.sharedState.collections) ? this.sharedState.collections.segments : { records: [] };
+        if (data) {
           this._clearNode(this.article);
           this._segmentIndex = -1;
-          this._segments = this.sharedState.collections.segments.records || [];
+          this._segments = data.records || [];
           this._addNextSegment();
         }
       }
@@ -115,7 +125,7 @@
             let path = this.importPath + nodeInfo.href;
             Polymer.importHref(path, () => {
               let node = document.createElement(nodeInfo.name);
-              node.delegate = this.delegate;
+              node.delegate = this._delegate;
               node.data = segment.data;
               this.article.appendChild(node);
               resolve();
@@ -129,13 +139,13 @@
       }
 
       _clearNode(node) {
-        while (node && node.hasChildNodes()) {
+        while (node.hasChildNodes()) {
           node.removeChild(node.lastChild);
         }
       }
 
       get scrollPanel() {
-        return this.$.article;
+        return this.article;
       }
 
       addIntersectionHandler(node, handler) {

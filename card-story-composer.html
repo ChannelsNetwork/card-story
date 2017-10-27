@@ -76,6 +76,7 @@
         height: 18px;
         width: 18px;
         background: transparent;
+        border: 2px solid;
       }
 
       #configPanel {
@@ -176,20 +177,28 @@
       get sharedState() {
         let collections = {
           segments: {
+            keyField: 'id',
             records: []
           }
         };
         for (let i = 0; i < this.segments.length; i++) {
           let s = this.segments[i];
           collections.segments.records.push({
+            id: s.id || this._guid(),
             type: s.type,
             data: s.data
           });
         }
         return {
-          properties: {},
           collections: collections
         };
+      }
+
+      _guid() {
+        const s4 = () => {
+          return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+        };
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + '-' + (new Date()).getTime();
       }
 
       connectedCallback() {
@@ -291,6 +300,7 @@
 
       _createSegment(type) {
         return {
+          id: this._guid(),
           type: type,
           data: {}
         };
@@ -387,19 +397,9 @@
       }
 
       _onPreview() {
-        let story = {
-          segments: []
-        };
-        for (let i = 0; i < this.segments.length; i++) {
-          let s = this.segments[i];
-          story.segments.push({
-            type: s.type,
-            data: s.data
-          });
-        }
-        console.log("Segments", story);
+        console.log("Shared State", this.sharedState);
         Polymer.importHref(this.importPath + 'card-story-preview.html', () => {
-          this.$.preview.data = story;
+          this.$.preview.data = this.sharedState;
           this.$.preview.classList.remove("hidden");
           document.body.style.overflow = "hidden";
         });
