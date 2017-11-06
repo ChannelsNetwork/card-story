@@ -64,7 +64,7 @@
     <div class="fit">
       <textarea id="textarea" name$="[[name]]" autocomplete$="[[autocomplete]]" autofocus$="[[autofocus]]" inputmode$="[[inputmode]]"
         placeholder$="[[placeholder]]" readonly$="[[readonly]]" required$="[[required]]" disabled$="[[disabled]]" rows$="[[rows]]"
-        minlength$="[[minlength]]" maxlength$="[[maxlength]]" on-input="_onInput"></textarea>
+        minlength$="[[minlength]]" maxlength$="[[maxlength]]" on-input="_onInput" on-keydown="_onKeydown"></textarea>
     </div>
   </template>
   <script>
@@ -116,6 +116,10 @@
             type: Boolean,
             value: false,
             observer: '_onDisableChange'
+          },
+          singleLine: {
+            type: Boolean,
+            value: false
           }
         };
       }
@@ -176,6 +180,12 @@
           this.classList.add("disabled");
         } else {
           this.classList.remove("disabled");
+        }
+      }
+
+      _onKeydown(event) {
+        if (this.singleLine && (event.keyCode === 13)) {
+          event.preventDefault();
         }
       }
     }
