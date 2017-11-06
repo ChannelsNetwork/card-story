@@ -48,7 +48,7 @@
       <div id="bar" class="horizontal layout center">
         <div class="flex">Preview</div>
         <div>
-          <iron-icon class="barIcon" icon="composer:close" on-click="_close"></iron-icon>
+          <soso-icon icon-map="[[iconMap]]" class="barIcon" icon="close" on-click="_close"></soso-icon>
         </div>
       </div>
       <div class="flex content">
@@ -61,8 +61,14 @@
       static get is() { return 'card-story-preview'; }
       static get properties() {
         return {
-          data: Object
+          data: Object,
+          iconMap: Object
         };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.iconMap = window._cardStroyComposerIcons;
       }
 
       _close() {
