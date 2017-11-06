@@ -27,7 +27,7 @@
         background: rgba(0, 0, 0, 0.6);
       }
     </style>
-    <iron-icon id="removeIcon" icon="composer:close" on-click="_onRemove"></iron-icon>
+    <soso-icon id="removeIcon" icon="close" icon-map="[[iconMap]]" on-click="_onRemove"></soso-icon>
   </template>
   <script>
     class GalleryComposerItem extends Polymer.Element {
@@ -37,7 +37,8 @@
           data: {
             type: Object,
             observer: '_refresh'
-          }
+          },
+          iconMap: Object
         };
       }
 
@@ -54,6 +55,7 @@
       connectedCallback() {
         super.connectedCallback();
         this._connected = true;
+        this.iconMap = window._cardStroyComposerIcons;
         requestAnimationFrame(() => {
           this._refresh();
         });

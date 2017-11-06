@@ -45,7 +45,7 @@
         display: none;
       }
 
-      #actions iron-icon {
+      #actions soso-icon {
         height: 18px;
         width: 18px;
         padding: 5px;
@@ -65,7 +65,7 @@
         user-select: none;
       }
 
-      #actions iron-icon:hover {
+      #actions soso-icon:hover {
         color: #000;
       }
 
@@ -81,7 +81,7 @@
         user-select: none;
       }
 
-      #bottomActions iron-icon {
+      #bottomActions soso-icon {
         height: 24px;
         width: 24px;
         padding: 5px;
@@ -103,7 +103,7 @@
         pointer-events: none;
       }
 
-      #bottomActions iron-icon:hover {
+      #bottomActions soso-icon:hover {
         color: #000;
       }
 
@@ -118,17 +118,17 @@
     </style>
     <div id="shell">
       <div id="actions">
-        <iron-icon id="noteAdd" icon="composer:note-add"></iron-icon>
-        <iron-icon id="config" icon="composer:settings" on-mousedown="_onConfig"></iron-icon>
-        <iron-icon id="close" icon="composer:close" on-mousedown="_onRemove"></iron-icon>
+        <soso-icon icon-map="[[iconMap]]" id="noteAdd" icon="note-add"></soso-icon>
+        <soso-icon icon-map="[[iconMap]]" id="config" icon="settings" on-mousedown="_onConfig"></soso-icon>
+        <soso-icon icon-map="[[iconMap]]" id="close" icon="close" on-mousedown="_onRemove"></soso-icon>
       </div>
       <div id="bottomActions">
-        <iron-icon id="add" icon="composer:add" on-mousedown="_toggleAddComponent"></iron-icon>
-        <iron-icon class="segIcon" icon="composer:text-format" title="Add a new text section" on-mousedown="_onAddText"></iron-icon>
-        <iron-icon class="segIcon" icon="composer:photo-camera" title="Add an image" on-mousedown="_onAddPhoto"></iron-icon>
-        <iron-icon class="segIcon" icon="composer:play-arrow" title="Add a video" on-mousedown="_onAddVideo"></iron-icon>
-        <iron-icon class="segIcon" icon="composer:collections" title="Add a photo gallery" on-mousedown="_onAddGallery"></iron-icon>
-        <iron-icon class="segIcon" icon="composer:format-quote" title="Add a quote" on-mousedown="_onAddQuote"></iron-icon>
+        <soso-icon icon-map="[[iconMap]]" id="add" icon="add" on-mousedown="_toggleAddComponent"></soso-icon>
+        <soso-icon icon-map="[[iconMap]]" class="segIcon" icon="text-format" title="Add a new text section" on-mousedown="_onAddText"></soso-icon>
+        <soso-icon icon-map="[[iconMap]]" class="segIcon" icon="photo-camera" title="Add an image" on-mousedown="_onAddPhoto"></soso-icon>
+        <soso-icon icon-map="[[iconMap]]" class="segIcon" icon="play-arrow" title="Add a video" on-mousedown="_onAddVideo"></soso-icon>
+        <soso-icon icon-map="[[iconMap]]" class="segIcon" icon="collections" title="Add a photo gallery" on-mousedown="_onAddGallery"></soso-icon>
+        <soso-icon icon-map="[[iconMap]]" class="segIcon" icon="format-quote" title="Add a quote" on-mousedown="_onAddQuote"></soso-icon>
       </div>
     </div>
   </template>
@@ -142,13 +142,15 @@
           editing: {
             type: Boolean,
             observer: '_onEditing'
-          }
+          },
+          iconMap: Object
         };
       }
 
       connectedCallback() {
         super.connectedCallback();
         this.shell = this.$.shell;
+        this.iconMap = window._cardStroyComposerIcons;
         this.shell.addEventListener('click', this._onFocus.bind(this));
         this.shell.addEventListener('focus', this._onFocus.bind(this));
         this.shell.addEventListener('blur', this._onBlur.bind(this));

@@ -1,4 +1,5 @@
 <link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="card-story-styles.html">
 <link rel="import" href="composer/segment-container.html">
 <dom-module id="card-story-composer">
   <template>
@@ -128,11 +129,11 @@
     <div id="container"></div>
     <div id="addPanel" class="hidden">
       <div style="padding: 0 0 20px; letter-spacing: 0.03em;">Add a section</div>
-      <iron-icon class="segIcon" icon="composer:text-format" title="Add a new text section" on-click="_onAddText"></iron-icon>
-      <iron-icon class="segIcon" icon="composer:photo-camera" title="Add an image" on-click="_onAddPhoto"></iron-icon>
-      <iron-icon class="segIcon" icon="composer:play-arrow" title="Add a video" on-click="_onAddVideo"></iron-icon>
-      <iron-icon class="segIcon" icon="composer:collections" title="Add a photo gallery" on-click="_onAddGallery"></iron-icon>
-      <iron-icon class="segIcon" icon="composer:format-quote" title="Add a quote" on-click="_onAddQuote"></iron-icon>
+      <soso-icon icon-map="[[iconMap]]" class="segIcon" icon="text-format" title="Add a new text section" on-click="_onAddText"></soso-icon>
+      <soso-icon icon-map="[[iconMap]]" class="segIcon" icon="photo-camera" title="Add an image" on-click="_onAddPhoto"></soso-icon>
+      <soso-icon icon-map="[[iconMap]]" class="segIcon" icon="play-arrow" title="Add a video" on-click="_onAddVideo"></soso-icon>
+      <soso-icon icon-map="[[iconMap]]" class="segIcon" icon="collections" title="Add a photo gallery" on-click="_onAddGallery"></soso-icon>
+      <soso-icon icon-map="[[iconMap]]" class="segIcon" icon="format-quote" title="Add a quote" on-click="_onAddQuote"></soso-icon>
     </div>
     <div id="previewPanel">
       <button on-click="_onPreview">Preview</button>
@@ -141,7 +142,7 @@
       <div id="configCell">
         <div id="configShell">
           <div id="configBar">
-            <iron-icon class="segIcon barIcon" icon="composer:close" on-click="_closeConfig"></iron-icon>
+            <soso-icon icon-map="[[iconMap]]" class="segIcon barIcon" icon="close" on-click="_closeConfig"></soso-icon>
           </div>
           <div id="configContainer"></div>
         </div>
@@ -156,6 +157,7 @@
         return {
           services: Object,
           segments: Array,
+          iconMap: Object
         };
       }
 
@@ -203,6 +205,7 @@
 
       connectedCallback() {
         super.connectedCallback();
+        this.iconMap = window._cardStroyComposerIcons;
         if (this.segments.length === 0) {
           this._addSegmentAtIndex(0, "header", false);
           this._addSegmentAtIndex(1, "text", true);

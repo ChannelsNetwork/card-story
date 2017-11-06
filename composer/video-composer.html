@@ -84,7 +84,7 @@
       <div id="videoPanel">
         <div id="videoShell">
           <video id="v" preload="metadata" loop playsinline on-loadedmetadata="_onMetadata"></video>
-          <iron-icon id="playIcon" icon="composer:play-arrow"></iron-icon>
+          <soso-icon id="playIcon" icon-map="[[iconMap]]" icon="play-arrow"></soso-icon>
         </div>
       </div>
     </div>
@@ -100,12 +100,14 @@
             type: Boolean,
             observer: '_onEditing'
           },
-          fileMessage: String
+          fileMessage: String,
+          iconMap: Object
         };
       }
 
       connectedCallback() {
         super.connectedCallback();
+        this.iconMap = window._cardStroyComposerIcons;
         this.setAttribute("tabIndex", "-1");
         this.addEventListener("focus", this._onFocus.bind(this));
         this.addEventListener("blur", this._onBlur.bind(this));
