@@ -39,11 +39,10 @@
             type: Boolean,
             observer: '_onEditing'
           },
-          toolbar: {
+          delegate: {
             type: Object,
             observer: '_attachToolbar'
-          },
-          delegate: Object
+          }
         }
       }
 
@@ -81,16 +80,16 @@
       }
 
       _attachToolbar() {
-        if (this._attached && this.toolbar) {
+        if (this._attached && this.delegate && this.delegate.toolbar) {
           this._detachToolbar();
           this._toolbarActionListener = this._handleToolbarAction.bind(this);
-          this.toolbar.addEventListener("action", this._toolbarActionListener);
+          this.delegate.toolbar.addEventListener("action", this._toolbarActionListener);
         }
       }
 
       _detachToolbar() {
-        if (this.toolbar && this._toolbarActionListener) {
-          this.toolbar.removeEventListener("action", this._toolbarActionListener);
+        if (this.delegate && this.delegate.toolbar && this._toolbarActionListener) {
+          this.delegate.toolbar.removeEventListener("action", this._toolbarActionListener);
           this._toolbarActionListener = null;
         }
       }
@@ -166,30 +165,12 @@
       }
 
       _showToolbar(rect) {
-        if (!this.toolbar) {
-          return;
-        }
-        if (!this._toolbarVisible) {
-          this._toolbarVisible = true;
-          this.toolbar.style.display = "";
-        }
         this._refreshBarState();
-        this._updateToolbarPosition(rect);
-      }
-
-      _updateToolbarPosition(rect) {
-        if (rect) {
-          let myRect = this.getBoundingClientRect();
-          this.toolbar.style.left = Math.max(62, rect.x - myRect.x + (rect.width / 2)) + "px";
-          this.toolbar.style.top = Math.max(0, rect.y - myRect.y) + "px";
-        }
+        this.delegate.showToolbar(rect);
       }
 
       _hideToolbar() {
-        if (this._toolbarVisible) {
-          this._toolbarVisible = false;
-          this.toolbar.style.display = "none";
-        }
+        this.delegate.hideToolbar();
       }
 
       _handleToolbarAction(event) {
@@ -199,6 +180,9 @@
             break;
           case "italic":
             document.execCommand("italic");
+            break;
+          case "clear":
+            document.execCommand("removeFormat");
             break;
           case "link":
             if (this._isSelectionLinked()) {
@@ -217,13 +201,11 @@
       }
 
       _refreshBarState() {
-        if (this.toolbar) {
-          this.toolbar.state = {
-            bold: document.queryCommandState("bold"),
-            italic: document.queryCommandState("italic"),
-            linked: this._isSelectionLinked()
-          };
-        }
+        this.delegate.toolbarState = {
+          bold: document.queryCommandState("bold"),
+          italic: document.queryCommandState("italic"),
+          linked: this._isSelectionLinked()
+        };
       }
 
       insertLink(url, range) {
@@ -239,7 +221,7 @@
 
       _isSelectionLinked() {
         const selection = this.parentNode.getSelection();
-        if (selection) {
+        if (selection && (selection.type === "Range")) {
           const range = selection.getRangeAt(0);
           if (range) {
             let container = range.commonAncestorContainer;

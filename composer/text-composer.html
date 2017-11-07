@@ -16,7 +16,7 @@
       soso-richtext-toolbar {
         position: absolute;
         margin-top: -43px;
-        margin-left: -62px;
+        margin-left: -81.5px;
         z-index: 1;
       }
 
@@ -97,6 +97,37 @@
       _onBlur() {
         if (this.data) {
           this.data.html = this.$.text.value;
+        }
+      }
+
+      hideToolbar() {
+        if (this._toolbarVisible) {
+          this._toolbarVisible = false;
+          this.$.toolbar.style.display = "none";
+        }
+      }
+
+      showToolbar(rect) {
+        if (!this._toolbarVisible) {
+          this._toolbarVisible = true;
+          this.$.toolbar.style.display = "";
+        }
+        this._updateToolbarPosition(rect);
+      }
+
+      set toolbarState(value) {
+        this.$.toolbar.state = value;
+      }
+
+      get toolbar() {
+        return this.$.toolbar;
+      }
+
+      _updateToolbarPosition(rect) {
+        if (rect) {
+          let myRect = this.$.text.getBoundingClientRect();
+          this.$.toolbar.style.left = Math.max(81, rect.x - myRect.x + (rect.width / 2)) + "px";
+          this.$.toolbar.style.top = Math.max(0, rect.y - myRect.y) + "px";
         }
       }
 

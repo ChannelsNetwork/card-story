@@ -24,9 +24,10 @@
       }
     </style>
     <div id="bar" class="horizontal layout">
-      <soso-icon id="bold" icon="format-bold" icon-map="[[iconMap]]" on-mousedown="_bold"></soso-icon>
-      <soso-icon id="italic" icon="format-italic" icon-map="[[iconMap]]" on-mousedown="_italic"></soso-icon>
-      <soso-icon id="link" class="lastIcon" icon="format-link" icon-map="[[iconMap]]" on-mousedown="_link"></soso-icon>
+      <soso-icon id="bold" title="Bold" icon="format-bold" icon-map="[[iconMap]]" on-mousedown="_bold"></soso-icon>
+      <soso-icon id="italic" title="Italic" icon="format-italic" icon-map="[[iconMap]]" on-mousedown="_italic"></soso-icon>
+      <soso-icon id="link" title="Link" icon="format-link" icon-map="[[iconMap]]" on-mousedown="_link"></soso-icon>
+      <soso-icon id="clear" title="Clear formatting" class="lastIcon" icon="format-clear" icon-map="[[iconMap]]" on-mousedown="_clear"></soso-icon>
     </div>
   </template>
   <script>
@@ -82,6 +83,11 @@
       _link(event) {
         event.preventDefault();
         this._fireAction("link");
+      }
+
+      _clear(event) {
+        event.preventDefault();
+        this._fireAction("clear");
       }
 
       _fireAction(type) {
