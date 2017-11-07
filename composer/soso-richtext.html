@@ -38,6 +38,10 @@
           editing: {
             type: Boolean,
             observer: '_onEditing'
+          },
+          toolbar: {
+            type: Object,
+            observer: '_attachToolbar'
           }
         }
       }
@@ -47,12 +51,10 @@
         this._editing = false;
         this.addEventListener('focus', (event) => {
           event.stopPropagation();
-          this._attachSelectionListener();
           this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
         });
         this.addEventListener('blur', (event) => {
           event.stopPropagation();
-          this._detachSelectionListener();
           this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true, detail: {} }));
         });
         this.addEventListener('input', () => {
@@ -67,7 +69,30 @@
 
       connectedCallback() {
         super.connectedCallback();
+        this._attached = true;
         this.updateStyles({ '--richtext-placeholder': "'" + (this.placeholder || "") + "'" });
+        this._attachToolbar();
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        this._attached = false;
+        this._detachToolbar();
+      }
+
+      _attachToolbar() {
+        if (this._attached && this.toolbar) {
+          this._detachToolbar();
+          this._toolbarActionListener = this._handleToolbarAction.bind(this);
+          this.toolbar.addEventListener("action", this._toolbarActionListener);
+        }
+      }
+
+      _detachToolbar() {
+        if (this.toolbar && this._toolbarActionListener) {
+          this.toolbar.removeEventListener("action", this._toolbarActionListener);
+          this._toolbarActionListener = null;
+        }
       }
 
       _onEditing() {
@@ -76,9 +101,13 @@
           this.focus();
           setTimeout(() => {
             this.focus();
+            this._onSelection();
           }, 100);
+          this._attachSelectionListener();
         } else {
           this.contentEditable = false
+          this._clearSelection();
+          this._detachSelectionListener();
         }
       }
 
@@ -92,8 +121,18 @@
 
       _attachSelectionListener() {
         this._detachSelectionListener();
+
         this._selectionListener = () => {
-          this._onSelection();
+          if (this._selectionTimer) {
+            clearTimeout(this._selectionTimer);
+            this._selectionTimer = null;
+          }
+          this._selectionTimer = setTimeout(() => {
+            this._selectionTimer = null;
+            if (this._attached && this.editing) {
+              this._onSelection();
+            }
+          }, 250);
         };
         document.addEventListener("selectionchange", this._selectionListener);
       }
@@ -109,23 +148,69 @@
       _onSelection() {
         const selection = this.parentNode.getSelection();
         if (selection.type === "Range") {
-          this._showToolbar();
+          let rect = selection.getRangeAt(0).getBoundingClientRect();
+          this._showToolbar(rect);
         } else {
           this._hideToolbar();
         }
       }
 
-      _showToolbar() {
+      _clearSelection() {
+        const selection = this.parentNode.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+        }
+      }
+
+      _showToolbar(rect) {
+        if (!this.toolbar) {
+          return;
+        }
         if (!this._toolbarVisible) {
-          console.log("show bar");
           this._toolbarVisible = true;
+          this.toolbar.style.display = "";
+        }
+        this._refreshBarState();
+        this._updateToolbarPosition(rect);
+      }
+
+      _updateToolbarPosition(rect) {
+        if (rect) {
+          let myRect = this.getBoundingClientRect();
+          this.toolbar.style.left = Math.max(62, rect.x - myRect.x + (rect.width / 2)) + "px";
+          this.toolbar.style.top = Math.max(0, rect.y - myRect.y) + "px";
         }
       }
 
       _hideToolbar() {
         if (this._toolbarVisible) {
-          console.log("hide bar");
           this._toolbarVisible = false;
+          this.toolbar.style.display = "none";
+        }
+      }
+
+      _handleToolbarAction(event) {
+        switch (event.detail.type) {
+          case "bold":
+            document.execCommand("bold");
+            break;
+          case "italic":
+            document.execCommand("italic");
+            break;
+          case "link":
+            break;
+          default:
+            break;
+        }
+        this._refreshBarState();
+      }
+
+      _refreshBarState() {
+        if (this.toolbar) {
+          this.toolbar.state = {
+            bold: document.queryCommandState("bold"),
+            italic: document.queryCommandState("italic")
+          };
         }
       }
     }

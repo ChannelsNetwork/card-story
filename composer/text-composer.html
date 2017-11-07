@@ -1,17 +1,26 @@
 <link rel="import" href="soso-richtext.html">
+<link rel="import" href="soso-richtext-toolbar.html">
 <dom-module id="text-composer">
   <template>
     <style>
       :host {
         display: block;
+        position: relative;
       }
 
       soso-richtext {
         border: none;
         min-height: 27px;
       }
+
+      soso-richtext-toolbar {
+        position: absolute;
+        margin-top: -43px;
+        margin-left: -62px;
+      }
     </style>
     <soso-richtext id="text" editing="[[editing]]" placeholder="[[placeholder]]" on-blurred="_onBlur"></soso-richtext>
+    <soso-richtext-toolbar id="toolbar" style="display: none;"></soso-richtext-toolbar>
   </template>
   <script>
     class TextComposer extends Polymer.Element {
@@ -26,6 +35,7 @@
 
       connectedCallback() {
         super.connectedCallback();
+        this.$.text.toolbar = this.$.toolbar;
         this._refresh();
         this.addEventListener('click', (event) => {
 

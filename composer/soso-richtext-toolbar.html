@@ -1,0 +1,92 @@
+<dom-module id="soso-richtext-toolbar">
+  <template>
+    <style is="custom-style" include="story-styles">
+      :host {
+        display: block;
+        background: rgba(0, 0, 0, 0.85);
+        border-radius: 3px;
+        box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.6);
+      }
+
+      soso-icon {
+        padding: 5px 8px;
+        cursor: pointer;
+        border-right: 1px solid rgba(255, 255, 255, 0.4);
+        color: #f5f5f5;
+      }
+
+      .lastIcon {
+        border-right: none;
+      }
+
+      .selected {
+        color: #ffeb3b;
+      }
+    </style>
+    <div class="horizontal layout">
+      <soso-icon id="bold" icon="format-bold" icon-map="[[iconMap]]" on-mousedown="_bold"></soso-icon>
+      <soso-icon id="italic" icon="format-italic" icon-map="[[iconMap]]" on-mousedown="_italic"></soso-icon>
+      <soso-icon id="link" class="lastIcon" icon="format-link" icon-map="[[iconMap]]" on-mousedown="_link"></soso-icon>
+    </div>
+  </template>
+  <script>
+    class SosoRichtextToolbar extends Polymer.Element {
+      static get is() { return 'soso-richtext-toolbar'; }
+      static get properties() {
+        return {
+          iconMap: Object
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.iconMap = window._cardStroyComposerIcons;
+        this._refreshState();
+      }
+
+      set state(value) {
+        this._state = value;
+        this._refreshState();
+      }
+
+      _refreshState() {
+        let nodes = this.shadowRoot.querySelectorAll('soso-icon');
+        if (nodes) {
+          for (let i = 0; i < nodes.length; i++) {
+            nodes[i].classList.remove("selected");
+          }
+        }
+        if (this._state) {
+          if (this._state.bold) {
+            this.$.bold.classList.add("selected");
+          }
+          if (this._state.italic) {
+            this.$.italic.classList.add("selected");
+          }
+        }
+      }
+
+      _bold(event) {
+        event.preventDefault();
+        this._fireAction("bold");
+      }
+
+      _italic(event) {
+        event.preventDefault();
+        this._fireAction("italic");
+      }
+
+      _link(event) {
+        event.preventDefault();
+        this._fireAction("link");
+      }
+
+      _fireAction(type) {
+        requestAnimationFrame(() => {
+          this.dispatchEvent(new CustomEvent('action', { bubbles: true, composed: true, detail: { type: type } }));
+        });
+      }
+    }
+    window.customElements.define(SosoRichtextToolbar.is, SosoRichtextToolbar);
+  </script>
+</dom-module>
