@@ -156,6 +156,7 @@
         this.shell.addEventListener('blur', this._onBlur.bind(this));
         this.shell.addEventListener('focused', this._onFocus.bind(this));
         this.shell.addEventListener('blurred', this._onBlur.bind(this));
+        this.shell.addEventListener("new-section", this._onNewSection.bind(this));
 
         this._loadComponent();
       }
@@ -293,7 +294,9 @@
       }
 
       _onAddText(event) {
-        event.preventDefault();
+        if (event) {
+          event.preventDefault();
+        }
         this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'text' } }));
       }
 
@@ -320,6 +323,19 @@
       _onRemove(event) {
         event.preventDefault();
         this.dispatchEvent(new CustomEvent('remove-segment', { bubbles: true, composed: true, detail: {} }));
+      }
+
+      _onNewSection(event) {
+        let type = event.detail.type;
+        if (type) {
+          switch (type) {
+            case "text":
+              this._onAddText();
+              break;
+            default:
+              break;
+          }
+        }
       }
     }
     window.customElements.define(SegmentContainer.is, SegmentContainer);
