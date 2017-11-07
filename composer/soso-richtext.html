@@ -47,10 +47,12 @@
         this._editing = false;
         this.addEventListener('focus', (event) => {
           event.stopPropagation();
+          this._attachSelectionListener();
           this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
         });
         this.addEventListener('blur', (event) => {
           event.stopPropagation();
+          this._detachSelectionListener();
           this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true, detail: {} }));
         });
         this.addEventListener('input', () => {
@@ -86,6 +88,45 @@
 
       set value(v) {
         this.innerHTML = v;
+      }
+
+      _attachSelectionListener() {
+        this._detachSelectionListener();
+        this._selectionListener = () => {
+          this._onSelection();
+        };
+        document.addEventListener("selectionchange", this._selectionListener);
+      }
+
+      _detachSelectionListener() {
+        if (this._selectionListener) {
+          document.removeEventListener("selectionchange", this._selectionListener);
+          this._selectionListener = null;
+        }
+        this._hideToolbar();
+      }
+
+      _onSelection() {
+        const selection = this.parentNode.getSelection();
+        if (selection.type === "Range") {
+          this._showToolbar();
+        } else {
+          this._hideToolbar();
+        }
+      }
+
+      _showToolbar() {
+        if (!this._toolbarVisible) {
+          console.log("show bar");
+          this._toolbarVisible = true;
+        }
+      }
+
+      _hideToolbar() {
+        if (this._toolbarVisible) {
+          console.log("hide bar");
+          this._toolbarVisible = false;
+        }
       }
     }
 
