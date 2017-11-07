@@ -2,7 +2,7 @@
 <link rel="import" href="soso-richtext-toolbar.html">
 <dom-module id="text-composer">
   <template>
-    <style>
+    <style is="custom-style" include="story-styles">
       :host {
         display: block;
         position: relative;
@@ -18,9 +18,49 @@
         margin-top: -43px;
         margin-left: -62px;
       }
+
+      #urlPanel {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.85);
+        border-radius: 3px;
+        box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.6);
+        color: white;
+      }
+
+      .cell {
+        padding: 0 5px;
+      }
+
+      .cell soso-icon {
+        cursor: pointer;
+        color: #f5f5f5;
+        display: block;
+        padding: 3px;
+      }
+
+      #txtLink {
+        font-size: 11px;
+        font-weight: bold;
+        background: transparent;
+        color: white;
+        border: none;
+        width: 100%;
+        box-sizing: border-box;
+        display: block;
+        outline: none;
+      }
     </style>
     <soso-richtext id="text" editing="[[editing]]" placeholder="[[placeholder]]" on-blurred="_onBlur"></soso-richtext>
-    <soso-richtext-toolbar id="toolbar" style="display: none;"></soso-richtext-toolbar>
+    <soso-richtext-toolbar id="toolbar" style="display: none;" on-click="_preventEvent"></soso-richtext-toolbar>
+    <div id="urlPanel" class="hidden horizontal layout center" on-click="_preventEvent">
+      <div class="flex cell">
+        <input id="txtLink" placeholder="Paste of type a link" on-change="_onLinkChange" on-focus="_preventEvent" on-blur="_preventEvent"
+          on-click="_preventEvent">
+      </div>
+      <div class="cell">
+        <soso-icon icon-map="[[iconMap]]" icon="close" on-click="_closUrlPanel"></soso-icon>
+      </div>
+    </div>
   </template>
   <script>
     class TextComposer extends Polymer.Element {
@@ -29,17 +69,17 @@
         return {
           placeholder: String,
           data: Object,
-          editing: Boolean
+          editing: Boolean,
+          iconMap: Object
         };
       }
 
       connectedCallback() {
         super.connectedCallback();
+        this.iconMap = window._cardStroyComposerIcons;
         this.$.text.toolbar = this.$.toolbar;
+        this.$.text.delegate = this;
         this._refresh();
-        this.addEventListener('click', (event) => {
-
-        });
       }
 
       _refresh() {
@@ -56,6 +96,55 @@
       _onBlur() {
         if (this.data) {
           this.data.html = this.$.text.value;
+        }
+      }
+
+      _preventEvent(event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      _closUrlPanel(event) {
+        event.stopPropagation();
+        this.hideLink();
+      }
+
+      hideLink() {
+        this.$.urlPanel.classList.add("hidden");
+        if (this._bodyClickListener) {
+          document.removeEventListener("click", this._bodyClickListener);
+          this._bodyClickListener = null;
+        }
+      }
+
+      createLink(range) {
+        this._linkSelectionRange = range.cloneRange();
+        let myRect = this.$.text.getBoundingClientRect();
+        let rect = range.getBoundingClientRect();
+        this.$.urlPanel.style.left = Math.max(0, rect.x - myRect.x + (rect.width / 2) - 88.5) + "px";
+        this.$.urlPanel.style.top = Math.max(-36, rect.y - myRect.y - 36) + "px";
+        this.$.urlPanel.classList.remove("hidden");
+        this.$.txtLink.value = "";
+        this.$.txtLink.focus();
+        requestAnimationFrame(() => {
+          this.$.txtLink.focus();
+        });
+
+        if (!this._bodyClickListener) {
+          this._bodyClickListener = () => {
+            this.hideLink();
+          };
+          document.addEventListener("click", this._bodyClickListener);
+        }
+      }
+
+      _onLinkChange() {
+        let value = this.$.txtLink.value.trim();
+        if (value && this._linkSelectionRange) {
+          console.log("Create link", value, this._linkSelectionRange);
+          this.hideLink();
+          this.$.text.insertLink(value, this._linkSelectionRange);
+          this._linkSelectionRange = null;
         }
       }
     }

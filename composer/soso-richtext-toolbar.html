@@ -23,7 +23,7 @@
         color: #ffeb3b;
       }
     </style>
-    <div class="horizontal layout">
+    <div id="bar" class="horizontal layout">
       <soso-icon id="bold" icon="format-bold" icon-map="[[iconMap]]" on-mousedown="_bold"></soso-icon>
       <soso-icon id="italic" icon="format-italic" icon-map="[[iconMap]]" on-mousedown="_italic"></soso-icon>
       <soso-icon id="link" class="lastIcon" icon="format-link" icon-map="[[iconMap]]" on-mousedown="_link"></soso-icon>
@@ -62,6 +62,9 @@
           }
           if (this._state.italic) {
             this.$.italic.classList.add("selected");
+          }
+          if (this._state.linked) {
+            this.$.link.classList.add("selected");
           }
         }
       }

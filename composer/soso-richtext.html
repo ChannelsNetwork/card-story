@@ -42,13 +42,13 @@
           toolbar: {
             type: Object,
             observer: '_attachToolbar'
-          }
+          },
+          delegate: Object
         }
       }
 
       constructor() {
         super();
-        this._editing = false;
         this.addEventListener('focus', (event) => {
           event.stopPropagation();
           this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
@@ -153,6 +153,9 @@
         } else {
           this._hideToolbar();
         }
+        if (this.delegate) {
+          this.delegate.hideLink();
+        }
       }
 
       _clearSelection() {
@@ -198,6 +201,14 @@
             document.execCommand("italic");
             break;
           case "link":
+            if (this._isSelectionLinked()) {
+              document.execCommand("unlink");
+            } else {
+              this._hideToolbar();
+              setTimeout(() => {
+                this.delegate.createLink(this.parentNode.getSelection().getRangeAt(0));
+              }, 200);
+            }
             break;
           default:
             break;
@@ -209,9 +220,38 @@
         if (this.toolbar) {
           this.toolbar.state = {
             bold: document.queryCommandState("bold"),
-            italic: document.queryCommandState("italic")
+            italic: document.queryCommandState("italic"),
+            linked: this._isSelectionLinked()
           };
         }
+      }
+
+      insertLink(url, range) {
+        this.editing = true;
+        setTimeout(() => {
+          const selection = this.parentNode.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          document.execCommand("createLink", null, url);
+          this._refreshBarState();
+        }, 50);
+      }
+
+      _isSelectionLinked() {
+        const selection = this.parentNode.getSelection();
+        if (selection) {
+          const range = selection.getRangeAt(0);
+          if (range) {
+            let container = range.commonAncestorContainer;
+            if (container) {
+              if (container.nodeType == 3) { container = container.parentNode; }
+              if (container.nodeName === "A") {
+                return true;
+              }
+            }
+          }
+        }
+        return false;
       }
     }
 
