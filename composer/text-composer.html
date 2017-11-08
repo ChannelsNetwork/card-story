@@ -92,6 +92,28 @@
         if (this.data.html) {
           this.$.text.value = this.data.html;
         }
+        this._refreshStyle();
+      }
+
+      get options() {
+        return this.data.options || {};
+      }
+
+      set options(value) {
+        this.data.options = value;
+        this._refreshStyle();
+      }
+
+      _refreshStyle() {
+        if (this.$.text) {
+          let options = this.data.options || {};
+          let style = options.style || "default";
+          if (this._prevStyle) {
+            this.$.text.classList.remove(this._prevStyle);
+          }
+          this.$.text.classList.add(style);
+          this._prevStyle = style;
+        }
       }
 
       _onBlur() {

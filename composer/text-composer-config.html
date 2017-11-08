@@ -1,0 +1,91 @@
+<link rel="import" href="../../soso-radio-button/soso-radio-button.html">
+<link rel="import" href="../../soso-radio-group/soso-radio-group.html">
+<dom-module id="text-composer-config">
+  <template>
+    <style is="custom-style" include="story-styles">
+      :host {
+        display: block;
+        font-size: 14px;
+      }
+
+      h3 {
+        font-family: 'Raleway', sans-serif;
+        margin: 0;
+        line-height: 1.4;
+        font-size: 18px;
+        color: #000;
+        font-weight: 400;
+        letter-spacing: 0.05em;
+      }
+
+      #content {
+        padding: 0 0 10px;
+      }
+
+      section {
+        margin-top: 15px;
+      }
+
+      soso-radio-button {
+        --soso-radio-color: #4CAF50;
+      }
+
+      .mainTitle,
+      .sectionTitle {
+        letter-spacing: initial;
+      }
+    </style>
+    <h3>Text style</h3>
+    <div id="content">
+      <section>
+        <div>
+          <soso-radio-group id="textStyle" on-select="_onStyleSelect">
+            <soso-radio-button name="mainTitle" class="mainTitle" label="Main title"></soso-radio-button>
+            <soso-radio-button name="sectionTitle" class="sectionTitle" label="Section title"></soso-radio-button>
+            <soso-radio-button name="default" label="Paragraph"></soso-radio-button>
+          </soso-radio-group>
+        </div>
+      </section>
+    </div>
+  </template>
+  <script>
+    class TextComposerConfig extends Polymer.Element {
+      static get is() { return 'text-composer-config'; }
+      static get properties() {
+        return {
+          options: Object
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this._loadFromOptions();
+      }
+
+      _loadFromOptions() {
+        if (!this.options) {
+          this.options = {};
+        }
+        setTimeout(() => {
+          this.$.textStyle.selected = this.options.style || "default";
+        }, 200);
+      }
+
+      _onStyleSelect() {
+        if (!this.$.textStyle.selected) {
+          setTimeout(() => {
+            this.$.textStyle.selected = this.options.style || "default";
+          }, 10);
+          return;
+        }
+        this.options.style = this.$.textStyle.selected;
+        this._fireOptionsChanged();
+      }
+
+      _fireOptionsChanged() {
+        this.dispatchEvent(new CustomEvent('options-change', { bubbles: true, composed: true, detail: { options: this.options } }));
+      }
+    }
+    window.customElements.define(TextComposerConfig.is, TextComposerConfig);
+  </script>
+</dom-module>

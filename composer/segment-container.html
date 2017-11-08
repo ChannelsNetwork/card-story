@@ -203,7 +203,6 @@
             this.component = document.createElement("text-composer");
             this.component.placeholder = "Start writing...";
             this.$.noteAdd.classList.add("hidden");
-            this.$.config.classList.add("hidden");
             this.style.maxWidth = "710px";
             break;
           case "header":
@@ -264,6 +263,13 @@
             configInfo = {
               path: this.importPath + "video-composer-config.html",
               nodeName: "video-composer-config",
+              delegate: this.component
+            };
+            break;
+          case "text":
+            configInfo = {
+              path: this.importPath + "text-composer-config.html",
+              nodeName: "text-composer-config",
               delegate: this.component
             };
             break;
