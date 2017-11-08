@@ -8,20 +8,23 @@
   <link href="https://fonts.googleapis.com/css?family=Open+Sans|Raleway" rel="stylesheet">
 
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-  <link rel="import" href="../card-story.html">
+  <link rel="import" href="../composer/soso-richtext.html">
 
   <custom-style>
     <style is="custom-style">
       body {
-        margin: 0;
+        margin: 10px;
+      }
+
+      soso-richtext {
+        background: rgba(0, 0, 0, 0.1);
       }
     </style>
   </custom-style>
 </head>
 
 <body>
-  <card-story-composer></card-story-composer>
-  <!-- <card-story></card-story> -->
+  <soso-richtext id="text" editing="true" placeholder="enter text"></soso-richtext>
 </body>
 
 </html>
