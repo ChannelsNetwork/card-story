@@ -1,3 +1,4 @@
+<link rel="import" href="../../polymer/polymer-element.html">
 <dom-module id="soso-richtext">
   <template>
     <style>
@@ -224,11 +225,15 @@
 
       _showToolbar(rect) {
         this._refreshBarState();
-        this.delegate.showToolbar(rect);
+        if (this.delegate) {
+          this.delegate.showToolbar(rect);
+        }
       }
 
       _hideToolbar() {
-        this.delegate.hideToolbar();
+        if (this.delegate) {
+          this.delegate.hideToolbar();
+        }
       }
 
       _handleToolbarAction(event) {
@@ -247,9 +252,11 @@
               document.execCommand("unlink");
             } else {
               this._hideToolbar();
-              setTimeout(() => {
-                this.delegate.createLink(this.selection.getRangeAt(0));
-              }, 200);
+              if (this.delegate) {
+                setTimeout(() => {
+                  this.delegate.createLink(this.selection.getRangeAt(0));
+                }, 200);
+              }
             }
             break;
           default:
@@ -259,11 +266,13 @@
       }
 
       _refreshBarState() {
-        this.delegate.toolbarState = {
-          bold: document.queryCommandState("bold"),
-          italic: document.queryCommandState("italic"),
-          linked: this._isSelectionLinked()
-        };
+        if (this.delegate) {
+          this.delegate.toolbarState = {
+            bold: document.queryCommandState("bold"),
+            italic: document.queryCommandState("italic"),
+            linked: this._isSelectionLinked()
+          };
+        }
       }
 
       insertLink(url, range) {
