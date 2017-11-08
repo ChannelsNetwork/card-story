@@ -49,11 +49,9 @@
       constructor() {
         super();
         this.addEventListener('focus', (event) => {
-          event.stopPropagation();
           this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
         });
         this.addEventListener('blur', (event) => {
-          event.stopPropagation();
           this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true, detail: {} }));
         });
         this.addEventListener('input', () => {

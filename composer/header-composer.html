@@ -131,12 +131,10 @@
       }
 
       _onFocus(event) {
-        event.stopPropagation();
         this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
       }
 
       _onBlur(event) {
-        event.stopPropagation();
         this.data.title = this.$.title.value.trim();
         this.data.subtitle = this.$.subtitle.value.trim();
         this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true, detail: {} }));
