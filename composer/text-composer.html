@@ -51,7 +51,8 @@
         outline: none;
       }
     </style>
-    <soso-richtext id="text" editing="[[editing]]" placeholder="[[placeholder]]" on-blurred="_onBlur" on-enter-key="_onEnterKey"></soso-richtext>
+    <soso-richtext id="text" editing="[[editing]]" placeholder="[[placeholder]]" on-blurred="_onBlur" on-enter-key="_onEnterKey"
+      on-empty-backspace="_onEmptyBackspace"></soso-richtext>
     <soso-richtext-toolbar id="toolbar" style="display: none;" on-click="_preventEvent"></soso-richtext-toolbar>
     <div id="urlPanel" class="hidden horizontal layout center" on-click="_preventEvent">
       <div class="flex cell">
@@ -206,6 +207,17 @@
         requestAnimationFrame(() => {
           this.dispatchEvent(new CustomEvent('new-section', { bubbles: true, composed: true, detail: { type: "text" } }));
         });
+      }
+
+      _onEmptyBackspace(event) {
+        event.stopPropagation();
+        requestAnimationFrame(() => {
+          this.dispatchEvent(new CustomEvent('delete-section', { bubbles: true, composed: true }));
+        });
+      }
+
+      selectEnd() {
+        this.$.text.selectEnd();
       }
     }
     window.customElements.define(TextComposer.is, TextComposer);

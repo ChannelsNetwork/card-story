@@ -157,6 +157,7 @@
         this.shell.addEventListener('focused', this._onFocus.bind(this));
         this.shell.addEventListener('blurred', this._onBlur.bind(this));
         this.shell.addEventListener("new-section", this._onNewSection.bind(this));
+        this.shell.addEventListener("delete-section", this._onDeleteSection.bind(this));
 
         this._loadComponent();
       }
@@ -179,7 +180,19 @@
         }
       }
 
-      _onFocus(event) {
+      focus() {
+        if (super.focus) {
+          super.focus();
+        }
+        this._onFocus();
+        setTimeout(() => {
+          if (this.component && this.component.selectEnd) {
+            this.component.selectEnd();
+          }
+        });
+      }
+
+      _onFocus() {
         if (!this.editing) {
           this.set("editing", true);
         }
@@ -328,7 +341,7 @@
 
       _onRemove(event) {
         event.preventDefault();
-        this.dispatchEvent(new CustomEvent('remove-segment', { bubbles: true, composed: true, detail: {} }));
+        this.dispatchEvent(new CustomEvent('remove-segment', { bubbles: true, composed: true }));
       }
 
       _onNewSection(event) {
@@ -342,6 +355,10 @@
               break;
           }
         }
+      }
+
+      _onDeleteSection(event) {
+        this._onRemove(event);
       }
     }
     window.customElements.define(SegmentContainer.is, SegmentContainer);

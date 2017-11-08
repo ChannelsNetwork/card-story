@@ -296,9 +296,15 @@
               break;
             }
           }
+          let prevSegment = (ix > 0) ? this.segments[ix - 1] : null;
           this.$.container.removeChild(event.target);
           this.segments.splice(ix, 1);
           this._refreshAddPanelVisibility();
+          if (prevSegment) {
+            setTimeout(() => {
+              prevSegment.node.focus();
+            });
+          }
         }
       }
 
