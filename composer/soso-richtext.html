@@ -58,7 +58,8 @@
         });
         this.addEventListener('input', () => {
           let tx = this.textContent.trim();
-          if (tx) {
+          let hasList = (this.value.indexOf("<ol>") >= 0) || (this.value.indexOf("<ul>") >= 0);
+          if (tx || hasList) {
             this.updateStyles({ '--richtext-placeholder': "" });
           } else {
             this.updateStyles({ '--richtext-placeholder': "'" + (this.placeholder || "") + "'" });
@@ -77,6 +78,7 @@
         super.disconnectedCallback();
         this._attached = false;
         this._detachToolbar();
+        this._detachListeners();
       }
 
       _attachToolbar() {
@@ -102,11 +104,11 @@
             this.focus();
             this._onSelection();
           }, 100);
-          this._attachSelectionListener();
+          this._attachListeners();
         } else {
           this.contentEditable = false
           this._clearSelection();
-          this._detachSelectionListener();
+          this._detachListeners();
         }
       }
 
@@ -118,8 +120,12 @@
         this.innerHTML = v;
       }
 
-      _attachSelectionListener() {
-        this._detachSelectionListener();
+      get textValue() {
+        return this.textContent;
+      }
+
+      _attachListeners() {
+        this._detachListeners();
 
         this._selectionListener = () => {
           if (this._selectionTimer) {
@@ -134,12 +140,33 @@
           }, 250);
         };
         document.addEventListener("selectionchange", this._selectionListener);
+
+        this._keyPressListener = this._handleKeyPress.bind(this);
+        this.addEventListener("keypress", this._keyPressListener);
+
+        this._keyDownListener = (event) => {
+          if (event.keyCode === 13) {
+            if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
+              return;
+            }
+            let hasList = (this.value.indexOf("<ol>") >= 0) || (this.value.indexOf("<ul>") >= 0);
+            if (!hasList) {
+              event.preventDefault();
+              this.dispatchEvent(new CustomEvent('enter-key', { bubbles: true, composed: true }));
+            }
+          }
+        };
+        this.addEventListener("keydown", this._keyDownListener);
       }
 
-      _detachSelectionListener() {
+      _detachListeners() {
         if (this._selectionListener) {
           document.removeEventListener("selectionchange", this._selectionListener);
           this._selectionListener = null;
+        }
+        if (this._keyPressListener) {
+          this.removeEventListener("keypress", this._keyPressListener);
+          this._keyPressListener = null;
         }
         this._hideToolbar();
       }
@@ -234,6 +261,30 @@
           }
         }
         return false;
+      }
+
+      _handleKeyPress(event) {
+        if (event.keyCode === 41 || event.keyCode === 46) {
+          let text = this.textContent.trim();
+          if (text === "1") {
+            event.preventDefault();
+            event.stopPropagation();
+            setTimeout(() => {
+              this.innerHTML = "";
+              document.execCommand("insertOrderedList");
+            });
+          }
+        } else if (event.keyCode === 32) {
+          let text = this.textContent.trim();
+          if (text === "*") {
+            event.preventDefault();
+            event.stopPropagation();
+            setTimeout(() => {
+              this.innerHTML = "";
+              document.execCommand("insertUnorderedList");
+            });
+          }
+        }
       }
     }
 

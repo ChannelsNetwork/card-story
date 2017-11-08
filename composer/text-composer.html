@@ -51,7 +51,7 @@
         outline: none;
       }
     </style>
-    <soso-richtext id="text" editing="[[editing]]" placeholder="[[placeholder]]" on-blurred="_onBlur" on-keydown="_onKeyDown"></soso-richtext>
+    <soso-richtext id="text" editing="[[editing]]" placeholder="[[placeholder]]" on-blurred="_onBlur" on-enter-key="_onEnterKey"></soso-richtext>
     <soso-richtext-toolbar id="toolbar" style="display: none;" on-click="_preventEvent"></soso-richtext-toolbar>
     <div id="urlPanel" class="hidden horizontal layout center" on-click="_preventEvent">
       <div class="flex cell">
@@ -179,16 +179,11 @@
         }
       }
 
-      _onKeyDown(event) {
-        if (event.keyCode === 13) {
-          if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
-            return;
-          }
-          event.preventDefault();
-          requestAnimationFrame(() => {
-            this.dispatchEvent(new CustomEvent('new-section', { bubbles: true, composed: true, detail: { type: "text" } }));
-          });
-        }
+      _onEnterKey(event) {
+        event.stopPropagation();
+        requestAnimationFrame(() => {
+          this.dispatchEvent(new CustomEvent('new-section', { bubbles: true, composed: true, detail: { type: "text" } }));
+        });
       }
     }
     window.customElements.define(TextComposer.is, TextComposer);
