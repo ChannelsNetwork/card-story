@@ -161,7 +161,7 @@
           } else if (event.keyCode === 8) {
             let text = this.textValue.trim();
             if (!text) {
-              const selection = this.parentNode.getSelection();
+              const selection = this.selection;
               const range = selection.getRangeAt(0);
               if (range.startOffset === 0) {
                 setTimeout(() => {
@@ -197,8 +197,15 @@
         this._hideToolbar();
       }
 
+      get selection() {
+        if (this.parentNode.getSelection) {
+          return this.parentNode.getSelection();
+        }
+        return document.getSelection();
+      }
+
       _onSelection() {
-        const selection = this.parentNode.getSelection();
+        const selection = this.selection;
         if (selection.type === "Range") {
           let rect = selection.getRangeAt(0).getBoundingClientRect();
           this._showToolbar(rect);
@@ -211,7 +218,7 @@
       }
 
       _clearSelection() {
-        const selection = this.parentNode.getSelection();
+        const selection = this.selection;
         if (selection) {
           selection.removeAllRanges();
         }
@@ -243,7 +250,7 @@
             } else {
               this._hideToolbar();
               setTimeout(() => {
-                this.delegate.createLink(this.parentNode.getSelection().getRangeAt(0));
+                this.delegate.createLink(this.selection.getRangeAt(0));
               }, 200);
             }
             break;
@@ -264,7 +271,7 @@
       insertLink(url, range) {
         this.editing = true;
         setTimeout(() => {
-          const selection = this.parentNode.getSelection();
+          const selection = this.selection;
           selection.removeAllRanges();
           selection.addRange(range);
           document.execCommand("createLink", null, url);
@@ -273,7 +280,7 @@
       }
 
       _isSelectionLinked() {
-        const selection = this.parentNode.getSelection();
+        const selection = this.selection;
         if (selection && (selection.type === "Range")) {
           const range = selection.getRangeAt(0);
           if (range) {
@@ -319,7 +326,7 @@
         if (clipboard) {
           let html = clipboard.getData("text/html");
           if (html) {
-            let currentRange = this.parentNode.getSelection().getRangeAt(0);
+            let currentRange = this.selection.getRangeAt(0);
             if (currentRange) {
               currentRange = currentRange.cloneRange();
             }
@@ -365,7 +372,7 @@
             this.focus();
             setTimeout(() => {
               if (range) {
-                const selection = this.parentNode.getSelection();
+                const selection = this.selection;
                 selection.removeAllRanges();
                 selection.addRange(range);
               }
@@ -400,7 +407,7 @@
         let range = document.createRange();
         range.selectNodeContents(this);
         range.collapse(false);
-        const selection = this.parentNode.getSelection();
+        const selection = this.selection;
         selection.removeAllRanges();
         selection.addRange(range);
       }
