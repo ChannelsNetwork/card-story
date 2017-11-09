@@ -51,8 +51,7 @@
         outline: none;
       }
     </style>
-    <soso-richtext id="text" editing="[[editing]]" placeholder="[[placeholder]]" on-blurred="_onBlur" on-enter-key="_onEnterKey"
-      on-empty-backspace="_onEmptyBackspace"></soso-richtext>
+    <soso-richtext id="text" editing="[[editing]]" placeholder="[[placeholder]]" on-blur="_onBlur"></soso-richtext>
     <soso-richtext-toolbar id="toolbar" style="display: none;" on-click="_preventEvent"></soso-richtext-toolbar>
     <div id="urlPanel" class="hidden horizontal layout center" on-click="_preventEvent">
       <div class="flex cell">
