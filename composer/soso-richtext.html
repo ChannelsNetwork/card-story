@@ -168,24 +168,41 @@
       }
 
       _handleKeyPress(event) {
-        if (event.keyCode === 41 || event.keyCode === 46) {
+        let code = event.charCode || event.keyCode;
+        if (code === 41 || code === 46) {
           let text = this.textValue.trim();
           if (text === "1") {
             event.preventDefault();
             event.stopPropagation();
             setTimeout(() => {
               this.editor.innerHTML = "";
-              document.execCommand("insertOrderedList");
+              setTimeout(() => {
+                let ol = document.createElement("ol");
+                let li = document.createElement("li");
+                ol.appendChild(li);
+                this.editor.appendChild(ol);
+                setTimeout(() => {
+                  this._selectEndOfNode(li);
+                });
+              });
             });
           }
-        } else if (event.keyCode === 32) {
+        } else if (code === 32) {
           let text = this.textValue.trim();
           if (text === "*") {
             event.preventDefault();
             event.stopPropagation();
             setTimeout(() => {
               this.editor.innerHTML = "";
-              document.execCommand("insertUnorderedList");
+              setTimeout(() => {
+                let ul = document.createElement("ul");
+                let li = document.createElement("li");
+                ul.appendChild(li);
+                this.editor.appendChild(ul);
+                setTimeout(() => {
+                  this._selectEndOfNode(li);
+                });
+              });
             });
           }
         }
@@ -386,6 +403,19 @@
             break;
         }
         this._refreshBarState();
+      }
+
+      _selectEndOfNode(node) {
+        let range = document.createRange();
+        range.selectNodeContents(node);
+        range.collapse(false);
+        const selection = this.selection;
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+
+      selectEnd() {
+        this._selectEndOfNode(this.editor);
       }
     }
     window.customElements.define(SosoRichtext.is, SosoRichtext);
