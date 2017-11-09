@@ -51,7 +51,7 @@
         outline: none;
       }
     </style>
-    <soso-richtext id="text" editing="[[editing]]" placeholder="[[placeholder]]" on-blur="_onBlur"></soso-richtext>
+    <soso-richtext id="text" editing="[[editing]]" placeholder="[[placeholder]]" on-blur="_onBlur" on-keydown="_onKeyDown"></soso-richtext>
     <soso-richtext-toolbar id="toolbar" style="display: none;" on-click="_preventEvent"></soso-richtext-toolbar>
     <div id="urlPanel" class="hidden horizontal layout center" on-click="_preventEvent">
       <div class="flex cell">
@@ -203,15 +203,13 @@
         }
       }
 
-      _onEnterKey(event) {
-        event.stopPropagation();
+      _onEnterKey() {
         requestAnimationFrame(() => {
           this.dispatchEvent(new CustomEvent('new-section', { bubbles: true, composed: true, detail: { type: "text" } }));
         });
       }
 
-      _onEmptyBackspace(event) {
-        event.stopPropagation();
+      _onEmptyBackspace() {
         requestAnimationFrame(() => {
           this.dispatchEvent(new CustomEvent('delete-section', { bubbles: true, composed: true }));
         });
@@ -219,6 +217,32 @@
 
       selectEnd() {
         this.$.text.selectEnd();
+      }
+
+      _onKeyDown(event) {
+        if (event.keyCode === 13) {
+          if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
+            return;
+          }
+          let value = this.$.text.value || "";
+          let hasList = (value.indexOf("<ol") >= 0) || (value.indexOf("<ul") >= 0);
+          if (!hasList) {
+            let text = this.$.text.textValue.trim();
+            if (!text) {
+              return;
+            }
+            event.preventDefault();
+            this._onEnterKey();
+          }
+        } else if (event.keyCode === 8) {
+          let text = this.$.text.textValue.trim();
+          if (!text) {
+            const range = this.$.text.selectionRange;
+            if (range && range.startOffset === 0) {
+              this._onEmptyBackspace();
+            }
+          }
+        }
       }
     }
     window.customElements.define(TextComposer.is, TextComposer);
