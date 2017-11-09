@@ -1,7 +1,7 @@
 <link rel="import" href="../../polymer/polymer-element.html">
 <dom-module id="soso-richtext">
   <template>
-    <style>
+    <style is="custom-style" include="story-styles">
       :host {
         display: block;
         position: relative;
@@ -144,11 +144,11 @@
 
         // Key losteners
         this._keyPressListener = this._handleKeyPress.bind(this);
-        this.addEventListener("keypress", this._keyPressListener);
+        this.editor.addEventListener("keypress", this._keyPressListener);
 
         // Paste listeners
         this._pasteListener = this._handlePaste.bind(this);
-        this.addEventListener("paste", this._pasteListener);
+        this.editor.addEventListener("paste", this._pasteListener);
       }
 
       _detachListeners() {
@@ -157,11 +157,11 @@
           this._selectionListener = null;
         }
         if (this._keyPressListener) {
-          this.removeEventListener("keypress", this._keyPressListener);
+          this.editor.removeEventListener("keypress", this._keyPressListener);
           this._keyPressListener = null;
         }
         if (this._pasteListener) {
-          this.removeEventListener("paste", this._pasteListener);
+          this.editor.removeEventListener("paste", this._pasteListener);
           this._pasteListener = null;
         }
         this._hideToolbar();
