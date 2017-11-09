@@ -207,7 +207,8 @@
 
       _onSelection() {
         const selection = this.selection;
-        if (selection.type === "Range") {
+        const range = selection.getRangeAt(0);
+        if (range && (!range.collapsed)) {
           let rect = selection.getRangeAt(0).getBoundingClientRect();
           this._showToolbar(rect);
         } else {
@@ -260,15 +261,20 @@
 
       _isSelectionLinked() {
         const selection = this.selection;
-        if (selection && (selection.type === "Range")) {
-          const range = selection.getRangeAt(0);
+        let collapsed = true;
+        let range = null;
+        if (selection) {
+          range = selection.getRangeAt(0);
           if (range) {
-            let container = range.commonAncestorContainer;
-            if (container) {
-              if (container.nodeType == 3) { container = container.parentNode; }
-              if (container.nodeName === "A") {
-                return true;
-              }
+            collapsed = range.collapsed;
+          }
+        }
+        if (range && (!collapsed)) {
+          let container = range.commonAncestorContainer;
+          if (container) {
+            if (container.nodeType == 3) { container = container.parentNode; }
+            if (container.nodeName === "A") {
+              return true;
             }
           }
         }
