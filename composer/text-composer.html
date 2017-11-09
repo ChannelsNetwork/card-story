@@ -116,10 +116,12 @@
         }
       }
 
-      _onBlur() {
+      _onBlur(event) {
+        event.stopPropagation();
         if (this.data) {
           this.data.html = this.$.text.value;
         }
+        this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true }));
       }
 
       hideToolbar() {

@@ -29,7 +29,7 @@
         min-height: 1em;
       }
     </style>
-    <div id="editor" on-focus="_onFocus" on-blur="_onBlur" on-input="_onInput"></div>
+    <div id="editor" on-input="_onInput"></div>
   </template>
 
   <script>
@@ -64,6 +64,14 @@
           return this.shadowRoot.getSelection();
         }
         return document.getSelection();
+      }
+
+      get selectionRange() {
+        const s = this.selection;
+        if (s && s.rangeCount) {
+          return s.getRangeAt(0);
+        }
+        return null;
       }
 
       connectedCallback() {
@@ -183,18 +191,6 @@
         }
       }
 
-      _onFocus(event) {
-        if (!event.bubbles) {
-          this.dispatchEvent(new CustomEvent('focus', { bubbles: true, composed: true }));
-        }
-      }
-
-      _onBlur(event) {
-        if (!event.bubbles) {
-          this.dispatchEvent(new CustomEvent('blur', { bubbles: true, composed: true }));
-        }
-      }
-
       _onInput() {
         let tx = this.textValue.trim();
         let hasList = (this.value.indexOf("<ol") >= 0) || (this.value.indexOf("<ul") >= 0);
@@ -206,13 +202,15 @@
       }
 
       _onSelection() {
-        const selection = this.selection;
-        const range = selection.getRangeAt(0);
+        const range = this.selectionRange;
         if (range && (!range.collapsed)) {
-          let rect = selection.getRangeAt(0).getBoundingClientRect();
+          let rect = range.getBoundingClientRect();
           this._showToolbar(rect);
         } else {
           this._hideToolbar();
+        }
+        if (this.delegate) {
+          this.delegate.hideLink();
         }
       }
 
@@ -234,7 +232,6 @@
       _hideToolbar() {
         if (this.delegate) {
           this.delegate.hideToolbar();
-          this.delegate.hideLink();
         }
       }
 
@@ -249,26 +246,22 @@
       }
 
       insertLink(url, range) {
-        this.editing = true;
         setTimeout(() => {
-          const selection = this.selection;
-          selection.removeAllRanges();
-          selection.addRange(range);
-          document.execCommand("createLink", null, url);
-          this._refreshBarState();
-        }, 50);
+          this.editing = true;
+          this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true }));
+          setTimeout(() => {
+            const selection = this.selection;
+            selection.removeAllRanges();
+            selection.addRange(range);
+            document.execCommand("createLink", null, url);
+            this._refreshBarState();
+          }, 50);
+        });
       }
 
       _isSelectionLinked() {
-        const selection = this.selection;
-        let collapsed = true;
-        let range = null;
-        if (selection) {
-          range = selection.getRangeAt(0);
-          if (range) {
-            collapsed = range.collapsed;
-          }
-        }
+        const range = this.selectionRange;
+        let collapsed = range ? range.collapsed : true;
         if (range && (!collapsed)) {
           let container = range.commonAncestorContainer;
           if (container) {
@@ -281,42 +274,13 @@
         return false;
       }
 
-      _handleToolbarAction(event) {
-        switch (event.detail.type) {
-          case "bold":
-            document.execCommand("bold");
-            break;
-          case "italic":
-            document.execCommand("italic");
-            break;
-          case "clear":
-            document.execCommand("removeFormat");
-            break;
-          case "link":
-            if (this._isSelectionLinked()) {
-              document.execCommand("unlink");
-            } else {
-              this._hideToolbar();
-              if (this.delegate) {
-                setTimeout(() => {
-                  this.delegate.createLink(this.selection.getRangeAt(0));
-                }, 200);
-              }
-            }
-            break;
-          default:
-            break;
-        }
-        this._refreshBarState();
-      }
-
       _handlePaste(event) {
         event.preventDefault();
         let clipboard = event.clipboardData || window.clipboardData;
         if (clipboard) {
           let html = clipboard.getData("text/html");
           if (html) {
-            let currentRange = this.selection.getRangeAt(0);
+            let currentRange = this.selectionRange;
             if (currentRange) {
               currentRange = currentRange.cloneRange();
             }
@@ -391,8 +355,39 @@
           });
         });
       }
-    }
 
+      _handleToolbarAction(event) {
+        switch (event.detail.type) {
+          case "bold":
+            document.execCommand("bold");
+            break;
+          case "italic":
+            document.execCommand("italic");
+            break;
+          case "clear":
+            document.execCommand("removeFormat");
+            break;
+          case "link":
+            if (this._isSelectionLinked()) {
+              document.execCommand("unlink");
+            } else {
+              this._hideToolbar();
+              if (this.delegate) {
+                setTimeout(() => {
+                  let range = this.selectionRange;
+                  if (range) {
+                    this.delegate.createLink(range);
+                  }
+                }, 200);
+              }
+            }
+            break;
+          default:
+            break;
+        }
+        this._refreshBarState();
+      }
+    }
     window.customElements.define(SosoRichtext.is, SosoRichtext);
   </script>
 </dom-module>
