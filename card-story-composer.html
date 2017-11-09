@@ -139,9 +139,9 @@
     <div id="previewPanel">
       <button on-click="_onPreview">Preview</button>
     </div>
-    <div id="configPanel" class="hidden" tabindex="-1">
+    <div id="configPanel" class="hidden" tabindex="-1" on-click="_configBackgroundClick">
       <div id="configCell">
-        <div id="configShell">
+        <div id="configShell" on-click="_configForegroundClick">
           <div id="configBar">
             <soso-icon icon-map="[[iconMap]]" class="segIcon barIcon" icon="close" on-click="_closeConfig"></soso-icon>
           </div>
@@ -413,6 +413,14 @@
           this.$.preview.classList.remove("hidden");
           document.body.style.overflow = "hidden";
         });
+      }
+
+      _configBackgroundClick() {
+        this._closeConfig();
+      }
+
+      _configForegroundClick(event) {
+        event.stopPropagation();
       }
     }
     window.customElements.define(CardStoryComposer.is, CardStoryComposer);

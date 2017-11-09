@@ -1,6 +1,7 @@
+<link rel="import" href="../../polymer/polymer-element.html">
 <dom-module id="soso-richtext">
   <template>
-    <style>
+    <style is="custom-style" include="story-styles">
       :host {
         display: block;
         position: relative;
@@ -13,11 +14,7 @@
         border: 1px solid #d8d8d8;
       }
 
-      :host([contenteditable]) {
-        outline: none;
-      }
-
-      :host::before {
+      :host(.empty)::before {
         content: var(--richtext-placeholder);
         opacity: 0.5;
         position: absolute;
@@ -25,8 +22,14 @@
         left: 0;
         pointer-events: none;
       }
+
+      #editor {
+        outline: none;
+        position: relative;
+        min-height: 1em;
+      }
     </style>
-    <slot></slot>
+    <div id="editor" on-input="_onInput"></div>
   </template>
 
   <script>
@@ -46,32 +49,39 @@
         }
       }
 
-      constructor() {
-        super();
-        this.addEventListener('focus', (event) => {
-          event.stopPropagation();
-          this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
-        });
-        this.addEventListener('blur', (event) => {
-          event.stopPropagation();
-          this.dispatchEvent(new CustomEvent('blurred', { bubbles: true, composed: true, detail: {} }));
-        });
-        this.addEventListener('input', () => {
-          let tx = this.textContent.trim();
-          let hasList = (this.value.indexOf("<ol>") >= 0) || (this.value.indexOf("<ul>") >= 0);
-          if (tx || hasList) {
-            this.updateStyles({ '--richtext-placeholder': "" });
-          } else {
-            this.updateStyles({ '--richtext-placeholder': "'" + (this.placeholder || "") + "'" });
-          }
-        });
+      get value() {
+        let html = this.editor.innerHTML || "";
+        html = html.replace(new RegExp(' class="style-scope soso-richtext"', 'g'), '');
+        return html.trim();
+      }
+
+      get textValue() {
+        return this.editor.textContent;
+      }
+
+      get selection() {
+        if (this.shadowRoot.getSelection) {
+          return this.shadowRoot.getSelection();
+        }
+        return document.getSelection();
+      }
+
+      get selectionRange() {
+        const s = this.selection;
+        if (s && s.rangeCount) {
+          return s.getRangeAt(0);
+        }
+        return null;
       }
 
       connectedCallback() {
         super.connectedCallback();
         this._attached = true;
+        this.editor = this.$.editor;
         this.updateStyles({ '--richtext-placeholder': "'" + (this.placeholder || "") + "'" });
+        this.classList.add("empty");
         this._attachToolbar();
+        this._onEditing();
       }
 
       disconnectedCallback() {
@@ -79,6 +89,24 @@
         this._attached = false;
         this._detachToolbar();
         this._detachListeners();
+      }
+
+      _onEditing() {
+        if (this._attached) {
+          if (this.editing) {
+            this.editor.contentEditable = true;
+            this.editor.focus();
+            setTimeout(() => {
+              this.editor.focus();
+              this._onSelection();
+            }, 100);
+            this._attachListeners();
+          } else {
+            this.editor.contentEditable = false;
+            this._clearSelection();
+            this._detachListeners();
+          }
+        }
       }
 
       _attachToolbar() {
@@ -96,37 +124,10 @@
         }
       }
 
-      _onEditing() {
-        if (this.editing) {
-          this.contentEditable = true;
-          this.focus();
-          setTimeout(() => {
-            this.focus();
-            this._onSelection();
-          }, 100);
-          this._attachListeners();
-        } else {
-          this.contentEditable = false
-          this._clearSelection();
-          this._detachListeners();
-        }
-      }
-
-      get value() {
-        return this.innerHTML;
-      }
-
-      set value(v) {
-        this.innerHTML = v;
-      }
-
-      get textValue() {
-        return this.textContent;
-      }
-
       _attachListeners() {
         this._detachListeners();
 
+        // Selection listener
         this._selectionListener = () => {
           if (this._selectionTimer) {
             clearTimeout(this._selectionTimer);
@@ -141,40 +142,13 @@
         };
         document.addEventListener("selectionchange", this._selectionListener);
 
+        // Key losteners
         this._keyPressListener = this._handleKeyPress.bind(this);
-        this.addEventListener("keypress", this._keyPressListener);
+        this.editor.addEventListener("keypress", this._keyPressListener);
 
-        this._keyDownListener = (event) => {
-          if (event.keyCode === 13) {
-            if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
-              return;
-            }
-            let hasList = (this.value.indexOf("<ol>") >= 0) || (this.value.indexOf("<ul>") >= 0);
-            if (!hasList) {
-              let text = this.textValue.trim();
-              if (!text) {
-                return;
-              }
-              event.preventDefault();
-              this.dispatchEvent(new CustomEvent('enter-key', { bubbles: true, composed: true }));
-            }
-          } else if (event.keyCode === 8) {
-            let text = this.textValue.trim();
-            if (!text) {
-              const selection = this.parentNode.getSelection();
-              const range = selection.getRangeAt(0);
-              if (range.startOffset === 0) {
-                setTimeout(() => {
-                  this.dispatchEvent(new CustomEvent('empty-backspace', { bubbles: true, composed: true }));
-                });
-              }
-            }
-          }
-        };
-        this.addEventListener("keydown", this._keyDownListener);
-
+        // Paste listeners
         this._pasteListener = this._handlePaste.bind(this);
-        this.addEventListener("paste", this._pasteListener);
+        this.editor.addEventListener("paste", this._pasteListener);
       }
 
       _detachListeners() {
@@ -183,24 +157,71 @@
           this._selectionListener = null;
         }
         if (this._keyPressListener) {
-          this.removeEventListener("keypress", this._keyPressListener);
+          this.editor.removeEventListener("keypress", this._keyPressListener);
           this._keyPressListener = null;
         }
-        if (this._keyDownListener) {
-          this.removeEventListener("keydown", this._keyDownListener);
-          this._keyDownListener = null;
-        }
         if (this._pasteListener) {
-          this.removeEventListener("paste", this._pasteListener);
+          this.editor.removeEventListener("paste", this._pasteListener);
           this._pasteListener = null;
         }
         this._hideToolbar();
       }
 
+      _handleKeyPress(event) {
+        let code = event.charCode || event.keyCode;
+        if (code === 41 || code === 46) {
+          let text = this.textValue.trim();
+          if (text === "1") {
+            event.preventDefault();
+            event.stopPropagation();
+            setTimeout(() => {
+              this.editor.innerHTML = "";
+              setTimeout(() => {
+                let ol = document.createElement("ol");
+                let li = document.createElement("li");
+                ol.appendChild(li);
+                this.editor.appendChild(ol);
+                setTimeout(() => {
+                  this._selectEndOfNode(li);
+                });
+              });
+            });
+          }
+        } else if (code === 32) {
+          let text = this.textValue.trim();
+          if (text === "*") {
+            event.preventDefault();
+            event.stopPropagation();
+            setTimeout(() => {
+              this.editor.innerHTML = "";
+              setTimeout(() => {
+                let ul = document.createElement("ul");
+                let li = document.createElement("li");
+                ul.appendChild(li);
+                this.editor.appendChild(ul);
+                setTimeout(() => {
+                  this._selectEndOfNode(li);
+                });
+              });
+            });
+          }
+        }
+      }
+
+      _onInput() {
+        let tx = this.textValue.trim();
+        let hasList = (this.value.indexOf("<ol") >= 0) || (this.value.indexOf("<ul") >= 0);
+        if (tx || hasList) {
+          this.classList.remove("empty");
+        } else {
+          this.classList.add("empty");
+        }
+      }
+
       _onSelection() {
-        const selection = this.parentNode.getSelection();
-        if (selection.type === "Range") {
-          let rect = selection.getRangeAt(0).getBoundingClientRect();
+        const range = this.selectionRange;
+        if (range && (!range.collapsed)) {
+          let rect = range.getBoundingClientRect();
           this._showToolbar(rect);
         } else {
           this._hideToolbar();
@@ -211,7 +232,7 @@
       }
 
       _clearSelection() {
-        const selection = this.parentNode.getSelection();
+        const selection = this.selection;
         if (selection) {
           selection.removeAllRanges();
         }
@@ -219,98 +240,55 @@
 
       _showToolbar(rect) {
         this._refreshBarState();
-        this.delegate.showToolbar(rect);
+        if (this.delegate) {
+          this.delegate.showToolbar(rect);
+          this.delegate.hideLink();
+        }
       }
 
       _hideToolbar() {
-        this.delegate.hideToolbar();
-      }
-
-      _handleToolbarAction(event) {
-        switch (event.detail.type) {
-          case "bold":
-            document.execCommand("bold");
-            break;
-          case "italic":
-            document.execCommand("italic");
-            break;
-          case "clear":
-            document.execCommand("removeFormat");
-            break;
-          case "link":
-            if (this._isSelectionLinked()) {
-              document.execCommand("unlink");
-            } else {
-              this._hideToolbar();
-              setTimeout(() => {
-                this.delegate.createLink(this.parentNode.getSelection().getRangeAt(0));
-              }, 200);
-            }
-            break;
-          default:
-            break;
+        if (this.delegate) {
+          this.delegate.hideToolbar();
         }
-        this._refreshBarState();
       }
 
       _refreshBarState() {
-        this.delegate.toolbarState = {
-          bold: document.queryCommandState("bold"),
-          italic: document.queryCommandState("italic"),
-          linked: this._isSelectionLinked()
-        };
+        if (this.delegate) {
+          this.delegate.toolbarState = {
+            bold: document.queryCommandState("bold"),
+            italic: document.queryCommandState("italic"),
+            linked: this._isSelectionLinked()
+          };
+        }
       }
 
       insertLink(url, range) {
-        this.editing = true;
         setTimeout(() => {
-          const selection = this.parentNode.getSelection();
-          selection.removeAllRanges();
-          selection.addRange(range);
-          document.execCommand("createLink", null, url);
-          this._refreshBarState();
-        }, 50);
+          this.editing = true;
+          this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true }));
+          setTimeout(() => {
+            const selection = this.selection;
+            selection.removeAllRanges();
+            selection.addRange(range);
+            document.execCommand("createLink", null, url);
+            this._refreshBarState();
+          }, 50);
+        });
       }
 
       _isSelectionLinked() {
-        const selection = this.parentNode.getSelection();
-        if (selection && (selection.type === "Range")) {
-          const range = selection.getRangeAt(0);
-          if (range) {
-            let container = range.commonAncestorContainer;
-            if (container) {
-              if (container.nodeType == 3) { container = container.parentNode; }
-              if (container.nodeName === "A") {
-                return true;
-              }
+        const range = this.selectionRange;
+        let collapsed = range ? range.collapsed : true;
+        if (range && (!collapsed)) {
+          let container = range.commonAncestorContainer;
+          if (container) {
+            if (container.nodeType == 3) { container = container.parentNode; }
+            if (container.nodeName === "A") {
+              return true;
             }
           }
         }
         return false;
-      }
-
-      _handleKeyPress(event) {
-        if (event.keyCode === 41 || event.keyCode === 46) {
-          let text = this.textContent.trim();
-          if (text === "1") {
-            event.preventDefault();
-            event.stopPropagation();
-            setTimeout(() => {
-              this.innerHTML = "";
-              document.execCommand("insertOrderedList");
-            });
-          }
-        } else if (event.keyCode === 32) {
-          let text = this.textContent.trim();
-          if (text === "*") {
-            event.preventDefault();
-            event.stopPropagation();
-            setTimeout(() => {
-              this.innerHTML = "";
-              document.execCommand("insertUnorderedList");
-            });
-          }
-        }
       }
 
       _handlePaste(event) {
@@ -319,7 +297,7 @@
         if (clipboard) {
           let html = clipboard.getData("text/html");
           if (html) {
-            let currentRange = this.parentNode.getSelection().getRangeAt(0);
+            let currentRange = this.selectionRange;
             if (currentRange) {
               currentRange = currentRange.cloneRange();
             }
@@ -360,12 +338,11 @@
         return new Promise((resolve, reject) => {
           this.editing = true;
           this.focus();
-          // this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
           setTimeout(() => {
             this.focus();
             setTimeout(() => {
               if (range) {
-                const selection = this.parentNode.getSelection();
+                const selection = this.selection;
                 selection.removeAllRanges();
                 selection.addRange(range);
               }
@@ -381,6 +358,8 @@
           document.execCommand("selectAll");
           document.execCommand("removeFormat");
         }
+
+        // remove ignored nodes
         const ignoreList = ["figure", "img", "image", "form", "input", "select", "video", "audio", "meta", "script", "link", "meta", "applet", "aside",
           "object", "entity", "button", "canvas", "svg", "font", "frame", "iframe"];
         ignoreList.forEach((tag) => {
@@ -394,18 +373,60 @@
               d.parentNode.removeChild(d);
           });
         });
+
+        // remove styles
+        let nodes = div.querySelectorAll('[style]');
+        for (var i = 0; i < nodes.length; i++) {
+          let n = nodes[i];
+          n.removeAttribute("style");
+        }
       }
 
-      selectEnd() {
+      _handleToolbarAction(event) {
+        switch (event.detail.type) {
+          case "bold":
+            document.execCommand("bold");
+            break;
+          case "italic":
+            document.execCommand("italic");
+            break;
+          case "clear":
+            document.execCommand("removeFormat");
+            break;
+          case "link":
+            if (this._isSelectionLinked()) {
+              document.execCommand("unlink");
+            } else {
+              this._hideToolbar();
+              if (this.delegate) {
+                setTimeout(() => {
+                  let range = this.selectionRange;
+                  if (range) {
+                    this.delegate.createLink(range);
+                  }
+                }, 200);
+              }
+            }
+            break;
+          default:
+            break;
+        }
+        this._refreshBarState();
+      }
+
+      _selectEndOfNode(node) {
         let range = document.createRange();
-        range.selectNodeContents(this);
+        range.selectNodeContents(node);
         range.collapse(false);
-        const selection = this.parentNode.getSelection();
+        const selection = this.selection;
         selection.removeAllRanges();
         selection.addRange(range);
       }
-    }
 
+      selectEnd() {
+        this._selectEndOfNode(this.editor);
+      }
+    }
     window.customElements.define(SosoRichtext.is, SosoRichtext);
   </script>
 </dom-module>
