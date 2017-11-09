@@ -239,7 +239,11 @@
           if (!text) {
             const range = this.$.text.selectionRange;
             if (range && range.startOffset === 0) {
-              this._onEmptyBackspace();
+              let value = this.$.text.value || "";
+              let hasList = (value.indexOf("<ol") >= 0) || (value.indexOf("<ul") >= 0);
+              if (!hasList) {
+                this._onEmptyBackspace();
+              }
             }
           }
         }
