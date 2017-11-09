@@ -358,6 +358,8 @@
           document.execCommand("selectAll");
           document.execCommand("removeFormat");
         }
+
+        // remove ignored nodes
         const ignoreList = ["figure", "img", "image", "form", "input", "select", "video", "audio", "meta", "script", "link", "meta", "applet", "aside",
           "object", "entity", "button", "canvas", "svg", "font", "frame", "iframe"];
         ignoreList.forEach((tag) => {
@@ -371,6 +373,13 @@
               d.parentNode.removeChild(d);
           });
         });
+
+        // remove styles
+        let nodes = div.querySelectorAll('[style]');
+        for (var i = 0; i < nodes.length; i++) {
+          let n = nodes[i];
+          n.removeAttribute("style");
+        }
       }
 
       _handleToolbarAction(event) {
