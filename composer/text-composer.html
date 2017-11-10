@@ -150,8 +150,12 @@
       _updateToolbarPosition(rect) {
         if (rect) {
           let myRect = this.$.text.getBoundingClientRect();
-          this.$.toolbar.style.left = Math.max(81, rect.x - myRect.x + (rect.width / 2)) + "px";
-          this.$.toolbar.style.top = Math.max(0, rect.y - myRect.y) + "px";
+          let x = rect.x || rect.left;
+          let y = rect.y || rect.top;
+          let myX = myRect.x || myRect.left;
+          let myY = myRect.y || myRect.top;
+          this.$.toolbar.style.left = Math.max(81, x - myX + (rect.width / 2)) + "px";
+          this.$.toolbar.style.top = Math.max(0, y - myY) + "px";
         }
       }
 
@@ -177,8 +181,12 @@
         this._linkSelectionRange = range.cloneRange();
         let myRect = this.$.text.getBoundingClientRect();
         let rect = range.getBoundingClientRect();
-        this.$.urlPanel.style.left = Math.max(0, rect.x - myRect.x + (rect.width / 2) - 88.5) + "px";
-        this.$.urlPanel.style.top = Math.max(-36, rect.y - myRect.y - 36) + "px";
+        let x = rect.x || rect.left;
+        let y = rect.y || rect.top;
+        let myX = myRect.x || myRect.left;
+        let myY = myRect.y || myRect.top;
+        this.$.urlPanel.style.left = Math.max(0, x - myX + (rect.width / 2) - 88.5) + "px";
+        this.$.urlPanel.style.top = Math.max(-36, y - myY - 36) + "px";
         this.$.urlPanel.classList.remove("hidden");
         this.$.txtLink.value = "";
         this.$.txtLink.focus();
