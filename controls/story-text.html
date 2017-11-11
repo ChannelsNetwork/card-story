@@ -30,6 +30,13 @@
       _refresh() {
         if (this.data) {
           this.$.section.innerHTML = this.data.html || "";
+          let options = this.data.options || {};
+          let style = options.style || "default";
+          if (this._prevStyle) {
+            this.$.section.classList.remove(this._prevStyle);
+          }
+          this.$.section.classList.add(style);
+          this._prevStyle = style;
         }
       }
     }
