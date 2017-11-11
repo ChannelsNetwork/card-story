@@ -205,7 +205,7 @@
           this._selectedThumbnail = null;
         }
         let selected = this.selected || 0;
-        let thumbnail = this.shadowRoot.querySelector('story-gallery-thumbnail[data-index="' + selected + '"');
+        let thumbnail = this.shadowRoot.querySelector('story-gallery-thumbnail[data-index="' + selected + '"]');
         thumbnail.classList.add("selected");
         thumbnail.classList.remove("notSelected");
         this._selectedThumbnail = thumbnail;
