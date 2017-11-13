@@ -371,6 +371,14 @@
           resolve();
         });
       }
+
+      get textSearch() {
+        if (this.component && this.component.textSearch) {
+          return this.component.textSearch;
+        } else {
+          return "";
+        }
+      }
     }
     window.customElements.define(SegmentContainer.is, SegmentContainer);
   </script>

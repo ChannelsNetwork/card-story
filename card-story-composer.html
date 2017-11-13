@@ -197,6 +197,16 @@
         };
       }
 
+      get searchText() {
+        let result = "";
+        for (const segment of this.segments) {
+          if (segment.node && segment.node.textSearch) {
+            result += segment.node.textSearch;
+          }
+        }
+        return result;
+      }
+
       get prepareMessage() {
         return "Uploading media";
       }
@@ -439,6 +449,7 @@
         }
         return Promise.all(promises);
       }
+
     }
     window.customElements.define(CardStoryComposer.is, CardStoryComposer);
   </script>
