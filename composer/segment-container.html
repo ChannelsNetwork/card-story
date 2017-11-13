@@ -227,9 +227,11 @@
             break;
           case "image":
             this.component = document.createElement("image-composer");
+            this.$.noteAdd.classList.add("hidden");
             break;
           case "video":
             this.component = document.createElement("video-composer");
+            this.$.noteAdd.classList.add("hidden");
             break;
           case "gallery":
             this.component = document.createElement("gallery-composer");
