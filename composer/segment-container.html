@@ -360,6 +360,15 @@
       _onDeleteSection(event) {
         this._onRemove(event);
       }
+
+      prepare() {
+        if (this.component && this.component.prepare) {
+          return this.component.prepare();
+        }
+        return new Promise((resolve, reject) => {
+          resolve();
+        });
+      }
     }
     window.customElements.define(SegmentContainer.is, SegmentContainer);
   </script>
