@@ -77,13 +77,13 @@
       }
     </style>
     <div id="noFile">
-      <soso-file-picker class="noborder" id="filePicker" label="Drag a video file" accept="video/*" on-files="_onFile"></soso-file-picker>
+      <soso-file-picker class="noborder" id="filePicker" label="Drag a video file" accept="video/mp4,video/*,.mp4" on-files="_onFile"></soso-file-picker>
       <div id="fileMessage" class="hidden">[[fileMessage]]</div>
     </div>
     <div id="hasFile" class="hidden">
       <div id="videoPanel">
         <div id="videoShell">
-          <video id="v" preload="metadata" loop playsinline on-loadedmetadata="_onMetadata"></video>
+          <video id="v" loop playsinline on-loadedmetadata="_onMetadata"></video>
           <soso-icon id="playIcon" icon-map="[[iconMap]]" icon="play-arrow"></soso-icon>
         </div>
       </div>
