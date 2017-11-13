@@ -55,8 +55,8 @@
     </style>
     <div id="videoPanel">
       <div id="videoShell">
-        <video id="v" src$="[[data.video]]" controls$="[[controls]]" preload="metadata" loop playsinline on-loadedmetadata="_onMetadata"
-          on-canplay="_canPlay" on-play="_onPlay" on-pause="_onPause">
+        <video id="v" src$="[[data.video]]" controls$="[[controls]]" loop playsinline on-loadedmetadata="_onMetadata" on-canplay="_canPlay"
+          on-play="_onPlay" on-pause="_onPause">
         </video>
         <story-video-controls id="bar" class="hidden" on-play-change="_onUserPlayChange"></story-video-controls>
       </div>
