@@ -261,12 +261,15 @@
           this._readFile(file).then((dataUrl) => {
             this._loadImage(dataUrl).then((imageData) => {
               this._setFileMessage("Uploading image...");
-              this._uploadImage(file, dataUrl).then((response) => {
+              this._uploadPromise = this._uploadImage(file, dataUrl).then((response) => {
                 this.data.image = response.url;
                 this.data.width = imageData.width;
                 this.data.height = imageData.height;
                 this._setFileMessage(null);
                 this._refreshImage();
+              }).catch((err) => {
+                this._setFileMessage("Failed to upload image");
+                console.error("Failed to upload file", err);
               });
             });
           }).catch((err) => {
@@ -320,6 +323,14 @@
               url: dataUrl
             });
           });
+        }
+      }
+
+      prepare() {
+        if (this._uploadPromise) {
+          return Promise.all([this._uploadPromise]);
+        } else {
+          return new Promise((resolve, reject) => { resolve(); });
         }
       }
     }

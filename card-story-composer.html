@@ -197,6 +197,10 @@
         };
       }
 
+      get prepareMessage() {
+        return "Uploading media";
+      }
+
       _guid() {
         const s4 = () => {
           return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
@@ -408,10 +412,12 @@
 
       _onPreview() {
         console.log("Shared State", this.sharedState);
-        Polymer.importHref(this.importPath + 'card-story-preview.html', () => {
-          this.$.preview.data = this.sharedState;
-          this.$.preview.classList.remove("hidden");
-          document.body.style.overflow = "hidden";
+        this.prepare().then(() => {
+          Polymer.importHref(this.importPath + 'card-story-preview.html', () => {
+            this.$.preview.data = this.sharedState;
+            this.$.preview.classList.remove("hidden");
+            document.body.style.overflow = "hidden";
+          });
         });
       }
 
@@ -421,6 +427,17 @@
 
       _configForegroundClick(event) {
         event.stopPropagation();
+      }
+
+      prepare() {
+        let promises = [];
+        for (let i = 0; i < this.segments.length; i++) {
+          let s = this.segments[i];
+          if (s.node && s.node.prepare) {
+            promises.push(s.node.prepare());
+          }
+        }
+        return Promise.all(promises);
       }
     }
     window.customElements.define(CardStoryComposer.is, CardStoryComposer);
