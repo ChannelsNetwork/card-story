@@ -53,7 +53,7 @@
 
       @media (max-width: 600px) {
         .volumeCell {
-          max-width: 65px;
+          display: none !important;
         }
       }
     </style>
@@ -181,7 +181,7 @@
       }
 
       _openFullScreen() {
-        let fn = this.video.requestFullscreen || this.video.mozRequestFullScreen || this.video.webkitRequestFullscreen;
+        let fn = this.video.webkitEnterFullscreen || this.video.requestFullscreen || this.video.mozRequestFullScreen || this.video.webkitRequestFullscreen;
         if (fn) {
           fn.call(this.video);
         }
