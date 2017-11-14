@@ -258,7 +258,7 @@
       }
 
       get searchText() {
-        return this.$.text.textValue;
+        return this.$.text.textValue || "";
       }
     }
     window.customElements.define(TextComposer.is, TextComposer);

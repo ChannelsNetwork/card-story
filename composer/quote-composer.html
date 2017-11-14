@@ -141,7 +141,7 @@
       }
 
       get textSearch() {
-        return this.$.quote.value + " " + this.$.author.value;
+        return (this.$.quote.value || "") + " " + (this.$.author.value || "");
       }
     }
     window.customElements.define(QuoteComposer.is, QuoteComposer);

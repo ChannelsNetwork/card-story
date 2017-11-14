@@ -374,7 +374,7 @@
 
       get textSearch() {
         if (this.component && this.component.textSearch) {
-          return this.component.textSearch;
+          return this.component.textSearch || "";
         } else {
           return "";
         }
