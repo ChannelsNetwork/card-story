@@ -224,7 +224,7 @@
       }
 
       get searchText() {
-        return (this.$.header.value || "") + " " + (this.$.subtitle.value || "");
+        return (this.$.title.value || "") + " " + (this.$.subtitle.value || "");
       }
     }
     window.customElements.define(HeaderComposer.is, HeaderComposer);
