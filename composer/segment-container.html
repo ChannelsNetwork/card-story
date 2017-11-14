@@ -372,9 +372,9 @@
         });
       }
 
-      get textSearch() {
-        if (this.component && this.component.textSearch) {
-          return this.component.textSearch || "";
+      get searchText() {
+        if (this.component && this.component.searchText) {
+          return this.component.searchText || "";
         } else {
           return "";
         }

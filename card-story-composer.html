@@ -200,8 +200,8 @@
       get searchText() {
         let result = "";
         for (const segment of this.segments) {
-          if (segment.node && segment.node.textSearch) {
-            result += segment.node.textSearch;
+          if (segment.node && segment.node.searchText) {
+            result += segment.node.searchText;
           }
         }
         return result;
