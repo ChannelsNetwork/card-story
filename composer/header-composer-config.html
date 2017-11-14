@@ -257,7 +257,7 @@
 
       _uploadImage(file) {
         if (this.services) {
-          return this.services.upload(file);
+          return this.services.uploadImage(file);
         } else {
           return this._readFile(file).then((dataUrl) => {
             return {
