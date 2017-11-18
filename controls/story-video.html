@@ -82,6 +82,7 @@
 
       connectedCallback() {
         super.connectedCallback();
+        this.options = {};
         this._userPausedOnce = false;
         this._connected = true;
         requestAnimationFrame(() => {
@@ -142,7 +143,7 @@
             let imh = imw / r;
             if (imh > (ph - 30)) {
               imh = ph - 30;
-              imW = imh * r;
+              imw = imh * r;
             }
             this.$.v.style.width = imw + "px";
             this.$.v.style.height = "auto";
