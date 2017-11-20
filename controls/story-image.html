@@ -4,6 +4,7 @@
       :host {
         display: block;
         position: relative;
+        margin: 20px 0;
       }
 
       #imgPanel {
@@ -110,6 +111,7 @@
                 break;
             }
             this._attachIntersectionObserver();
+            this._loadImage();
           });
         }
       }
