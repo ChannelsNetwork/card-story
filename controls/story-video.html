@@ -131,8 +131,8 @@
         let vh = this.$.v.videoHeight;
         let vw = this.$.v.videoWidth;
         let r = vw / vh;
-        let ph = this.delegate.scrollPanel.offsetHeight;
-        let pw = this.delegate.scrollPanel.offsetWidth;
+        let ph = this.delegate.viewerHeight;
+        let pw = this.delegate.viewerWidth;
         this._offset = [0, 0];
         this.$.v.classList.remove("natural");
         this.$.v.style.width = "";

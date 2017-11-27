@@ -15,14 +15,8 @@
       }
 
       #article {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        overflow-x: hidden;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
+        position: relative;
+        display: block;
       }
     </style>
     <article id="article"></article>
@@ -146,14 +140,18 @@
         }
       }
 
-      get scrollPanel() {
-        return this.article;
+      get viewerWidth() {
+        return window.innerWidth;
+      }
+
+      get viewerHeight() {
+        return Math.max(100, window.innerHeight - 60);
       }
 
       addIntersectionHandler(node, handler) {
         if (!this._intersectionObserver) {
           let options = {
-            root: this.scrollPanel,
+            root: null,
             rootMargin: "0px",
             threshold: this._buildThresholds(30)
           };
@@ -171,7 +169,7 @@
       addVisibleIntersectionHandle(node, handler) {
         if (!this._visibleIntersectionObserver) {
           let options = {
-            root: this.scrollPanel,
+            root: null,
             rootMargin: "0px",
             threshold: 0
           };
