@@ -92,8 +92,8 @@
             switch (style) {
               case "fullWidth": {
                 pStyle.width = "100%;";
-                let w = this.delegate.scrollPanel.offsetWidth;
-                let h = Math.min(w / imgRatio, this.delegate.scrollPanel.offsetHeight);
+                let w = this.delegate.viewerWidth;
+                let h = Math.min(w / imgRatio, this.delegate.viewerHeight);
                 pStyle.height = h + "px";
                 break;
               }
@@ -105,13 +105,12 @@
               case "cover":
               case "cover-fit":
                 pStyle.width = "100%";
-                pStyle.height = "100vh";
+                pStyle.height = this.delegate.viewerHeight + "px"
                 break;
               default:
                 break;
             }
             this._attachIntersectionObserver();
-            this._loadImage();
           });
         }
       }
