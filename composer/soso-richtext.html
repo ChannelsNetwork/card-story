@@ -57,6 +57,7 @@
 
       set value(v) {
         this.editor.innerHTML = v || "";
+        this._onInput();
       }
 
       get textValue() {
