@@ -258,8 +258,8 @@
       }
 
       _loadFromInitialState() {
-        if (this.initialState && this.initialState.shared && this.initialState.shared.collections && this.initialState.shared.collections.records) {
-          let records = this.initialState.shared.collections.records;
+        if (this.initialState && this.initialState.shared && this.initialState.shared.collections && this.initialState.shared.collections.segments && this.initialState.shared.collections.segments.records) {
+          let records = this.initialState.shared.collections.segments.records;
           for (let i = 0; i < records.length; i++) {
             let s = records[i];
             s.node = this._insertSegment(i, s, false);
