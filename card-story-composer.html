@@ -163,6 +163,7 @@
       static get properties() {
         return {
           services: Object,
+          initialState: Object,
           segments: Array,
           iconMap: Object
         };
@@ -227,6 +228,9 @@
       connectedCallback() {
         super.connectedCallback();
         this.iconMap = window._cardStroyComposerIcons;
+
+        this._loadFromInitialState();
+
         if (this.segments.length === 0) {
           this._addSegmentAtIndex(0, "header", false);
           this._addSegmentAtIndex(1, "text", true);
@@ -250,6 +254,17 @@
         if (this._summaryListener) {
           this.removeEventListener('story-summary-change', this._summaryListener);
           this._summaryListener = null;
+        }
+      }
+
+      _loadFromInitialState() {
+        if (this.initialState && this.initialState.shared && this.initialState.shared.collections && this.initialState.shared.collections.records) {
+          let records = this.initialState.shared.collections.records;
+          for (let i = 0; i < records.length; i++) {
+            let s = records[i];
+            s.node = this._insertSegment(i, s, false);
+            this.segments.push(s);
+          }
         }
       }
 
