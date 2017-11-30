@@ -118,6 +118,8 @@
           data.options = {};
         }
         this.data = data;
+        this.$.title.value = data.title || "";
+        this.$.Subtitle.value = data.subtitle || "";
         this._refreshOptions();
       }
 
