@@ -262,7 +262,7 @@
           let records = this.initialState.shared.collections.segments.records;
           for (let i = 0; i < records.length; i++) {
             let s = records[i];
-            s.node = this._insertSegment(i, s, false);
+            s.node = this._insertSegment(i, s, i === 0);
             this.segments.push(s);
           }
         }
