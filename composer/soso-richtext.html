@@ -55,6 +55,11 @@
         return html.trim();
       }
 
+      set value(v) {
+        this.editor.innerHTML = v || "";
+        this._onInput();
+      }
+
       get textValue() {
         return this.editor.textContent;
       }
