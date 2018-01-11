@@ -215,6 +215,7 @@
           case "text":
             this.component = document.createElement("text-composer");
             this.component.placeholder = "Start writing...";
+            this.component.loadOptions = this.segment.options;
             this.$.noteAdd.classList.add("hidden");
             this.style.maxWidth = "710px";
             break;
@@ -314,11 +315,11 @@
         }
       }
 
-      _onAddText(event) {
+      _onAddText(event, loadOptions) {
         if (event) {
           event.preventDefault();
         }
-        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'text' } }));
+        this.dispatchEvent(new CustomEvent('add-segment', { bubbles: true, composed: true, detail: { type: 'text', options: loadOptions } }));
       }
 
       _onAddPhoto(event) {
@@ -351,7 +352,8 @@
         if (type) {
           switch (type) {
             case "text":
-              this._onAddText();
+              let loadOptions = { pasteText: event.detail.paste, pasteTextContent: event.detail.pasteTextContent };
+              this._onAddText(null, loadOptions);
               break;
             default:
               break;

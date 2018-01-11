@@ -323,6 +323,7 @@
               div.focus();
               setTimeout(() => {
                 this._cleanHtml(div);
+                this._cleanCusomElements(div);
                 this._insertHtml(div.innerHTML, currentRange).then(() => {
                   div.parentNode.removeChild(div);
                 });
@@ -366,7 +367,7 @@
 
         // remove ignored nodes
         const ignoreList = ["figure", "img", "image", "form", "input", "select", "video", "audio", "meta", "script", "link", "meta", "applet", "aside",
-          "object", "entity", "button", "canvas", "svg", "font", "frame", "iframe"];
+          "object", "entity", "button", "canvas", "svg", "font", "frame", "iframe", "style"];
         ignoreList.forEach((tag) => {
           let nl = div.getElementsByTagName(tag);
           let list = [];
@@ -384,6 +385,32 @@
         for (var i = 0; i < nodes.length; i++) {
           let n = nodes[i];
           n.removeAttribute("style");
+        }
+        nodes = div.querySelectorAll('[class]');
+        for (var i = 0; i < nodes.length; i++) {
+          let n = nodes[i];
+          n.removeAttribute("class");
+        }
+      }
+
+      _cleanCusomElements(div) {
+        let nl = div.childNodes;
+        if (nl && nl.length) {
+          for (let i = 0; i < nl.length; i++) {
+            let n = nl[i];
+            if (n.nodeType === Node.ELEMENT_NODE) {
+              let tagName = n.tagName;
+              if (tagName) {
+                if (tagName.indexOf('-') >= 0) {
+                  let p = document.createElement("p");
+                  p.textContent = n.textContent || "";
+                  n.parentNode.replaceChild(p, n);
+                } else {
+                  this._cleanCusomElements(n);
+                }
+              }
+            }
+          }
         }
       }
 
@@ -430,6 +457,30 @@
 
       selectEnd() {
         this._selectEndOfNode(this.editor);
+      }
+
+      cutSelection() {
+        document.execCommand("cut");
+        requestAnimationFrame(() => {
+          this._onInput();
+        });
+      }
+
+      paste() {
+        let ret = document.execCommand("paste");
+        if (ret) {
+          requestAnimationFrame(() => {
+            this._onInput();
+          });
+        }
+        return ret;
+      }
+
+      setHtml(html) {
+        document.execCommand("insertHTML", null, html || "");
+        requestAnimationFrame(() => {
+          this._onInput();
+        });
       }
     }
     window.customElements.define(SosoRichtext.is, SosoRichtext);

@@ -297,7 +297,7 @@
       }
 
       _addSegmentAtIndex(index, type, editing) {
-        let s = this._createSegment(type);
+        let s = this._createSegment(type, null);
         s.node = this._insertSegment(index, s, editing);
         this.segments.push(s);
         this._refreshAddPanelVisibility();
@@ -314,7 +314,7 @@
               break;
             }
           }
-          let s = this._createSegment(detail.type);
+          let s = this._createSegment(detail.type, detail.options);
           s.node = this._insertAfter(target, s, true);
           this.segments.splice(ix + 1, 0, s);
           this._refreshAddPanelVisibility();
@@ -343,10 +343,11 @@
         }
       }
 
-      _createSegment(type) {
+      _createSegment(type, options) {
         return {
           id: this._guid(),
           type: type,
+          options: options,
           data: {}
         };
       }
