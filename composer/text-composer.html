@@ -69,6 +69,7 @@
       static get properties() {
         return {
           placeholder: String,
+          loadOptions: Object,
           data: Object,
           editing: Boolean,
           iconMap: Object
@@ -81,6 +82,14 @@
         this.$.text.toolbar = this.$.toolbar;
         this.$.text.delegate = this;
         this._refresh();
+
+        if (this.loadOptions && this.loadOptions.pasteText) {
+          setTimeout(() => {
+            if (!this.$.text.paste()) {
+              this.$.text.setHtml(this.loadOptions.pasteTextContent);
+            }
+          });
+        }
       }
 
       _refresh() {
@@ -211,9 +220,9 @@
         }
       }
 
-      _onEnterKey() {
+      _onEnterKey(cutText, cutContent) {
         requestAnimationFrame(() => {
-          this.dispatchEvent(new CustomEvent('new-section', { bubbles: true, composed: true, detail: { type: "text" } }));
+          this.dispatchEvent(new CustomEvent('new-section', { bubbles: true, composed: true, detail: { type: "text", paste: cutText, pasteTextContent: cutContent } }));
         });
       }
 
@@ -232,6 +241,12 @@
           if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
             return;
           }
+          let range = this.$.text.selectionRange;
+          // if text is selected - return i.e. default behavior
+          if (!(range && range.collapsed)) {
+            return;
+          }
+
           let value = this.$.text.value || "";
           let hasList = (value.indexOf("<ol") >= 0) || (value.indexOf("<ul") >= 0);
           if (!hasList) {
@@ -239,8 +254,34 @@
             if (!text) {
               return;
             }
+
+            // select from current cursor to end of text
+            let sOffset = range ? (range.startOffset || 0) : 0;
+            let sContainer = range.startContainer;
+            let cutText = false;
+            let cutContent = "";
+            try {
+              this.selectEnd();
+              range = this.$.text.selectionRange;
+              range.setStart(sContainer, sOffset);
+              let s = this.$.text.selection;
+              s.removeAllRanges();
+              s.addRange(range);
+              if (!range.collapsed) {
+                let clonedSelection = range.cloneContents() || "";
+                let div = document.createElement('div');
+                div.appendChild(clonedSelection);
+                cutContent = div.innerHTML;
+                this.$.text.cutSelection();
+                cutText = true;
+              }
+            } catch (err) {
+              // ignore 
+              // this is mainly so we dont crap out on old browsers
+              console.warn(err);
+            }
             event.preventDefault();
-            this._onEnterKey();
+            this._onEnterKey(cutText, cutContent);
           }
         } else if (event.keyCode === 8) {
           let text = this.$.text.textValue.trim();
