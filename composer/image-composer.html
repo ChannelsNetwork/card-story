@@ -1,4 +1,5 @@
 <link rel="import" href="../../soso-file-picker/soso-file-picker.html">
+<link rel="import" href="soso-textarea.html">
 
 <dom-module id="image-composer">
   <template>
@@ -52,10 +53,22 @@
 
       .flowingImage {
         max-width: 100%;
+        max-height: 100vh;
       }
 
       .fullWidthImage {
         width: 100%;
+      }
+
+      soso-textarea {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        text-align: center;
+        margin: 15px 0;
+        font-size: 15px;
+        color: #666;
+        font-family: helvetica, sans-serif;
       }
     </style>
     <div id="noImage">
@@ -64,6 +77,7 @@
     </div>
     <div id="hasImage" class="hidden">
       <div id="imgPanel"></div>
+      <soso-textarea single-line placeholder="Enter image caption" id="caption" on-input="_onCaptionChange"></soso-textarea>
     </div>
   </template>
   <script>
@@ -105,6 +119,13 @@
       set options(value) {
         this.data.options = value;
         this._refreshImage();
+      }
+
+      get summaryImage() {
+        if (this.data && this.data.image) {
+          return this.data.image;
+        }
+        return null;
       }
 
       _refreshImage() {
@@ -212,6 +233,9 @@
             }
             image.style.width = imW + "px";
             image.style.height = "auto";
+            if (imW > panelWidth) {
+              image.style.transform = "translate3d(" + Math.floor(-(imW - panelWidth) / 2) + "px, 0, 0)";
+            }
             break;
           }
           default:
@@ -247,6 +271,10 @@
           this.$.fileMessage.classList.add("hidden");
         }
         this.fileMessage = message;
+      }
+
+      _onCaptionChange() {
+        this.data.caption = this.$.caption.value.trim();
       }
 
       _onFile(event) {

@@ -53,6 +53,14 @@
         max-width: 100%;
         box-sizing: border-box;
       }
+
+      #caption {
+        text-align: center;
+        font-size: 15px;
+        padding: 12px;
+        color: #666;
+        font-family: helvetica, sans-serif;
+      }
     </style>
     <div id="videoPanel">
       <div id="videoShell">
@@ -62,6 +70,7 @@
         <story-video-controls id="bar" class="hidden" on-play-change="_onUserPlayChange"></story-video-controls>
       </div>
     </div>
+    <div id="caption" style="display: none;">[[data.caption]]</div>
     <slot on-slotchange="_onSlotChange"></slot>
   </template>
   <script>
@@ -105,11 +114,15 @@
       _refresh() {
         if (this._connected && this.data) {
           this.options = this.data.options || {};
+          this.$.caption.style.display = this.data.caption ? "" : "none";
         }
       }
 
       _canPlay() {
         this._readyToPlay = true;
+        if (this._pendingIntersectionEntry) {
+          this._handleIntersection(this._pendingIntersectionEntry);
+        }
       }
 
       _onPlay() {
@@ -180,8 +193,13 @@
       }
 
       _handleIntersection(entry) {
+        if (!this._readyToPlay) {
+          this._pendingIntersectionEntry = entry;
+          return;
+        }
+        this._pendingIntersectionEntry = null;
         let autoPlay = this.options.autoPlay || true;
-        if (this._readyToPlay && entry && this.data && autoPlay) {
+        if (entry && this.data && autoPlay) {
           if (entry.isIntersecting) {
             let entering = entry.boundingClientRect.y >= 0;
             let ir = entry.intersectionRatio;

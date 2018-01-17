@@ -177,6 +177,17 @@
       }
 
       get summary() {
+        if (!this._summary.imageURL) {
+          for (let i = 0; i < this.segments.length; i++) {
+            let s = this.segments[i];
+            if (s.node && s.node.component) {
+              if (s.node.component.summaryImage) {
+                this._summary.imageURL = s.node.component.summaryImage;
+                break;
+              }
+            }
+          }
+        }
         return this._summary;
       }
 
@@ -443,6 +454,7 @@
       }
 
       _onPreview() {
+        console.log("Summary", this.summary);
         console.log("Shared State", this.sharedState);
         this.prepare().then(() => {
           Polymer.importHref(this.importPath + 'card-story-preview.html', () => {

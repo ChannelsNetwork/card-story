@@ -4,7 +4,7 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",
     "soso-checkbox": "SosoElements/soso-checkbox#^0.1.2",
-    "soso-file-picker": "SosoElements/soso-file-picker#^0.1.5",
+    "soso-file-picker": "SosoElements/soso-file-picker#^0.1.6",
     "soso-slider": "SosoElements/soso-slider#^0.1.0",
     "soso-radio-group": "SosoElements/soso-radio-group#^0.1.1",
     "soso-radio-button": "SosoElements/soso-radio-button#^0.1.2",

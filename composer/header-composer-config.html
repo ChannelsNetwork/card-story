@@ -1,5 +1,4 @@
 <link rel="import" href="../../soso-checkbox/soso-checkbox.html">
-<link rel="import" href="../../soso-file-picker/soso-file-picker.html">
 <link rel="import" href="../../soso-slider/soso-slider.html">
 
 <dom-module id="header-composer-config">
@@ -10,41 +9,12 @@
         font-size: 14px;
       }
 
-      h3 {
-        font-family: 'Raleway', sans-serif;
-        margin: 0;
-        line-height: 1.4;
-        font-size: 18px;
-        color: #000;
-        font-weight: 400;
-        letter-spacing: 0.05em;
-      }
-
-      #content {
-        padding: 10px 0;
-      }
-
-      #imagePanel {
-        margin: 20px 0 0;
-      }
-
-      .hidden {
-        display: none;
-      }
-
       soso-checkbox {
         --soso-checkbox-color: #4CAF50;
       }
 
-      #filePicker {
-        min-height: 70px;
-        box-sizing: border-box;
-        --soso-link-color: #388E3C;
-      }
-
-      #fileStatus {
-        margin-top: 5px;
-        color: #388E3C;
+      #content {
+        padding: 10px 0;
       }
 
       .error {
@@ -107,21 +77,17 @@
         width: 162px;
       }
     </style>
-    <h3>Header</h3>
     <div id="content">
-      <soso-checkbox id="chkImage" label="Use a background image" on-change="_onImageCheckChange"></soso-checkbox>
-      <div id="imagePanel" class="hidden">
-        <soso-file-picker id="filePicker" accept="image/*" on-files="_onFile"></soso-file-picker>
-        <div id="fileStatus">[[fileStatus]]</div>
-        <div id="imageOptionsPanel" class="hidden">
+      <div id="imagePanel">
+        <div id="imageOptionsPanel">
           <section>
-            <h4>Image layout</h4>
+            <h4>Header Image layout</h4>
             <div class="row">
               <soso-checkbox id="chkFullPage" label="Full page header" on-change="_onCoverChange"></soso-checkbox>
             </div>
           </section>
           <section>
-            <h4>Image screen</h4>
+            <h4>Header Image screen</h4>
             <div class="horizontal row">
               <label class="flex" for="bgColor">Color</label>
               <input id="bgColor" value="#000000" class="inputCell" on-change="_onBgColorChange">
@@ -148,7 +114,6 @@
       static get properties() {
         return {
           services: Object,
-          fileStatus: String,
           options: Object
         };
       }
@@ -161,12 +126,6 @@
       _loadFromOptions() {
         if (!this.options) {
           this.options = {};
-        }
-        this.$.chkImage.checked = this.options.useImage || false;
-        this._updateImagePanelVisibility();
-        if (this.options.image) {
-          this.$.filePicker.label = this._trimUrl(this.options.image, 60);
-          this._showImageOptions();
         }
         this.$.chkFullPage.checked = this.options.style === 'cover';
         this.$.bgColor.value = this.options.bgColor || "#000000";
@@ -215,73 +174,6 @@
         this.options.style = this.$.chkFullPage.checked ? "cover" : "";
         this.options.textLayout = this.$.chkFullPage.checked ? "center" : "";
         this._fireOptionsChanged();
-      }
-
-      _onImageCheckChange() {
-        this.options.useImage = this.$.chkImage.checked;
-        this._updateImagePanelVisibility();
-        this._fireOptionsChanged();
-      }
-
-      _updateImagePanelVisibility() {
-        if (this.$.chkImage.checked) {
-          this.$.imagePanel.classList.remove("hidden");
-        } else {
-          this.$.imagePanel.classList.add("hidden");
-        }
-      }
-
-      _onFile(event) {
-        let file = event.detail.file;
-        if (!file) {
-          return;
-        }
-        if (file.type.indexOf('image/') != 0) {
-          this.fileStatus = "Invalid image";
-          this.$.fileStatus.classList.add("error");
-        } else {
-          this.$.fileStatus.classList.remove("error");
-          this.fileStatus = "Uploading image...";
-          this._uploadImage(file).then((response) => {
-            this.options.image = response.url;
-            this.fileStatus = "";
-            this._showImageOptions();
-            this._fireOptionsChanged();
-          });
-        }
-      }
-
-      _showImageOptions() {
-        this.$.imageOptionsPanel.classList.remove("hidden");
-      }
-
-      _uploadImage(file) {
-        if (this.services) {
-          return this.services.uploadImage(file);
-        } else {
-          return this._readFile(file).then((dataUrl) => {
-            return {
-              fileId: "some-file-id",
-              url: dataUrl
-            };
-          });
-        }
-      }
-
-      _readFile(file) {
-        return new Promise((resolve, reject) => {
-          let reader = new FileReader();
-          reader.addEventListener('load', () => {
-            resolve(reader.result);
-          });
-          reader.addEventListener("error", () => {
-            reject();
-          });
-          reader.addEventListener("abort", () => {
-            reject();
-          });
-          reader.readAsDataURL(file);
-        });
       }
 
       _fireOptionsChanged() {

@@ -1,4 +1,6 @@
 <link rel="import" href="soso-textarea.html">
+<link rel="import" href="../../soso-file-picker/soso-file-picker.html">
+
 <dom-module id="header-composer">
   <template>
     <style is="custom-style" include="story-styles">
@@ -15,16 +17,19 @@
         background-origin: border-box;
         background-position: 50% 35%;
         outline: none;
+        padding: 20px 0 0;
       }
 
       #header.overlayed {
         min-height: 40vh;
         color: white;
+        padding: 0;
       }
 
       #header.cover {
         min-height: 100vh;
         color: white;
+        padding: 0;
       }
 
       .hidden {
@@ -87,6 +92,46 @@
         box-sizing: border-box;
         width: 100%;
       }
+
+      #filePicker {
+        position: absolute;
+        top: -5px;
+        left: 0;
+        padding: 0 5px;
+        border: none;
+        width: auto;
+        font-size: 14px;
+        --soso-link-color: #aaa;
+        background: rgba(255, 255, 255, 0.9);
+      }
+
+      #filePicker.editing {
+        --soso-link-color: #388E3C;
+      }
+
+      #fileMessage {
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 5px 10px;
+        background: #E8F5E9;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        pointer-events: none;
+        color: #000;
+      }
+
+      #clearImage {
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 5px 10px;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        cursor: pointer;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+      }
     </style>
     <header id="header" class="vertical layout" tabindex="0" on-blur="_onBlur">
       <div id="glassPane" class="hidden fill"></div>
@@ -96,6 +141,9 @@
         <soso-textarea single-line placeholder="Subtitle" id="subtitle" on-focus="_onFocus" on-blur="_onBlur"></soso-textarea>
       </div>
       <div id="spacerBottom" class="flex hidden"></div>
+      <soso-file-picker id="filePicker" accept="image/*" on-files="_onFile" browse-label="Set header image" hide-prefix-label></soso-file-picker>
+      <div id="fileMessage" class="hidden">[[fileMessage]]</div>
+      <div id="clearImage" class="hidden" on-click="_clearImage">Clear image</div>
     </header>
   </template>
   <script>
@@ -104,7 +152,12 @@
       static get properties() {
         return {
           services: Object,
-          data: Object
+          data: Object,
+          fileMessage: String,
+          editing: {
+            type: Boolean,
+            observer: '_onEditing'
+          }
         };
       }
       connectedCallback() {
@@ -112,11 +165,20 @@
         this._refresh();
       }
 
+      _onEditing() {
+        if (this.editing) {
+          this.$.filePicker.classList.add("editing");
+        } else {
+          this.$.filePicker.classList.remove("editing");
+        }
+      }
+
       _refresh() {
         let data = this.data || {};
         if (!data.options) {
           data.options = {};
         }
+        this._setFileMessage(null);
         this.data = data;
         this.$.title.value = data.title || "";
         this.$.subtitle.value = data.subtitle || "";
@@ -143,20 +205,126 @@
         this._fireSummaryChange();
       }
 
+      _onFile(event) {
+        let file = event.detail.file;
+        if (!file) {
+          return;
+        }
+        if (file.type.indexOf('image/') === 0) {
+          this._readFile(file).then((dataUrl) => {
+            this._loadImage(dataUrl).then((imageData) => {
+              this._setFileMessage("Uploading image...");
+              this._uploadPromise = this._uploadImage(file, dataUrl).then((response) => {
+                this.data.image = response.url;
+                this._setFileMessage(null);
+                this._refreshOptions();
+              }).catch((err) => {
+                this._setFileMessage(null);
+                window.alert("Failed to upload image");
+                console.error("Failed to upload file", err);
+              });
+            });
+          }).catch((err) => {
+            this._setFileMessage(null);
+            window.alert("Failed to load image");
+            console.error(err);
+          });
+        }
+      }
+
+      _setFileMessage(message) {
+        if (message) {
+          this.$.fileMessage.classList.remove("hidden");
+          this.$.filePicker.classList.add("hidden");
+        } else {
+          this.$.fileMessage.classList.add("hidden");
+          this.$.filePicker.classList.remove("hidden");
+        }
+        this.fileMessage = message;
+      }
+
+      _uploadImage(file, dataUrl) {
+        if (this.services) {
+          return this.services.uploadImage(file);
+        } else {
+          return new Promise((resolve, reject) => {
+            resolve({
+              fileId: "some-file-id",
+              url: dataUrl
+            });
+          });
+        }
+      }
+
+      _loadImage(url) {
+        return new Promise((resolve, reject) => {
+          let image = new Image();
+          image.addEventListener('load', () => {
+            resolve({
+              width: image.width,
+              height: image.height
+            });
+          });
+          image.addEventListener("error", () => {
+            reject();
+          });
+          image.addEventListener("abort", () => {
+            reject();
+          });
+          image.src = url;
+        });
+      }
+
+      _readFile(file) {
+        return new Promise((resolve, reject) => {
+          let reader = new FileReader();
+          reader.addEventListener('load', () => {
+            resolve(reader.result);
+          });
+          reader.addEventListener("error", () => {
+            reject();
+          });
+          reader.addEventListener("abort", () => {
+            reject();
+          });
+          reader.readAsDataURL(file);
+        });
+      }
+
+      _clearImage() {
+        this.data.image = null;
+        this.$.filePicker.clear();
+        this._setFileMessage(null);
+        this._refreshOptions();
+      }
+
       _fireSummaryChange() {
         let options = this.data.options || {};
         let summary = {
           title: this.$.title.value.trim(),
           text: this.$.subtitle.value.trim(),
-          imageURL: options.image
+          imageURL: this.data.image || options.image
         };
         this.dispatchEvent(new CustomEvent('story-summary-change', { bubbles: true, composed: true, detail: { summary: summary } }));
       }
 
       _refreshOptions() {
         let options = this.data.options;
-        if (options.useImage && options.image) {
-          this.$.header.style.backgroundImage = 'url("' + options.image + '")';
+        let imageUrl = this.data.image;
+        if (imageUrl) {
+          this.$.clearImage.classList.remove("hidden");
+          this.$.filePicker.classList.add("hidden");
+        } else {
+          this.$.clearImage.classList.add("hidden");
+          this.$.filePicker.classList.remove("hidden");
+        }
+        if (!imageUrl) {
+          if (options.useImage) {
+            imageUrl = options.image;
+          }
+        }
+        if (imageUrl) {
+          this.$.header.style.backgroundImage = 'url("' + imageUrl + '")';
           let style = options.style || "";
           switch (style) {
             case "cover":
@@ -227,6 +395,14 @@
 
       get searchText() {
         return (this.$.title.value || "") + " " + (this.$.subtitle.value || "");
+      }
+
+      prepare() {
+        if (this._uploadPromise) {
+          return Promise.all([this._uploadPromise]);
+        } else {
+          return new Promise((resolve, reject) => { resolve(); });
+        }
       }
     }
     window.customElements.define(HeaderComposer.is, HeaderComposer);

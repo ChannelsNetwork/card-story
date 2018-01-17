@@ -26,6 +26,17 @@
         box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12), 0 5px 5px -3px rgba(0, 0, 0, 0.4);
       }
 
+      .hidden {
+        display: none;
+      }
+
+      #img {
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+        max-height: 90vh;
+      }
+
       @media (max-width: 600px) {
         story-gallery-item {
           height: 200px;
@@ -35,14 +46,19 @@
         }
       }
     </style>
-    <div id="container" class="horizontal layout wrap">
-      <dom-repeat items="[[items]]">
-        <template>
-          <story-gallery-item data="[[item]]" class="flex" on-click="_onItemClick"></story-gallery-item>
-        </template>
-      </dom-repeat>
+    <div id="galleryPanel">
+      <div id="container" class="horizontal layout wrap">
+        <dom-repeat items="[[items]]">
+          <template>
+            <story-gallery-item data="[[item]]" class="flex" on-click="_onItemClick"></story-gallery-item>
+          </template>
+        </dom-repeat>
+      </div>
+      <story-gallery-viewer data="[[items]]" id="viewer"></story-gallery-viewer>
     </div>
-    <story-gallery-viewer data="[[items]]" id="viewer"></story-gallery-viewer>
+    <div id="imagePanel" class="hidden">
+      <img id="img">
+    </div>
   </template>
   <script>
     class StoryGallery extends Polymer.Element {
@@ -58,7 +74,16 @@
       }
       _refresh() {
         if (this.data) {
-          this.set("items", this.data.items || []);
+          let list = this.data.items || [];
+          if (list.length === 1) {
+            this.$.galleryPanel.classList.add("hidden");
+            this.$.imagePanel.classList.remove("hidden");
+            this.$.img.src = list[0].url
+          } else {
+            this.set("items", list);
+            this.$.galleryPanel.classList.remove("hidden");
+            this.$.imagePanel.classList.add("hidden");
+          }
         }
       }
       _onItemClick(event) {
