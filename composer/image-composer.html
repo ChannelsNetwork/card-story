@@ -107,6 +107,13 @@
         this._refreshImage();
       }
 
+      get summaryImage() {
+        if (this.data && this.data.image) {
+          return this.data.image;
+        }
+        return null;
+      }
+
       _refreshImage() {
         if (this.data.image) {
           this.$.noImage.classList.add("hidden");

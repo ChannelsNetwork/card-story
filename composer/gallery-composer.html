@@ -102,6 +102,13 @@
         }
       }
 
+      get summaryImage() {
+        if (this.data && this.data.items && this.data.items.length) {
+          return this.data.items[0].url;
+        }
+        return null;
+      }
+
       _onFocus(event) {
         event.stopPropagation();
         this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
