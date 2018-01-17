@@ -40,8 +40,17 @@
         pointer-events: none;
         z-index: -1;
       }
+
+      #caption {
+        text-align: center;
+        font-size: 15px;
+        padding: 12px 12px 0;
+        color: #666;
+        font-family: helvetica, sans-serif;
+      }
     </style>
     <div id="imgPanel" class="background"></div>
+    <div id="caption" style="display: none;">[[data.caption]]</div>
     <section id="overlay">
       <slot on-slotchange="_onSlotChange"></slot>
     </section>
@@ -85,6 +94,7 @@
       _refresh() {
         if (this.data && this.delegate && this._connected) {
           this.options = this.data.options || {};
+          this.$.caption.style.display = this.data.caption ? "" : "none";
 
           this._ensureLaidOut().then(() => {
             let pStyle = this.$.imgPanel.style;

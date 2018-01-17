@@ -1,4 +1,5 @@
 <link rel="import" href="../../soso-file-picker/soso-file-picker.html">
+<link rel="import" href="soso-textarea.html">
 
 <dom-module id="image-composer">
   <template>
@@ -58,6 +59,17 @@
       .fullWidthImage {
         width: 100%;
       }
+
+      soso-textarea {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        text-align: center;
+        margin: 15px 0;
+        font-size: 15px;
+        color: #666;
+        font-family: helvetica, sans-serif;
+      }
     </style>
     <div id="noImage">
       <soso-file-picker class="noborder" id="filePicker" label="Drag an image file" accept="image/*" on-files="_onFile"></soso-file-picker>
@@ -65,6 +77,7 @@
     </div>
     <div id="hasImage" class="hidden">
       <div id="imgPanel"></div>
+      <soso-textarea single-line placeholder="Enter image caption" id="caption" on-input="_onCaptionChange"></soso-textarea>
     </div>
   </template>
   <script>
@@ -258,6 +271,10 @@
           this.$.fileMessage.classList.add("hidden");
         }
         this.fileMessage = message;
+      }
+
+      _onCaptionChange() {
+        this.data.caption = this.$.caption.value.trim();
       }
 
       _onFile(event) {
