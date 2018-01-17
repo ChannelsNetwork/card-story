@@ -220,6 +220,9 @@
             }
             image.style.width = imW + "px";
             image.style.height = "auto";
+            if (imW > panelWidth) {
+              image.style.transform = "translate3d(" + Math.floor(-(imW - panelWidth) / 2) + "px, 0, 0)";
+            }
             break;
           }
           default:
