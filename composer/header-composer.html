@@ -101,8 +101,12 @@
         border: none;
         width: auto;
         font-size: 14px;
-        --soso-link-color: #388E3C;
+        --soso-link-color: #aaa;
         background: rgba(255, 255, 255, 0.9);
+      }
+
+      #filePicker.editing {
+        --soso-link-color: #388E3C;
       }
 
       #fileMessage {
@@ -137,7 +141,7 @@
         <soso-textarea single-line placeholder="Subtitle" id="subtitle" on-focus="_onFocus" on-blur="_onBlur"></soso-textarea>
       </div>
       <div id="spacerBottom" class="flex hidden"></div>
-      <soso-file-picker id="filePicker" accept="image/*" on-files="_onFile" browse-label="Set background image" hide-prefix-label></soso-file-picker>
+      <soso-file-picker id="filePicker" accept="image/*" on-files="_onFile" browse-label="Set header image" hide-prefix-label></soso-file-picker>
       <div id="fileMessage" class="hidden">[[fileMessage]]</div>
       <div id="clearImage" class="hidden" on-click="_clearImage">Clear image</div>
     </header>
@@ -149,12 +153,24 @@
         return {
           services: Object,
           data: Object,
-          fileMessage: String
+          fileMessage: String,
+          editing: {
+            type: Boolean,
+            observer: '_onEditing'
+          }
         };
       }
       connectedCallback() {
         super.connectedCallback();
         this._refresh();
+      }
+
+      _onEditing() {
+        if (this.editing) {
+          this.$.filePicker.classList.add("editing");
+        } else {
+          this.$.filePicker.classList.remove("editing");
+        }
       }
 
       _refresh() {
