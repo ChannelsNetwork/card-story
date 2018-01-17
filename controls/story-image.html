@@ -26,6 +26,7 @@
 
       .flowingImage {
         max-width: 100%;
+        max-height: 100vh;
       }
 
       .fullWidthImage {
@@ -97,11 +98,12 @@
                 pStyle.height = h + "px";
                 break;
               }
-              case "sized":
+              case "sized": {
                 pStyle.width = (this.options.width || 300) + "px";
                 pStyle.height = (this.options.height || 300) + "px";
                 pStyle.margin = "0 auto";
                 break;
+              }
               case "cover":
               case "cover-fit":
                 pStyle.width = "100%";
