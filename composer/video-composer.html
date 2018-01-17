@@ -1,4 +1,6 @@
 <link rel="import" href="../../soso-file-picker/soso-file-picker.html">
+<link rel="import" href="soso-textarea.html">
+
 <dom-module id="video-composer">
   <template>
     <style>
@@ -75,6 +77,17 @@
         display: inline-block;
         vertical-align: middle;
       }
+
+      soso-textarea {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        text-align: center;
+        margin: 15px 0;
+        font-size: 15px;
+        color: #666;
+        font-family: helvetica, sans-serif;
+      }
     </style>
     <div id="noFile">
       <soso-file-picker class="noborder" id="filePicker" label="Drag a video file" accept="video/mp4,video/*,.mp4" on-files="_onFile"></soso-file-picker>
@@ -87,6 +100,7 @@
           <soso-icon id="playIcon" icon-map="[[iconMap]]" icon="play-arrow"></soso-icon>
         </div>
       </div>
+      <soso-textarea single-line placeholder="Enter video caption" id="caption" on-input="_onCaptionChange"></soso-textarea>
     </div>
   </template>
   <script>
@@ -159,6 +173,10 @@
           this.$.fileMessage.classList.add("hidden");
         }
         this.fileMessage = message;
+      }
+
+      _onCaptionChange() {
+        this.data.caption = this.$.caption.value.trim();
       }
 
       _onFile(event) {
