@@ -120,6 +120,9 @@
 
       _canPlay() {
         this._readyToPlay = true;
+        if (this._pendingIntersectionEntry) {
+          this._handleIntersection(this._pendingIntersectionEntry);
+        }
       }
 
       _onPlay() {
@@ -190,8 +193,13 @@
       }
 
       _handleIntersection(entry) {
+        if (!this._readyToPlay) {
+          this._pendingIntersectionEntry = entry;
+          return;
+        }
+        this._pendingIntersectionEntry = null;
         let autoPlay = this.options.autoPlay || true;
-        if (this._readyToPlay && entry && this.data && autoPlay) {
+        if (entry && this.data && autoPlay) {
           if (entry.isIntersecting) {
             let entering = entry.boundingClientRect.y >= 0;
             let ir = entry.intersectionRatio;
