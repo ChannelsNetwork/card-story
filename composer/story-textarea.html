@@ -1,5 +1,5 @@
 <link rel="import" href="../../polymer/polymer-element.html">
-<dom-module id="soso-textarea">
+<dom-module id="story-textarea">
   <template>
     <style>
       :host {
@@ -69,8 +69,8 @@
     </div>
   </template>
   <script>
-    class SosoTextarea extends Polymer.Element {
-      static get is() { return "soso-textarea"; }
+    class StoryTextarea extends Polymer.Element {
+      static get is() { return "story-textarea"; }
       static get properties() {
         return {
           value: {
@@ -191,6 +191,6 @@
       }
     }
 
-    window.customElements.define(SosoTextarea.is, SosoTextarea);
+    window.customElements.define(StoryTextarea.is, StoryTextarea);
   </script>
 </dom-module>

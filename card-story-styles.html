@@ -73,6 +73,7 @@
         outline: none;
         text-decoration: none;
         letter-spacing: 0.03em;
+        word-wrap: break-word;
       }
 
       a:hover {
@@ -95,6 +96,15 @@
         letter-spacing: 0.02em;
         font-family: 'Raleway', sans-serif;
         font-weight: 400;
+      }
+
+      @media (max-width: 600px) {
+        .sectionTitle {
+          font-size: 21px;
+        }
+        .mainTitle {
+          font-size: 23px;
+        }
       }
     </style>
   </template>

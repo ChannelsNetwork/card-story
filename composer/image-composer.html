@@ -1,5 +1,5 @@
 <link rel="import" href="../../soso-file-picker/soso-file-picker.html">
-<link rel="import" href="soso-textarea.html">
+<link rel="import" href="story-textarea.html">
 
 <dom-module id="image-composer">
   <template>
@@ -60,7 +60,7 @@
         width: 100%;
       }
 
-      soso-textarea {
+      story-textarea {
         display: block;
         box-sizing: border-box;
         width: 100%;
@@ -69,6 +69,8 @@
         font-size: 15px;
         color: #666;
         font-family: helvetica, sans-serif;
+        max-width: 900px;
+        margin: 15px auto;
       }
     </style>
     <div id="noImage">
@@ -77,7 +79,7 @@
     </div>
     <div id="hasImage" class="hidden">
       <div id="imgPanel"></div>
-      <soso-textarea single-line placeholder="Enter image caption" id="caption" on-input="_onCaptionChange"></soso-textarea>
+      <story-textarea single-line placeholder="Enter image caption" id="caption" on-input="_onCaptionChange"></story-textarea>
     </div>
   </template>
   <script>
@@ -133,6 +135,9 @@
           this.$.noImage.classList.add("hidden");
           this.$.hasImage.classList.remove("hidden");
           this._refreshImagePanel();
+          setTimeout(() => {
+            this.focus();
+          });
         } else {
           this.$.noImage.classList.remove("hidden");
           this.$.hasImage.classList.add("hidden");
@@ -257,6 +262,9 @@
       _onFocus(event) {
         event.stopPropagation();
         this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
+        setTimeout(() => {
+          this.$.caption.textarea.focus();
+        }, 50);
       }
 
       _onBlur(event) {
