@@ -167,6 +167,7 @@
               this._setFileMessage("Uploading image...");
               this._uploadPromise = this._uploadImage(file, dataUrl).then((response) => {
                 let item = {
+                  fileId: response.fileId,
                   url: response.url,
                   width: imageData.width,
                   height: imageData.height

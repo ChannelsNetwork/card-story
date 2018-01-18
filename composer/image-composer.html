@@ -298,6 +298,7 @@
             this._loadImage(dataUrl).then((imageData) => {
               this._setFileMessage("Uploading image...");
               this._uploadPromise = this._uploadImage(file, dataUrl).then((response) => {
+                this.data.fileId = response.fileId;
                 this.data.image = response.url;
                 this.data.width = imageData.width;
                 this.data.height = imageData.height;

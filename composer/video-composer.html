@@ -195,6 +195,7 @@
         } else {
           this._setFileMessage("Uploading video...");
           this._uploadPromise = this._uploadVideo(file).then((response) => {
+            this.data.fileId = response.fileId;
             this.data.video = response.url;
             this.$.v.src = this.data.video;
             this._setFileMessage(null);

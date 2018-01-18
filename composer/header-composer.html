@@ -216,6 +216,7 @@
               this._setFileMessage("Uploading image...");
               this._uploadPromise = this._uploadImage(file, dataUrl).then((response) => {
                 this.data.image = response.url;
+                this.data.fileId = response.fileId;
                 this._setFileMessage(null);
                 this._refreshOptions();
               }).catch((err) => {
