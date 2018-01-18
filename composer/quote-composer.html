@@ -1,4 +1,4 @@
-<link rel="import" href="soso-textarea.html">
+<link rel="import" href="story-textarea.html">
 <dom-module id="quote-composer">
   <template>
     <style is="custom-style" include="story-styles">
@@ -54,7 +54,7 @@
         font-style: italic;
       }
 
-      soso-textarea {
+      story-textarea {
         display: block;
         box-sizing: border-box;
         width: 100%;
@@ -85,8 +85,8 @@
         <img id="openQuote" class="qimage" src$="[[importPath]]../controls/images/oquote.png">
       </div>
       <div class="flex content">
-        <soso-textarea placeholder="Quote text" id="quote" class="quote" on-focus="_onFocus" on-blur="_onBlur"></soso-textarea>
-        <soso-textarea placeholder="Author's name" id="author" class="author" on-focus="_onFocus" on-blur="_onBlur"></soso-textarea>
+        <story-textarea placeholder="Quote text" id="quote" class="quote" on-focus="_onFocus" on-blur="_onBlur"></story-textarea>
+        <story-textarea placeholder="Author's name" id="author" class="author" on-focus="_onFocus" on-blur="_onBlur"></story-textarea>
       </div>
       <div class="qpanel vertical layout">
         <span class="flex"></span>

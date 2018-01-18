@@ -1,5 +1,5 @@
 <link rel="import" href="../../soso-file-picker/soso-file-picker.html">
-<link rel="import" href="soso-textarea.html">
+<link rel="import" href="story-textarea.html">
 
 <dom-module id="video-composer">
   <template>
@@ -78,7 +78,7 @@
         vertical-align: middle;
       }
 
-      soso-textarea {
+      story-textarea {
         display: block;
         box-sizing: border-box;
         width: 100%;
@@ -100,7 +100,7 @@
           <soso-icon id="playIcon" icon-map="[[iconMap]]" icon="play-arrow"></soso-icon>
         </div>
       </div>
-      <soso-textarea single-line placeholder="Enter video caption" id="caption" on-input="_onCaptionChange"></soso-textarea>
+      <story-textarea single-line placeholder="Enter video caption" id="caption" on-input="_onCaptionChange"></story-textarea>
     </div>
   </template>
   <script>

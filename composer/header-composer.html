@@ -1,4 +1,4 @@
-<link rel="import" href="soso-textarea.html">
+<link rel="import" href="story-textarea.html">
 <link rel="import" href="../../soso-file-picker/soso-file-picker.html">
 
 <dom-module id="header-composer">
@@ -87,7 +87,7 @@
         background: rgba(0, 0, 0, 0.6);
       }
 
-      soso-textarea {
+      story-textarea {
         display: block;
         box-sizing: border-box;
         width: 100%;
@@ -137,8 +137,8 @@
       <div id="glassPane" class="hidden fill"></div>
       <div id="spacerTop" class="flex"></div>
       <div id="content" class="center">
-        <soso-textarea single-line placeholder="Title" id="title" on-focus="_onFocus" on-blur="_onBlur"></soso-textarea>
-        <soso-textarea single-line placeholder="Subtitle" id="subtitle" on-focus="_onFocus" on-blur="_onBlur"></soso-textarea>
+        <story-textarea single-line placeholder="Title" id="title" on-focus="_onFocus" on-blur="_onBlur"></story-textarea>
+        <story-textarea single-line placeholder="Subtitle" id="subtitle" on-focus="_onFocus" on-blur="_onBlur"></story-textarea>
       </div>
       <div id="spacerBottom" class="flex hidden"></div>
       <soso-file-picker id="filePicker" accept="image/*" on-files="_onFile" browse-label="Set header image" hide-prefix-label></soso-file-picker>
