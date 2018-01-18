@@ -210,9 +210,9 @@
             type: s.type,
             data: s.data
           });
-          if (s.files && s.files.length) {
-            let sf = s.files;
-            for (let j = 0; j < s.files.length; j++) {
+          if (s.node && s.node.files && s.node.files.length) {
+            let sf = s.node.files;
+            for (let j = 0; j < sf.length; j++) {
               files[sf[j]] = {};
             }
           }

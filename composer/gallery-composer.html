@@ -92,6 +92,19 @@
         this._refresh();
       }
 
+      get files() {
+        let list = [];
+        if (this.items && this.items.length) {
+          for (let i = 0; i < this.items.length; i++) {
+            let fid = this.items[i].fileId;
+            if (fid) {
+              list.push(fid);
+            }
+          }
+        }
+        return list;
+      }
+
       _onEditing() {
         if (this.editing) {
           this.$.filePicker.classList.add('noborder');

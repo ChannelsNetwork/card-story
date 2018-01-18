@@ -157,12 +157,17 @@
           editing: {
             type: Boolean,
             observer: '_onEditing'
-          }
+          },
+          _fileId: String
         };
       }
       connectedCallback() {
         super.connectedCallback();
         this._refresh();
+      }
+
+      get files() {
+        return this._fileId ? [this._fileId] : [];
       }
 
       _onEditing() {
@@ -215,6 +220,7 @@
             this._loadImage(dataUrl).then((imageData) => {
               this._setFileMessage("Uploading image...");
               this._uploadPromise = this._uploadImage(file, dataUrl).then((response) => {
+                this._fileId = response.fileId;
                 this.data.image = response.url;
                 this.data.fileId = response.fileId;
                 this._setFileMessage(null);
@@ -294,6 +300,7 @@
 
       _clearImage() {
         this.data.image = null;
+        this._fileId = null;
         this.$.filePicker.clear();
         this._setFileMessage(null);
         this._refreshOptions();

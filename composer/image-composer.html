@@ -93,7 +93,8 @@
             type: Boolean,
             observer: '_onEditing'
           },
-          fileMessage: String
+          fileMessage: String,
+          _fileId: String
         };
       }
 
@@ -103,6 +104,10 @@
         this.addEventListener("focus", this._onFocus.bind(this));
         this.addEventListener("blur", this._onBlur.bind(this));
         this._refresh();
+      }
+
+      get files() {
+        return this._fileId ? [this._fileId] : [];
       }
 
       _refresh() {
@@ -298,6 +303,7 @@
             this._loadImage(dataUrl).then((imageData) => {
               this._setFileMessage("Uploading image...");
               this._uploadPromise = this._uploadImage(file, dataUrl).then((response) => {
+                this._fileId = response.fileId;
                 this.data.fileId = response.fileId;
                 this.data.image = response.url;
                 this.data.width = imageData.width;
