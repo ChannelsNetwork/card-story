@@ -247,7 +247,14 @@
           this.$.imgPanel.appendChild(image);
           this._applyScrollToImage(this._lastIntersectionEntry);
         });
-        image.src = this.data.image;
+        let imgSrc = null;
+        if (this.data.fileId && this.delegate) {
+          let fileInfo = this.delegate.fileById(this.data.fileId);
+          if (fileInfo) {
+            imgSrc = fileInfo.url;
+          }
+        }
+        image.src = imgSrc || this.data.image;
       }
 
       _applyScrollToImage(entry) {

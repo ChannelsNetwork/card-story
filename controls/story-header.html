@@ -79,7 +79,6 @@
       }
     </style>
     <header id="header" class="vertical layout">
-      <!-- <video id="video" src$="[[data.video]]" placeholder$="[[data.image]]" preload="metadata" on-loadedmetadata="_initVideo" class="hidden"></video> -->
       <div id="glassPane" class="hidden fill"></div>
       <div id="spacerTop" class="flex"></div>
       <div id="content" class="center">
@@ -97,7 +96,8 @@
           data: {
             type: Object,
             observer: '_refresh'
-          }
+          },
+          delegate: Object
         }
       }
 
@@ -119,7 +119,17 @@
       _refresh() {
         if (this.data && this._connected) {
           this.options = this.data.options || {};
-          let imageUrl = this.data.image;
+
+          let imageUrl = null;
+          if (this.delegate && this.data.fileId) {
+            let fileInfo = this.delegate.fileById(this.data.fileId);
+            if (fileInfo) {
+              imageUrl = fileInfo.url;
+            }
+          }
+          if (!imageUrl) {
+            imageUrl = this.data.image;
+          }
           if (!imageUrl) {
             if (this.options.useImage) {
               imageUrl = this.options.image;
