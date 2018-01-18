@@ -69,6 +69,8 @@
         font-size: 15px;
         color: #666;
         font-family: helvetica, sans-serif;
+        max-width: 900px;
+        margin: 15px auto;
       }
     </style>
     <div id="noImage">
@@ -133,6 +135,9 @@
           this.$.noImage.classList.add("hidden");
           this.$.hasImage.classList.remove("hidden");
           this._refreshImagePanel();
+          setTimeout(() => {
+            this.focus();
+          });
         } else {
           this.$.noImage.classList.remove("hidden");
           this.$.hasImage.classList.add("hidden");
@@ -257,6 +262,9 @@
       _onFocus(event) {
         event.stopPropagation();
         this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
+        setTimeout(() => {
+          this.$.caption.textarea.focus();
+        }, 50);
       }
 
       _onBlur(event) {

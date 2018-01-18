@@ -87,6 +87,8 @@
         font-size: 15px;
         color: #666;
         font-family: helvetica, sans-serif;
+        max-width: 900px;
+        margin: 15px auto;
       }
     </style>
     <div id="noFile">
@@ -159,6 +161,9 @@
       _onFocus(event) {
         event.stopPropagation();
         this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
+        setTimeout(() => {
+          this.$.caption.textarea.focus();
+        }, 50);
       }
 
       _onBlur(event) {
@@ -227,6 +232,9 @@
           this.$.noFile.classList.add("hidden");
           this.$.hasFile.classList.remove("hidden");
           this._refreshVideoPanel();
+          setTimeout(() => {
+            this.focus();
+          });
         } else {
           this.$.noFile.classList.remove("hidden");
           this.$.hasFile.classList.add("hidden");
