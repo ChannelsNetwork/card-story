@@ -117,7 +117,10 @@
 
       get summaryImage() {
         if (this.data && this.data.items && this.data.items.length) {
-          return this.data.items[0].url;
+          return {
+            imageURL: this.data.items[0].url,
+            imageId: this.data.items[0].fileId
+          }
         }
         return null;
       }

@@ -130,7 +130,10 @@
 
       get summaryImage() {
         if (this.data && this.data.image) {
-          return this.data.image;
+          return {
+            imageURL: this.data.image,
+            imageId: this.data.fileId || this._fileId
+          }
         }
         return null;
       }

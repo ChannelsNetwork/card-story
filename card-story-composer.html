@@ -182,7 +182,11 @@
             let s = this.segments[i];
             if (s.node && s.node.component) {
               if (s.node.component.summaryImage) {
-                this._summary.imageURL = s.node.component.summaryImage;
+                let sInfo = s.node.component.summaryImage;
+                if (sInfo) {
+                  this._summary.imageURL = sInfo.imageURL;
+                  this._summary.imageId = sInfo.imageId;
+                }
                 break;
               }
             }

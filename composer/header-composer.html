@@ -300,6 +300,7 @@
 
       _clearImage() {
         this.data.image = null;
+        this.data.fileId = null;
         this._fileId = null;
         this.$.filePicker.clear();
         this._setFileMessage(null);
@@ -311,7 +312,8 @@
         let summary = {
           title: this.$.title.value.trim(),
           text: this.$.subtitle.value.trim(),
-          imageURL: this.data.image || options.image
+          imageURL: this.data.image || options.image,
+          imageId: this.data.fileId || this._fileId
         };
         this.dispatchEvent(new CustomEvent('story-summary-change', { bubbles: true, composed: true, detail: { summary: summary } }));
       }
