@@ -161,9 +161,18 @@
       _onFocus(event) {
         event.stopPropagation();
         this.dispatchEvent(new CustomEvent('focused', { bubbles: true, composed: true, detail: {} }));
-        setTimeout(() => {
-          this.$.caption.textarea.focus();
-        }, 50);
+        this._delayedFocus();
+      }
+
+      _delayedFocus() {
+        let now = (new Date()).getTime();
+        let prev = this._prevDelayedFocus || 0;
+        if ((now - prev) > 2000) {
+          this._prevDelayedFocus = now;
+          setTimeout(() => {
+            this.$.caption.textarea.focus();
+          }, 50);
+        }
       }
 
       _onBlur(event) {
