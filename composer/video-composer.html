@@ -117,7 +117,8 @@
             observer: '_onEditing'
           },
           fileMessage: String,
-          iconMap: Object
+          iconMap: Object,
+          _fileId: String
         };
       }
 
@@ -128,6 +129,10 @@
         this.addEventListener("focus", this._onFocus.bind(this));
         this.addEventListener("blur", this._onBlur.bind(this));
         this._refresh();
+      }
+
+      get files() {
+        return this._fileId ? [this._fileId] : [];
       }
 
       _refresh() {
@@ -205,6 +210,8 @@
         } else {
           this._setFileMessage("Uploading video...");
           this._uploadPromise = this._uploadVideo(file).then((response) => {
+            this._fileId = response.fileId;
+            this.data.fileId = response.fileId;
             this.data.video = response.url;
             this.$.v.src = this.data.video;
             this._setFileMessage(null);

@@ -140,6 +140,13 @@
         }
       }
 
+      fileById(id) {
+        if (id && this.sharedState && this.sharedState.files) {
+          return this.sharedState.files[id];
+        }
+        return null;
+      }
+
       get viewerWidth() {
         return window.innerWidth;
       }

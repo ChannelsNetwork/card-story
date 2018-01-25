@@ -92,6 +92,19 @@
         this._refresh();
       }
 
+      get files() {
+        let list = [];
+        if (this.items && this.items.length) {
+          for (let i = 0; i < this.items.length; i++) {
+            let fid = this.items[i].fileId;
+            if (fid) {
+              list.push(fid);
+            }
+          }
+        }
+        return list;
+      }
+
       _onEditing() {
         if (this.editing) {
           this.$.filePicker.classList.add('noborder');
@@ -104,7 +117,10 @@
 
       get summaryImage() {
         if (this.data && this.data.items && this.data.items.length) {
-          return this.data.items[0].url;
+          return {
+            imageURL: this.data.items[0].url,
+            imageId: this.data.items[0].fileId
+          }
         }
         return null;
       }
@@ -167,6 +183,7 @@
               this._setFileMessage("Uploading image...");
               this._uploadPromise = this._uploadImage(file, dataUrl).then((response) => {
                 let item = {
+                  fileId: response.fileId,
                   url: response.url,
                   width: imageData.width,
                   height: imageData.height

@@ -64,7 +64,7 @@
     </style>
     <div id="videoPanel">
       <div id="videoShell">
-        <video id="v" src$="[[data.video]]" controls$="[[controls]]" loop playsinline on-loadedmetadata="_onMetadata" on-canplay="_canPlay"
+        <video id="v" src$="[[videoUrl]]" controls$="[[controls]]" loop playsinline on-loadedmetadata="_onMetadata" on-canplay="_canPlay"
           on-play="_onPlay" on-pause="_onPause">
         </video>
         <story-video-controls id="bar" class="hidden" on-play-change="_onUserPlayChange"></story-video-controls>
@@ -86,7 +86,8 @@
             type: Object,
             observer: '_onDelegate'
           },
-          controls: Boolean
+          controls: Boolean,
+          videoUrl: String
         };
       }
 
@@ -115,6 +116,14 @@
         if (this._connected && this.data) {
           this.options = this.data.options || {};
           this.$.caption.style.display = this.data.caption ? "" : "none";
+          let src = null;
+          if (this.data.fileId && this.delegate) {
+            let fileInfo = this.delegate.fileById(this.data.fileId);
+            if (fileInfo) {
+              src = fileInfo.url;
+            }
+          }
+          this.videoUrl = src || this.data.video;
         }
       }
 
