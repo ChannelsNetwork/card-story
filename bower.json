@@ -6,9 +6,9 @@
     "soso-checkbox": "SosoElements/soso-checkbox#^0.1.2",
     "soso-file-picker": "SosoElements/soso-file-picker#^0.1.6",
     "soso-slider": "SosoElements/soso-slider#^0.1.0",
-    "soso-radio-group": "SosoElements/soso-radio-group#^0.1.1",
-    "soso-radio-button": "SosoElements/soso-radio-button#^0.1.2",
-    "soso-icon": "SosoElements/soso-icon#^0.0.1"
+    "soso-radio-group": "SosoElements/soso-radio-group#^0.1.2",
+    "soso-radio-button": "SosoElements/soso-radio-button#^0.1.4",
+    "soso-icon": "SosoElements/soso-icon#^0.0.2"
   },
   "devDependencies": {
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"
